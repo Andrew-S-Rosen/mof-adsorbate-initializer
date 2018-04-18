@@ -49,7 +49,7 @@ class adsorbate_constructor():
 ```
 The only required arguments are `ads_species`, `bond_dist`, and either `site_species` or `site_idx`. Once the `adsorbate_constructor` is instanced, one of three routines can be called: `get_adsorbate_raspa`, `get_adsorbate_pm`, and `get_adsorbate_zeo_oms`. These are described below.
 
-Molecular Adsorbate (RASPA)
+Molecular Adsorbate (from RASPA energy grid)
 -----
 
 ![AHOKIR_CH4](test/success/add_CH4/ahokir_ch4.png)
@@ -100,11 +100,11 @@ for filename in os.listdir(mof_path):
 	mof_adsorbate, mof_name = ads_const.get_adsorbate_raspa(filepath,
 		new_mofs_path=new_mofs_path)
 ```
-Atomic Adsorbate (Zeo++)
+Atomic Adsorbate (using Zeo++ OMS detection)
 -----
 ![azixud_O](test/success/add_O/azixud_o.png)
 
-Atomic Adsorbate (Pymatgen)
+Atomic Adsorbate (using Pymatgen NN algorithms)
 -----
 ![anugia_oh](test/success/add_H/anugia_oh.png)
 
