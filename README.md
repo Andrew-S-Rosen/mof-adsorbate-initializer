@@ -5,7 +5,7 @@ Python code to initialize the position of adsorbates on MOFs for high-throughput
 1. MAI requires Python 3.x. If you do not already have Python installed, the easiest option is to download the [Anaconda](https://www.anaconda.com/download/) distribution.
 2. Install the most recent versions of Pymatgen and ASE. This can be easily done using `pip install pymatgen ase` 
 3. Download or clone the MAI repository and run `pip install .` from the MAI base directory.
-4. (recommended) To detect open metal sites (OMSs), download and install [Zeo++](http://www.zeoplusplus.org/download.html) (any version >= 0.3). By default, Zeo++'s OMS detection algorithm does not output a lot of information necessary to add adsorbates to OMSs. To address this, copy `network.cc` from `network/network.cc` in the MAI directory and replace the corresponding `network.cc` file in the base directory of Zeo++. The relevant changes can be found starting on line 1165.
+4. (recommended) To detect open metal sites (OMSs), download and install [Zeo++](http://www.zeoplusplus.org/download.html) (any version >= 0.3). By default, Zeo++'s OMS detection algorithm does not output a lot of information necessary to add adsorbates to OMSs. To address this, copy `network.cc` from `network/network.cc` in the MAI directory and replace the corresponding `network.cc` file in the base directory of Zeo++ before installation. The relevant changes can be found starting on line 1165.
 5. (recommended) To generate energy grids for the adsorption of molecular adsorbates (**`Todo`**)
 
 ## Ready-to-Run Examples
