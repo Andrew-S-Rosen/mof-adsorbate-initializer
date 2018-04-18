@@ -152,7 +152,7 @@ def get_adsorbate_zeo_oms(self,atoms_filepath,oms_data_path=None,
 		object in new_atoms_list
 	"""
 ```
-The script below is taken from `examples/add_O.py`. It reads in CIF files from `mof_path`, adds an O atom 2.0 Å away from an OMS in the CIF file (ensuring that the O adsorbate doesn't overlap within 1.3 Å of the MOF), and stores the new CIF files with O adsorbate in `new_mofs_path`. It assumes that the Zeo++ `.oms` and `.omsex` files are stored in a folder named `examples/bare_MOFs/oms_data` since `oms_data_path` is not set in `get_adsorbate_zeo_oms`. 
+The script below is taken from `examples/add_O.py`. It reads in CIF files from `mof_path`, adds an O atom 2.0 Å away from an OMS in the CIF file (ensuring that the O adsorbate doesn't overlap within 1.3 Å of the MOF), and stores the new CIF files with O adsorbate in `new_mofs_path`. It assumes that the Zeo++ `.oms` and `.omsex` files are stored in a folder named `examples/bare_MOFs/oms_data` since `oms_data_path` is not set in `get_adsorbate_zeo_oms`. Note that neither `site_species` or `site_idx` should be specified for `get_adsorbate_zeo_oms` since the algorithm identifies the adsorption OMS from Zeo++.
 
 ```python
 import os
