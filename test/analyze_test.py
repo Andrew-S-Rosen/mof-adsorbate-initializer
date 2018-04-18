@@ -12,5 +12,5 @@ for specie in species:
 	for file in os.listdir(success_path):
 		mof_test = read(os.path.join(path,file))
 		mof_real = read(os.path.join(success_path,file))
-		if np.sum(np.abs(mof_real.get_positions()-mof_test.get_positions())) >= tol:
+		if np.sum(np.abs(mof_real.get_positions()-mof_test.get_positions()) >= tol) != 0:
 			raise ValueError('Error with: '+file)
