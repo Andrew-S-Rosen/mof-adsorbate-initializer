@@ -82,6 +82,7 @@ class adsorbate_constructor():
 
 		site_species = self.site_species
 		max_dist = self.bond_dist
+		ads_species = self.ads_species
 
 		if write_file == True:
 			prep_paths(new_mofs_path,error_path)
@@ -100,8 +101,10 @@ class adsorbate_constructor():
 			return None, None		
 		ads_optimizer = ads_pos_optimizer(self,atoms_filepath,
 					new_mofs_path=new_mofs_path,error_path=error_path)
-		new_atoms, new_name = ads_optimizer.get_new_atoms_ch4_grid(site_pos,ads_pos)
-
+		if ads_species == 'CH4':
+			new_atoms, new_name = ads_optimizer.get_new_atoms_ch4_grid(site_pos,ads_pos)
+		else:
+			raise ValueError('Unsupported ads_species')
 		return new_atoms, new_name
 
 	def get_adsorbate_pm(self,atoms_filepath,NN_method='vire',write_file=True,
