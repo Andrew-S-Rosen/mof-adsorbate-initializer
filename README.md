@@ -230,4 +230,4 @@ for filename in os.listdir(mof_path):
 ### Running RASPA for Generating Energy Grids
 `Todo`
 ### Running Zeo++ for OMS Detection
-Zeo++ is the recommended method for detecting OMSs in combination with MAI. To use the Zeo++ OMS detection algorithm, one simply has to run `zeo_path -omsex filepath`, where `zeo_path` is the path to `.../zeo++-0.3/network`, `-omsex` requests OMS detection with extended output, and `filepath` is the path to the CIF file of the MOF. This will produce a `.oms` and `.omsex` file for each MOF, which must be stored if MAI is to be used to add adsorbates to the OMSs.
+Zeo++ is the recommended method for detecting OMSs in combination with MAI. To use the Zeo++ OMS detection algorithm, one simply has to run `.../zeo++-0.3/network -omsex filepath`, where `-omsex` requests OMS detection with extended output, and `filepath` is the path to the CIF file of the MOF. This will produce a `.oms` and `.omsex` file for each MOF, which must be stored if MAI is to be used to add adsorbates to the OMSs.
