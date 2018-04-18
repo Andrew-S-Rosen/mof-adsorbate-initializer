@@ -129,7 +129,7 @@ class ads_site_constructor():
 
 		return best_to_worst_idx
 
-	def get_planar_ads_site(self,center_coord,site_idx):
+	def get_planar_ads_site(self,center_coord,dist,site_idx):
 		"""
 		Get adsorption site for planar structure
 
@@ -143,14 +143,13 @@ class ads_site_constructor():
 		"""
 		NN = []
 		min_dist = []
-		bond_dist = self.bond_dist
 
 		#Get +/- normal vector
 		for i in range(2):
 			if i == 0:
-				ads_site_temp = center_coord + bond_dist
+				ads_site_temp = center_coord + dist
 			elif i == 1:
-				ads_site_temp = center_coord - bond_dist
+				ads_site_temp = center_coord - dist
 			NN_temp, min_dist_temp = self.get_NNs(ads_site_temp,site_idx)
 			NN.append(NN_temp)
 			min_dist.append(min_dist_temp)
@@ -158,23 +157,23 @@ class ads_site_constructor():
 		#Select best direction for normal vector
 		if NN[0] == NN[1]:
 			if min_dist[0] >= min_dist[1]:
-				ads_site = center_coord + bond_dist
+				ads_site = center_coord + dist
 			else:
-				ads_site = center_coord - bond_dist
+				ads_site = center_coord - dist
 		elif NN[0] <= NN[1]:
-			ads_site = center_coord + bond_dist
+			ads_site = center_coord + dist
 		else:
-			ads_site = center_coord - bond_dist
+			ads_site = center_coord - dist
 
 		return ads_site
 
-	def get_nonplanar_ads_site(self,sum_dist,center_coord):
+	def get_nonplanar_ads_site(self,scaled_sum_dist,center_coord):
 		"""
 		Get adsorption site for non-planar structure
 
 		Args:
-			sum_dist (numpy array): 2D numpy array for the
-			Euclidean distance vectors between each coordinating
+			scaled_sum_dist (numpy array): 2D numpy array for the
+			scaled Euclidean distance vectors between each coordinating
 			atom and the central atom (i.e. the adsorption site)
 			center_coord (numpy array): 1D numpy array for adsorption site
 		Returns:
@@ -184,8 +183,8 @@ class ads_site_constructor():
 
 		#Sum up Euclidean vectors and scale to bond distance
 		bond_dist = self.bond_dist
-		dist = bond_dist*sum_dist/np.linalg.norm(sum_dist)
-		ads_site =  center_coord - dist
+		dist = bond_dist*scaled_sum_dist/np.linalg.norm(scaled_sum_dist)
+		ads_site = center_coord - dist
 
 		return ads_site
 
@@ -252,15 +251,15 @@ class ads_site_constructor():
 
 		return ads_site
 
-	def get_tri_ads_site(self,normal_vec,sum_dist,center_coord,site_idx):
+	def get_tri_ads_site(self,normal_vec,scaled_sum_dist,center_coord,site_idx):
 		"""
 		Get adsorption site for a 3-coordinate site
 
 		Args:
 			normal_vec (numpy array): 1D numpy array for the
 			normal vector to the line
-			sum_dist (numpy array): 2D numpy array for the
-			Euclidean distance vectors between each coordinating
+			scaled_sum_dist (numpy array): 2D numpy array for the
+			scaled Euclidean distance vectors between each coordinating
 			atom and the central atom (i.e. the adsorption site)
 			center_coord (numpy array): 1D numpy array for adsorption site
 			site_idx (int): ASE index of adsorption site
@@ -268,9 +267,10 @@ class ads_site_constructor():
 			ads_site (numpy array): 1D numpy array for the proposed
 			adsorption position
 		"""
-		ads_site_planar = self.get_planar_ads_site(center_coord,site_idx)
+		dist = self.get_dist_planar(normal_vec)
+		ads_site_planar = self.get_planar_ads_site(center_coord,dist,site_idx)
 		NN_planar, min_dist_planar = self.get_NNs(ads_site_planar,site_idx)
-		ads_site_nonplanar = self.get_nonplanar_ads_site(sum_dist,center_coord)
+		ads_site_nonplanar = self.get_nonplanar_ads_site(scaled_sum_dist,center_coord)
 		NN_nonplanar, min_dist_nonplanar = self.get_NNs(ads_site_nonplanar,
 			site_idx)
 
@@ -328,8 +328,7 @@ class ads_site_constructor():
 			#sum of Euclidean vectors
 			scaled_mic_coords = mic_coords*scale_factor/np.linalg.norm(
 				mic_coords,axis=1)[np.newaxis].T
-			scaled_sum_dist = sum(scaled_mic_coords)
-			sum_dist = sum(mic_coords)
+			scaled_sum_dist = np.sum(scaled_mic_coords,axis=0)
 			norm_scaled = np.linalg.norm(scaled_sum_dist)
 			rmse, normal_vec = TLS_fit(mic_coords)
 
@@ -340,13 +339,13 @@ class ads_site_constructor():
 		elif cnum == 2:
 			ads_site = self.get_bi_ads_site(normal_vec,center_coord,site_idx)
 		elif cnum == 3 and norm_scaled > sum_tol:
-			ads_site = self.get_tri_ads_site(normal_vec,sum_dist,center_coord,
+			ads_site = self.get_tri_ads_site(normal_vec,scaled_sum_dist,center_coord,
 				site_idx)
 		elif norm_scaled <= sum_tol or rmse <= rmse_tol:
 			dist = self.get_dist_planar(normal_vec)
-			ads_site = self.get_planar_ads_site(center_coord,site_idx)
+			ads_site = self.get_planar_ads_site(center_coord,dist,site_idx)
 		else:
-			ads_site = self.get_nonplanar_ads_site(sum_dist,center_coord)
+			ads_site = self.get_nonplanar_ads_site(scaled_sum_dist,center_coord)
 
 		return ads_site
 
