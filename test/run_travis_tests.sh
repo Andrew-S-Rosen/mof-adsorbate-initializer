@@ -5,4 +5,4 @@
 python examples/add_O.py &&
 python examples/add_H.py &&
 python examples/add_CH4.py &&
-python analyze_test.py
+python test/analyze_test.py
