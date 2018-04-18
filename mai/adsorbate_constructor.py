@@ -57,15 +57,19 @@ class adsorbate_constructor():
 		Args:
 			atoms_filepath (string): filepath to the structure file (accepts
 			CIFs, POSCARs, and CONTCARs)
-			grid_path (string): path to the RASPA energy grids
+			grid_path (string): path to the directory containing RASPA energy
+			grids (defaults to /energy_grids within the directory of the
+			starting structure files)
 			write_file (bool): if True, the new ASE atoms object should be
-			written to a CIF file
+			written to a CIF file (defaults to True)
 			new_mofs_path (string): path to store the new CIF files if
-			write_file is True (defaults to atoms_filepath/new_mofs)
+			write_file is True (defaults to /new_mofs within the
+			directory of the starting structure files)
 			error_path (string): path to store any adsorbates flagged as
-			problematic (defaults to atoms_filepath/errors)
+			problematic (defaults to /errors within the directory of the
+			starting structure files)
 		Returns:
-			new_atoms (Atoms object): Atoms object of MOF with adsorbate
+			new_atoms (Atoms object): ASE Atoms object of MOF with adsorbate
 			new_name (string): name of MOF with adsorbate
 		"""
 		#Check for file and prepare paths
@@ -116,17 +120,18 @@ class adsorbate_constructor():
 			atoms_filepath (string): filepath to the structure file (accepts
 			CIFs, POSCARs, and CONTCARs)
 			NN_method (string): string representing the desired Pymatgen
-			nearest neighbor algorithm (accepts 'vire','voronoi','jmol',
-			'min_dist','okeeffe','brunner', and 'econ')
+			nearest neighbor algorithm (options include 'vire','voronoi',
+			'jmol','min_dist','okeeffe','brunner', and 'econ')
 			write_file (bool): if True, the new ASE atoms object should be
-			written to a CIF file
-			bond_dist (float): distance between adsorbate and surface atom
+			written to a CIF file (defaults to True)
 			new_mofs_path (string): path to store the new CIF files if
-			write_file is True (defaults to atoms_filepath/new_mofs)
+			write_file is True (defaults to /new_mofs within the
+			directory of the starting structure files)
 			error_path (string): path to store any adsorbates flagged as
-			problematic (defaults to atoms_filepath/errors)
+			problematic (defaults to /errors within the directory of the
+			starting structure files)
 		Returns:
-			new_atoms (Atoms object): Atoms object of MOF with adsorbate
+			new_atoms (Atoms object): ASE Atoms object of MOF with adsorbate
 			new_name (string): name of MOF with adsorbate
 		"""
 		#Check for file and prepare paths
@@ -171,18 +176,21 @@ class adsorbate_constructor():
 		to extraframework atoms (excluding the adsorption site) is selected.
 
 		Args:
-			atoms_filepath (string): path to the structure file
+			atoms_filepath (string): filepath to the structure file (accepts
+			CIFs, POSCARs, and CONTCARs)
 			oms_data_path (string): path to the Zeo++ open metal site data
-			containing .oms and .omsex files (defaults to
-			atoms_filepath/OMS_data)
+			containing .oms and .omsex files (defaults to /oms_data within the
+			directory of the starting structure files)
 			write_file (bool): if True, the new ASE atoms object should be
-			written to a CIF file
+			written to a CIF file (defaults to True)
 			new_mofs_path (string): path to store the new CIF files if
-			write_file is True (defaults to atoms_filepath/new_mofs)
+			write_file is True (defaults to /new_mofs within the
+			directory of the starting structure files)
 			error_path (string): path to store any adsorbates flagged as
-			problematic (defaults to atoms_filepath/errors)
+			problematic (defaults to /errors within the directory of the
+			starting structure files)
 		Returns:
-			new_atoms_list (list): list of ASE atoms objects with an adsorbate
+			new_atoms_list (list): list of ASE Atoms objects with an adsorbate
 			added to each unique OMS
 			new_name_list (list): list of names associated with each atoms
 			object in new_atoms_list
