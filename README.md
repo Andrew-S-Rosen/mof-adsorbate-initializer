@@ -107,6 +107,7 @@ Atomic Adsorbate (Zeo++)
 Atomic Adsorbate (Pymatgen)
 -----
 ![anugia_oh](test/success/add_H/anugia_oh.png)
+
 There are two implemented methods of initializing atomic adsorbates. The first allows for the use of one of Pymatgen's nearest neighbor algorithms to determine the coordination environment of the proposed adsorption site. The second allows for the use of 
 
 ```python
