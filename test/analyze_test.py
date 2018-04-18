@@ -10,6 +10,10 @@ for specie in species:
 	path = test_basepath+specie+'/'
 	success_path = success_basepath+specie+'/'
 	for file in os.listdir(success_path):
+		if not os.path.isfile(os.path.join(path,file)):
+			continue
+		if '.png' in file:
+			continue
 		mof_test = read(os.path.join(path,file))
 		mof_real = read(os.path.join(success_path,file))
 		if np.sum(np.abs(mof_real.get_positions()-mof_test.get_positions()) >= tol) != 0:
