@@ -3,7 +3,7 @@ from ase.io import read
 import numpy as np
 
 success_basepath = 'success/add_'
-test_basepath = '../examples/bare_MOFs/add_'
+test_basepath = 'examples/bare_MOFs/add_'
 species = ['O','H','CH4']
 for specie in species:
 	path = test_basepath+specie+'/'

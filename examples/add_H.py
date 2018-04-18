@@ -1,8 +1,8 @@
 import os
 from mai.adsorbate_constructor import adsorbate_constructor
 
-mof_path = 'oxygenated_MOFs/'
-new_mofs_path = 'add_H/'
+mof_path = 'examples/oxygenated_MOFs/'
+new_mofs_path = 'examples/add_H/'
 site_species = 'O'
 ads_species = 'H'
 bond_length = 1.0
