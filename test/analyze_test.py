@@ -10,6 +10,6 @@ for specie in species:
 	path = test_basepath+specie+'/'
 	success_path = success_basepath+specie+'/'
 	for file in os.listdir(success_path):
-		mof_test = read(os.join.path(path,file))
-		mof_real = read(os.join.path(success_path,file))
+		mof_test = read(os.path.join(path,file))
+		mof_real = read(os.path.join(success_path,file))
 		assert(np.sum(np.abs(mof_real.get_distances()-mof_test.get_distances())) > tol)
