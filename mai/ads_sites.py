@@ -9,7 +9,7 @@ import os
 """
 This module provides a class to identify ideal adsorption sites
 """
-class ads_site_constructor():
+class ads_pos_optimizer():
 	"""
 	This identifies ideal adsorption sites
 	"""
@@ -65,12 +65,12 @@ class ads_site_constructor():
 
 		return dist
 
-	def get_NNs(self,ads_site,site_idx):
+	def get_NNs(self,ads_pos,site_idx):
 		"""
 		Get the number of atoms nearby the proposed adsorption site within r_cut
 
 		Args:
-			ads_site (numpy array): 1D numpy array for the proposed
+			ads_pos (numpy array): 1D numpy array for the proposed
 			adsorption position
 			site_idx (int): ASE index for adsorption site
 		Returns:
@@ -83,7 +83,7 @@ class ads_site_constructor():
 
 		#Add proposed adsorbate
 		mof_temp = read(atoms_filepath)
-		adsorbate = Atoms([Atom(ads_species,ads_site)])
+		adsorbate = Atoms([Atom(ads_species,ads_pos)])
 		mof_temp.extend(adsorbate)
 
 		#Determine the number of nearby atoms and minimum distance
@@ -96,12 +96,12 @@ class ads_site_constructor():
 
 		return NN, min_dist
 
-	def get_best_to_worst_idx(self,ads_sites,site_idx_list):
+	def get_best_to_worst_idx(self,ads_poss,site_idx_list):
 		"""
 		Sort the potential adsorption sites by best to worst
 
 		Args:
-			ads_sites (numpy array): 2D numpy array for the proposed
+			ads_poss (numpy array): 2D numpy array for the proposed
 			adsorption positions
 			site_idx_list (list of ints): ASE indices for adsorption sites
 		Returns:
@@ -112,12 +112,12 @@ class ads_site_constructor():
 		min_dist = []
 		i_vec = []
 		best_to_worst_idx = []
-		if len(site_idx_list) != np.shape(ads_sites)[0]:
+		if len(site_idx_list) != np.shape(ads_poss)[0]:
 			raise ValueError('Incompatible lengths of lists')
 
 		#Cycle through proposed adsorbates sort by best
 		for i, ase_cus_idx in enumerate(site_idx_list):
-			NN_temp, min_dist_temp = self.get_NNs(ads_sites[i,:],ase_cus_idx)
+			NN_temp, min_dist_temp = self.get_NNs(ads_poss[i,:],ase_cus_idx)
 			NN.append(NN_temp)
 			min_dist.append(min_dist_temp)
 			i_vec.append(i)
@@ -129,7 +129,7 @@ class ads_site_constructor():
 
 		return best_to_worst_idx
 
-	def get_planar_ads_site(self,center_coord,dist,site_idx):
+	def get_planar_ads_pos(self,center_coord,dist,site_idx):
 		"""
 		Get adsorption site for planar structure
 
@@ -138,7 +138,7 @@ class ads_site_constructor():
 			(i.e. the central atom)
 			site_idx (int): ASE index for adsorption site
 		Returns:
-			ads_site (numpy array): 1D numpy array for the proposed
+			ads_pos (numpy array): 1D numpy array for the proposed
 			adsorption position
 		"""
 		NN = []
@@ -147,27 +147,27 @@ class ads_site_constructor():
 		#Get +/- normal vector
 		for i in range(2):
 			if i == 0:
-				ads_site_temp = center_coord + dist
+				ads_pos_temp = center_coord + dist
 			elif i == 1:
-				ads_site_temp = center_coord - dist
-			NN_temp, min_dist_temp = self.get_NNs(ads_site_temp,site_idx)
+				ads_pos_temp = center_coord - dist
+			NN_temp, min_dist_temp = self.get_NNs(ads_pos_temp,site_idx)
 			NN.append(NN_temp)
 			min_dist.append(min_dist_temp)
 
 		#Select best direction for normal vector
 		if NN[0] == NN[1]:
 			if min_dist[0] >= min_dist[1]:
-				ads_site = center_coord + dist
+				ads_pos = center_coord + dist
 			else:
-				ads_site = center_coord - dist
+				ads_pos = center_coord - dist
 		elif NN[0] <= NN[1]:
-			ads_site = center_coord + dist
+			ads_pos = center_coord + dist
 		else:
-			ads_site = center_coord - dist
+			ads_pos = center_coord - dist
 
-		return ads_site
+		return ads_pos
 
-	def get_nonplanar_ads_site(self,scaled_sum_dist,center_coord):
+	def get_nonplanar_ads_pos(self,scaled_sum_dist,center_coord):
 		"""
 		Get adsorption site for non-planar structure
 
@@ -177,18 +177,18 @@ class ads_site_constructor():
 			atom and the central atom (i.e. the adsorption site)
 			center_coord (numpy array): 1D numpy array for adsorption site
 		Returns:
-			ads_site (numpy array): 1D numpy array for the proposed
+			ads_pos (numpy array): 1D numpy array for the proposed
 			adsorption position
 		"""
 
 		#Sum up Euclidean vectors and scale to bond distance
 		bond_dist = self.bond_dist
 		dist = bond_dist*scaled_sum_dist/np.linalg.norm(scaled_sum_dist)
-		ads_site = center_coord - dist
+		ads_pos = center_coord - dist
 
-		return ads_site
+		return ads_pos
 
-	def get_bi_ads_site(self,normal_vec,center_coord,site_idx):
+	def get_bi_ads_pos(self,normal_vec,center_coord,site_idx):
 		"""
 		Get adsorption site for a 2-coordinate site
 
@@ -198,7 +198,7 @@ class ads_site_constructor():
 			center_coord (numpy array): 1D numpy array for adsorption site
 			site_idx (int): ASE index of adsorption site
 		Returns:
-			ads_site (numpy array): 1D numpy array for the proposed
+			ads_pos (numpy array): 1D numpy array for the proposed
 			adsorption position
 		"""
 		bond_dist = self.bond_dist
@@ -210,10 +210,10 @@ class ads_site_constructor():
 
 		#Prepare 2 overlapping adsorbates
 		try_angles = np.arange(0,360,10)
-		ads_site_temp_unrotated1 = center_coord + dist
-		ads_site_temp_unrotated2 = center_coord - dist
-		ads_temp1 = Atoms([Atom(ads_species,ads_site_temp_unrotated1)])
-		ads_temp2 = Atoms([Atom(ads_species,ads_site_temp_unrotated2)])
+		ads_pos_temp_unrotated1 = center_coord + dist
+		ads_pos_temp_unrotated2 = center_coord - dist
+		ads_temp1 = Atoms([Atom(ads_species,ads_pos_temp_unrotated1)])
+		ads_temp2 = Atoms([Atom(ads_species,ads_pos_temp_unrotated2)])
 		mof_temp_orig = read(atoms_filepath)
 
 		#Rotate one of the adsorbates about the axis
@@ -243,15 +243,15 @@ class ads_site_constructor():
 
 			#Select best option
 			if i == 0:
-				ads_site = mof_temp[-2].position
+				ads_pos = mof_temp[-2].position
 				old_min_NNs = NNs
 			elif sum(dist_mat <= overlap_tol) == 0 and NNs < old_min_NNs:
-				ads_site = mof_temp[-2].position
+				ads_pos = mof_temp[-2].position
 				old_min_NNs = NNs
 
-		return ads_site
+		return ads_pos
 
-	def get_tri_ads_site(self,normal_vec,scaled_sum_dist,center_coord,site_idx):
+	def get_tri_ads_pos(self,normal_vec,scaled_sum_dist,center_coord,site_idx):
 		"""
 		Get adsorption site for a 3-coordinate site
 
@@ -264,14 +264,14 @@ class ads_site_constructor():
 			center_coord (numpy array): 1D numpy array for adsorption site
 			site_idx (int): ASE index of adsorption site
 		Returns:
-			ads_site (numpy array): 1D numpy array for the proposed
+			ads_pos (numpy array): 1D numpy array for the proposed
 			adsorption position
 		"""
 		dist = self.get_dist_planar(normal_vec)
-		ads_site_planar = self.get_planar_ads_site(center_coord,dist,site_idx)
-		NN_planar, min_dist_planar = self.get_NNs(ads_site_planar,site_idx)
-		ads_site_nonplanar = self.get_nonplanar_ads_site(scaled_sum_dist,center_coord)
-		NN_nonplanar, min_dist_nonplanar = self.get_NNs(ads_site_nonplanar,
+		ads_pos_planar = self.get_planar_ads_pos(center_coord,dist,site_idx)
+		NN_planar, min_dist_planar = self.get_NNs(ads_pos_planar,site_idx)
+		ads_pos_nonplanar = self.get_nonplanar_ads_pos(scaled_sum_dist,center_coord)
+		NN_nonplanar, min_dist_nonplanar = self.get_NNs(ads_pos_nonplanar,
 			site_idx)
 
 		#3-coordinate can be something like trigonal planar or T-shaped.
@@ -279,17 +279,17 @@ class ads_site_constructor():
 		#andd sum of Euclidean vectors for the other shapes
 		if NN_planar == NN_nonplanar:
 			if min_dist_planar >= min_dist_nonplanar:
-				ads_site = ads_site_planar
+				ads_pos = ads_pos_planar
 			else:
-				ads_site = ads_site_nonplanar
+				ads_pos = ads_pos_nonplanar
 		elif NN_planar <= NN_nonplanar:
-			ads_site = ads_site_planar
+			ads_pos = ads_pos_planar
 		else:
-			ads_site = ads_site_nonplanar
+			ads_pos = ads_pos_nonplanar
 			
-		return ads_site
+		return ads_pos
 
-	def get_opt_ads_site(self,mic_coords,site_idx):
+	def get_opt_ads_pos(self,mic_coords,site_idx):
 		"""
 		Get the optimal adsorption site
 
@@ -299,7 +299,7 @@ class ads_site_constructor():
 			atom (i.e. adsorption site) as the origin
 			site_idx (int): ASE index of adsorption site
 		Returns:
-			ads_site (numpy array): 1D numpy array for the proposed
+			ads_pos (numpy array): 1D numpy array for the proposed
 			adsorption position
 		"""
 		sum_tol = self.sum_tol
@@ -335,26 +335,26 @@ class ads_site_constructor():
 		#Get adsorption site based on coordination number
 		if cnum == 1:
 			dist = self.get_dist_planar(normal_vec)
-			ads_site = center_coord-dist
+			ads_pos = center_coord-dist
 		elif cnum == 2:
-			ads_site = self.get_bi_ads_site(normal_vec,center_coord,site_idx)
+			ads_pos = self.get_bi_ads_pos(normal_vec,center_coord,site_idx)
 		elif cnum == 3 and norm_scaled > sum_tol:
-			ads_site = self.get_tri_ads_site(normal_vec,scaled_sum_dist,center_coord,
+			ads_pos = self.get_tri_ads_pos(normal_vec,scaled_sum_dist,center_coord,
 				site_idx)
 		elif norm_scaled <= sum_tol or rmse <= rmse_tol:
 			dist = self.get_dist_planar(normal_vec)
-			ads_site = self.get_planar_ads_site(center_coord,dist,site_idx)
+			ads_pos = self.get_planar_ads_pos(center_coord,dist,site_idx)
 		else:
-			ads_site = self.get_nonplanar_ads_site(scaled_sum_dist,center_coord)
+			ads_pos = self.get_nonplanar_ads_pos(scaled_sum_dist,center_coord)
 
-		return ads_site
+		return ads_pos
 
-	def add_ads_species(self,ads_site):
+	def add_ads_species(self,ads_pos):
 		"""
 		Add adsorbate to the ASE atoms object
 
 		Args:
-			ads_site (numpy array): 1D numpy array for the proposed
+			ads_pos (numpy array): 1D numpy array for the proposed
 			adsorption position
 		Returns:
 			new_mof (ASE Atoms object): Atoms object for new
@@ -363,18 +363,18 @@ class ads_site_constructor():
 		ads_species = self.ads_species
 		atoms_filepath = self.atoms_filepath
 		new_mof = read(atoms_filepath)
-		adsorbate = Atoms([Atom(ads_species,ads_site)])
+		adsorbate = Atoms([Atom(ads_species,ads_pos)])
 		new_mof.extend(adsorbate)
 
 		return new_mof
 
-	def get_new_atoms_zeo_oms(self,ads_sites,best_to_worst_idx,cluster):
+	def get_new_atoms_zeo_oms(self,ads_poss,best_to_worst_idx,cluster):
 		"""
 		Construct new Atoms object with adsorbate based on Zeo++ OMS
 		detection
 
 		Args:
-			ads_sites (numpy array): 2D numpy array for the proposed
+			ads_poss (numpy array): 2D numpy array for the proposed
 			adsorption positions
 			best_to_worst_idx (list of ints): sorted adsorption sites from best
 			to worst
@@ -399,7 +399,7 @@ class ads_site_constructor():
 		#Cycle through all proposed adsorbates and write the best
 		#one that does not overlap with other atoms
 		for idx in best_to_worst_idx:
-			new_mof = self.add_ads_species(ads_sites[idx,:])
+			new_mof = self.add_ads_species(ads_poss[idx,:])
 			dist_mat = new_mof.get_distances(len(new_mof)-1,
 				np.arange(0,len(new_mof)-1).tolist(),mic=True)
 			
@@ -421,13 +421,12 @@ class ads_site_constructor():
 
 		return new_mof, new_name
 
-	def get_new_atoms(self,ads_site):
+	def get_new_atoms(self,ads_pos):
 		"""
-		Write out new CIF file with adsorbate and store the
-		new ASE Atoms object
+		Get new ASE atoms object with adsorbate
 
 		Args:
-			ads_site (numpy array): 1D numpy array for the proposed
+			ads_pos (numpy array): 1D numpy array for the proposed
 			adsorption position
 		Returns:
 			new_mof (ASE Atoms object): new ASE Atoms object with adsorbate
@@ -444,7 +443,7 @@ class ads_site_constructor():
 		name = get_refcode(atoms_filename)
 		new_name = name+'_'+ads_species
 
-		new_mof = self.add_ads_species(ads_site)
+		new_mof = self.add_ads_species(ads_pos)
 		dist_mat = new_mof.get_distances(len(new_mof)-1,
 			np.arange(0,len(new_mof)-1).tolist(),mic=True)
 
@@ -459,7 +458,16 @@ class ads_site_constructor():
 		return new_mof, new_name
 
 	def get_new_atoms_ch4_grid(self,site_pos,ads_pos):
+		"""
+		Get new ASE atoms object with CH4 adsorbate from energy grid
 
+		Args:
+			ads_pos (numpy array): 1D numpy array for the proposed
+			adsorption position
+		Returns:
+			new_mof (ASE Atoms object): new ASE Atoms object with adsorbate
+			name (string): name of new structure with adsorbate
+		"""
 		atoms_filepath = self.atoms_filepath
 		ads_species = self.ads_species
 		overlap_tol = self.overlap_tol
@@ -467,11 +475,14 @@ class ads_site_constructor():
 		new_mofs_path = self.new_mofs_path
 		error_path = self.error_path
 
+		#Add CH4 to structure
 		atoms_filename = os.path.basename(atoms_filepath)
 		mof = read(atoms_filepath)
 		name = get_refcode(atoms_filename)
 		new_name = name+'_'+ads_species
 		new_mof = add_CH4(site_pos,ads_pos,mof)
+
+		#Confirm no overlapping atoms and write file
 		n = len(new_mof)-len(mof)
 		overlap = False
 		for i in range(n):

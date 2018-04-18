@@ -1,7 +1,7 @@
 import numpy as np
 import os
 from ase.io import read
-from mai.ads_sites import ads_site_constructor
+from mai.ads_sites import ads_pos_optimizer
 from mai.janitor import prep_paths, get_refcode
 from mai.zeo_handler import get_omsex_data
 from mai.geom import get_NNs_pm
@@ -87,9 +87,9 @@ class adsorbate_constructor():
 		if ads_pos is None:
 			print('WARNING: no grid for '+name)
 			return None, None		
-		ads_site_const = ads_site_constructor(self,atoms_filepath,
+		ads_optimizer = ads_pos_optimizer(self,atoms_filepath,
 					new_mofs_path=new_mofs_path,error_path=error_path)
-		new_atoms, new_name = ads_site_const.get_new_atoms_ch4_grid(site_pos,ads_pos)
+		new_atoms, new_name = ads_optimizer.get_new_atoms_ch4_grid(site_pos,ads_pos)
 
 		return new_atoms, new_name
 
@@ -140,10 +140,10 @@ class adsorbate_constructor():
 			mic=True,vector=True))
 
 		#Get the optimal adsorption site
-		ads_site_const = ads_site_constructor(self,atoms_filepath,
+		ads_optimizer = ads_pos_optimizer(self,atoms_filepath,
 					new_mofs_path=new_mofs_path,error_path=error_path)
-		ads_site = ads_site_const.get_opt_ads_site(mic_coords,site_idx)
-		new_atoms, new_name = ads_site_const.get_new_atoms(ads_site)
+		ads_site = ads_optimizer.get_opt_ads_site(mic_coords,site_idx)
+		new_atoms, new_name = ads_optimizer.get_new_atoms(ads_site)
 
 		return new_atoms, new_name
 
@@ -241,18 +241,18 @@ class adsorbate_constructor():
 					mic=True,vector=True))
 
 				#Get adsorption sites
-				ads_site_const = ads_site_constructor(self,atoms_filepath,
+				ads_optimizer = ads_pos_optimizer(self,atoms_filepath,
 					new_mofs_path=new_mofs_path,error_path=error_path)
-				ads_sites[i,:] = ads_site_const.get_opt_ads_site(mic_coords,
+				ads_sites[i,:] = ads_optimizer.get_opt_ads_site(mic_coords,
 					oms_idx)
 				
 			#Identify optimal adsorption site
 			oms_idx_cluster = [omsex_dict['oms_idx'][j] for j in omsex_indices]
-			best_to_worst_idx = ads_site_const.get_best_to_worst_idx(ads_sites,
+			best_to_worst_idx = ads_optimizer.get_best_to_worst_idx(ads_sites,
 				oms_idx_cluster)
 
 			#Get new atoms object with adsorbate
-			new_atoms, new_name = ads_site_const.get_new_atoms_zeo_oms(
+			new_atoms, new_name = ads_optimizer.get_new_atoms_zeo_oms(
 				ads_sites,best_to_worst_idx,unique_cluster_sym)
 
 			new_atoms_list.append(new_atoms)
