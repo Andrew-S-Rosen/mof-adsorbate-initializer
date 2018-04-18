@@ -27,7 +27,7 @@ class adsorbate_constructor():
 			site_species (string): string of atomic element for the adsorption
 			site species
 			site_idx (int): ASE index for the adsorption site (defaults to
-			the last element of element site_species)
+			the last element of element type site_species)
 			r_cut (float): cutoff distance for calculating nearby atoms when
 			ranking adsorption sites
 			sum_tol (float): threshold to determine planarity. when the sum
@@ -55,7 +55,18 @@ class adsorbate_constructor():
 		generated using RASPA
 
 		Args:
+			atoms_filepath (string): filepath to the structure file (accepts
+			CIFs, POSCARs, and CONTCARs)
+			grid_path (string): path to the RASPA energy grids
+			write_file (bool): if True, the new ASE atoms object should be
+			written to a CIF file
+			new_mofs_path (string): path to store the new CIF files if
+			write_file is True (defaults to atoms_filepath/new_mofs)
+			error_path (string): path to store any adsorbates flagged as
+			problematic (defaults to atoms_filepath/errors)
 		Returns:
+			new_atoms (Atoms object): Atoms object of MOF with adsorbate
+			new_name (string): name of MOF with adsorbate
 		"""
 		#Check for file and prepare paths
 		if not os.path.isfile(atoms_filepath):
@@ -142,8 +153,8 @@ class adsorbate_constructor():
 		#Get the optimal adsorption site
 		ads_optimizer = ads_pos_optimizer(self,atoms_filepath,
 					new_mofs_path=new_mofs_path,error_path=error_path)
-		ads_site = ads_optimizer.get_opt_ads_site(mic_coords,site_idx)
-		new_atoms, new_name = ads_optimizer.get_new_atoms(ads_site)
+		ads_pos = ads_optimizer.get_opt_ads_pos(mic_coords,site_idx)
+		new_atoms, new_name = ads_optimizer.get_new_atoms(ads_pos)
 
 		return new_atoms, new_name
 
@@ -228,7 +239,7 @@ class adsorbate_constructor():
 
 			omsex_indices = [idx for idx, entry in enumerate(cluster_sym)
 				if entry == unique_cluster_sym]
-			ads_sites = np.zeros((len(omsex_indices),3))
+			ads_positions = np.zeros((len(omsex_indices),3))
 
 			#Cycle through each (chemically identical) OMS environment
 			for i, omsex_idx in enumerate(omsex_indices):
@@ -243,17 +254,17 @@ class adsorbate_constructor():
 				#Get adsorption sites
 				ads_optimizer = ads_pos_optimizer(self,atoms_filepath,
 					new_mofs_path=new_mofs_path,error_path=error_path)
-				ads_sites[i,:] = ads_optimizer.get_opt_ads_site(mic_coords,
+				ads_positions[i,:] = ads_optimizer.get_opt_ads_pos(mic_coords,
 					oms_idx)
 				
 			#Identify optimal adsorption site
 			oms_idx_cluster = [omsex_dict['oms_idx'][j] for j in omsex_indices]
-			best_to_worst_idx = ads_optimizer.get_best_to_worst_idx(ads_sites,
+			best_to_worst_idx = ads_optimizer.get_best_to_worst_idx(ads_positions,
 				oms_idx_cluster)
 
 			#Get new atoms object with adsorbate
 			new_atoms, new_name = ads_optimizer.get_new_atoms_zeo_oms(
-				ads_sites,best_to_worst_idx,unique_cluster_sym)
+				ads_positions,best_to_worst_idx,unique_cluster_sym)
 
 			new_atoms_list.append(new_atoms)
 			new_name_list.append(new_name)
