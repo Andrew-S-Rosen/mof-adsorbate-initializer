@@ -1,0 +1,492 @@
+import numpy as np
+from ase import Atoms, Atom
+from ase.io import read, write
+from mai.regression import OLS_fit, TLS_fit
+from mai.janitor import get_refcode
+from mai.energy_grid_handler import add_CH4
+import os
+
+"""
+This module provides a class to identify ideal adsorption sites
+"""
+class ads_site_constructor():
+	"""
+	This identifies ideal adsorption sites
+	"""
+	def __init__(self,adsorbate_constructor,atoms_filepath,write_file=True,
+		new_mofs_path=None,error_path=None):
+		"""
+		Initialized variables
+
+		Args:
+			adsorbate_constructor (class): adsorbate_constructor class
+			containing many relevant defaults
+			atoms_filepath (string): path to the structure file
+			write_file (bool): if True, the new ASE atoms object should be
+			written to a CIF file
+			write_file is True (defaults to atoms_filepath/new_mofs)
+			new_mofs_path (string): path to store the new CIF files if
+			write_file is True (defaults to atoms_filepath/new_mofs)
+			error_path (string): path to store any adsorbates flagged as
+			problematic (defaults to atoms_filepath/errors)
+		"""
+		self.ads_species = adsorbate_constructor.ads_species
+		self.bond_dist = adsorbate_constructor.bond_dist
+		self.overlap_tol = adsorbate_constructor.overlap_tol
+		self.r_cut = adsorbate_constructor.r_cut
+		self.sum_tol = adsorbate_constructor.sum_tol
+		self.rmse_tol = adsorbate_constructor.rmse_tol
+		self.atoms_filepath = atoms_filepath
+		self.write_file = write_file
+
+		if new_mofs_path is None:
+			self.new_mofs_path = os.path.join(os.path.dirname(atoms_filepath),
+				'new_mofs')
+		else:
+			self.new_mofs_path = new_mofs_path
+		if error_path is None:
+			self.error_path = os.path.join(new_mofs_path,'errors')
+		else:
+			self.error_path = error_path
+
+	def get_dist_planar(self,normal_vec):
+		"""
+		Get distance vector for planar adsorption site
+
+		Args:
+			normal_vec (numpy array): 1D numpy array for normal vector
+		Returns:
+			dist (float): distance vector scaled to bond_dist
+		"""
+		#Scale normal vector to desired bond length
+		bond_dist = self.bond_dist
+		unit_normal = normal_vec/np.linalg.norm(normal_vec)
+		dist = unit_normal*bond_dist
+
+		return dist
+
+	def get_NNs(self,ads_site,site_idx):
+		"""
+		Get the number of atoms nearby the proposed adsorption site within r_cut
+
+		Args:
+			ads_site (numpy array): 1D numpy array for the proposed
+			adsorption position
+			site_idx (int): ASE index for adsorption site
+		Returns:
+			NN (int): number of neighbors within r_cut
+			min_dist (float): distance from adsorbate to nearest atom
+		"""
+		ads_species = self.ads_species
+		r_cut = self.r_cut
+		atoms_filepath = self.atoms_filepath
+
+		#Add proposed adsorbate
+		mof_temp = read(atoms_filepath)
+		adsorbate = Atoms([Atom(ads_species,ads_site)])
+		mof_temp.extend(adsorbate)
+
+		#Determine the number of nearby atoms and minimum distance
+		compare_with = np.arange(0,len(mof_temp)-1).tolist()
+		del compare_with[site_idx]
+		neighbor_dist = mof_temp.get_distances(len(mof_temp)-1,compare_with,
+			mic=True)
+		NN = sum(neighbor_dist <= r_cut)
+		min_dist = np.min(neighbor_dist)
+
+		return NN, min_dist
+
+	def get_best_to_worst_idx(self,ads_sites,site_idx_list):
+		"""
+		Sort the potential adsorption sites by best to worst
+
+		Args:
+			ads_sites (numpy array): 2D numpy array for the proposed
+			adsorption positions
+			site_idx_list (list of ints): ASE indices for adsorption sites
+		Returns:
+			best_to_worst_idx (list of ints): sorted adsorption sites from best
+			to worst
+		"""
+		NN = []
+		min_dist = []
+		i_vec = []
+		best_to_worst_idx = []
+		if len(site_idx_list) != np.shape(ads_sites)[0]:
+			raise ValueError('Incompatible lengths of lists')
+
+		#Cycle through proposed adsorbates sort by best
+		for i, ase_cus_idx in enumerate(site_idx_list):
+			NN_temp, min_dist_temp = self.get_NNs(ads_sites[i,:],ase_cus_idx)
+			NN.append(NN_temp)
+			min_dist.append(min_dist_temp)
+			i_vec.append(i)
+		merged_list = list(zip(i_vec,NN,min_dist))
+		merged_list.sort(key=lambda x: x[2],reverse=True)
+		merged_list.sort(key=lambda x: x[1])
+		for item in merged_list:
+			best_to_worst_idx.append(item[0])
+
+		return best_to_worst_idx
+
+	def get_planar_ads_site(self,center_coord,site_idx):
+		"""
+		Get adsorption site for planar structure
+
+		Args:
+			center_coord (numpy array): 1D numpy array for adsorption site
+			(i.e. the central atom)
+			site_idx (int): ASE index for adsorption site
+		Returns:
+			ads_site (numpy array): 1D numpy array for the proposed
+			adsorption position
+		"""
+		NN = []
+		min_dist = []
+		bond_dist = self.bond_dist
+
+		#Get +/- normal vector
+		for i in range(2):
+			if i == 0:
+				ads_site_temp = center_coord + bond_dist
+			elif i == 1:
+				ads_site_temp = center_coord - bond_dist
+			NN_temp, min_dist_temp = self.get_NNs(ads_site_temp,site_idx)
+			NN.append(NN_temp)
+			min_dist.append(min_dist_temp)
+
+		#Select best direction for normal vector
+		if NN[0] == NN[1]:
+			if min_dist[0] >= min_dist[1]:
+				ads_site = center_coord + bond_dist
+			else:
+				ads_site = center_coord - bond_dist
+		elif NN[0] <= NN[1]:
+			ads_site = center_coord + bond_dist
+		else:
+			ads_site = center_coord - bond_dist
+
+		return ads_site
+
+	def get_nonplanar_ads_site(self,sum_dist,center_coord):
+		"""
+		Get adsorption site for non-planar structure
+
+		Args:
+			sum_dist (numpy array): 2D numpy array for the
+			Euclidean distance vectors between each coordinating
+			atom and the central atom (i.e. the adsorption site)
+			center_coord (numpy array): 1D numpy array for adsorption site
+		Returns:
+			ads_site (numpy array): 1D numpy array for the proposed
+			adsorption position
+		"""
+
+		#Sum up Euclidean vectors and scale to bond distance
+		bond_dist = self.bond_dist
+		dist = bond_dist*sum_dist/np.linalg.norm(sum_dist)
+		ads_site =  center_coord - dist
+
+		return ads_site
+
+	def get_bi_ads_site(self,normal_vec,center_coord,site_idx):
+		"""
+		Get adsorption site for a 2-coordinate site
+
+		Args:
+			normal_vec (numpy array): 1D numpy array for the
+			normal vector to the line
+			center_coord (numpy array): 1D numpy array for adsorption site
+			site_idx (int): ASE index of adsorption site
+		Returns:
+			ads_site (numpy array): 1D numpy array for the proposed
+			adsorption position
+		"""
+		bond_dist = self.bond_dist
+		r_cut = self.r_cut
+		overlap_tol = self.overlap_tol
+		ads_species = self.ads_species
+		atoms_filepath = self.atoms_filepath
+		dist = self.get_dist_planar(normal_vec)
+
+		#Prepare 2 overlapping adsorbates
+		try_angles = np.arange(0,360,10)
+		ads_site_temp_unrotated1 = center_coord + dist
+		ads_site_temp_unrotated2 = center_coord - dist
+		ads_temp1 = Atoms([Atom(ads_species,ads_site_temp_unrotated1)])
+		ads_temp2 = Atoms([Atom(ads_species,ads_site_temp_unrotated2)])
+		mof_temp_orig = read(atoms_filepath)
+
+		#Rotate one of the adsorbates about the axis
+		#defined by the two coordinating atoms
+		for i, angle in enumerate(try_angles):
+
+			#Add 2 overlapping atoms
+			mof_temp = mof_temp_orig.copy()
+			mof_temp.extend(ads_temp1)
+			mof_temp.extend(ads_temp2)
+
+			#Offset one of the atoms by small value
+			#(just to be higher than machine epsilon)
+			mof_temp[-1].position += 1e-6
+
+			#Set the new angle
+			mof_temp.set_distance(site_idx,len(mof_temp)-1,bond_dist,
+				fix=0,mic=True)
+			mof_temp.set_distance(site_idx,len(mof_temp)-2,bond_dist,
+				fix=0,mic=True)	
+			mof_temp.set_angle(len(mof_temp)-1,site_idx,len(mof_temp)-2,angle)
+
+			#Determine number of nearby atoms
+			dist_mat = mof_temp.get_distances(len(mof_temp)-2,
+				np.arange(0,len(mof_temp)-2).tolist(),mic=True)
+			NNs = sum(dist_mat <= r_cut)
+
+			#Select best option
+			if i == 0:
+				ads_site = mof_temp[-2].position
+				old_min_NNs = NNs
+			elif sum(dist_mat <= overlap_tol) == 0 and NNs < old_min_NNs:
+				ads_site = mof_temp[-2].position
+				old_min_NNs = NNs
+
+		return ads_site
+
+	def get_tri_ads_site(self,normal_vec,sum_dist,center_coord,site_idx):
+		"""
+		Get adsorption site for a 3-coordinate site
+
+		Args:
+			normal_vec (numpy array): 1D numpy array for the
+			normal vector to the line
+			sum_dist (numpy array): 2D numpy array for the
+			Euclidean distance vectors between each coordinating
+			atom and the central atom (i.e. the adsorption site)
+			center_coord (numpy array): 1D numpy array for adsorption site
+			site_idx (int): ASE index of adsorption site
+		Returns:
+			ads_site (numpy array): 1D numpy array for the proposed
+			adsorption position
+		"""
+		ads_site_planar = self.get_planar_ads_site(center_coord,site_idx)
+		NN_planar, min_dist_planar = self.get_NNs(ads_site_planar,site_idx)
+		ads_site_nonplanar = self.get_nonplanar_ads_site(sum_dist,center_coord)
+		NN_nonplanar, min_dist_nonplanar = self.get_NNs(ads_site_nonplanar,
+			site_idx)
+
+		#3-coordinate can be something like trigonal planar or T-shaped.
+		#Use planar algorithm (normal vector) for trigonal planar structures
+		#andd sum of Euclidean vectors for the other shapes
+		if NN_planar == NN_nonplanar:
+			if min_dist_planar >= min_dist_nonplanar:
+				ads_site = ads_site_planar
+			else:
+				ads_site = ads_site_nonplanar
+		elif NN_planar <= NN_nonplanar:
+			ads_site = ads_site_planar
+		else:
+			ads_site = ads_site_nonplanar
+			
+		return ads_site
+
+	def get_opt_ads_site(self,mic_coords,site_idx):
+		"""
+		Get the optimal adsorption site
+
+		Args:
+			mic_coords (numpy array): 2D numpy array for the
+			coordinates of each coordinating atom using the central
+			atom (i.e. adsorption site) as the origin
+			site_idx (int): ASE index of adsorption site
+		Returns:
+			ads_site (numpy array): 1D numpy array for the proposed
+			adsorption position
+		"""
+		sum_tol = self.sum_tol
+		rmse_tol = self.rmse_tol
+		atoms_filepath = self.atoms_filepath
+		scale_factor = 2.0
+
+		#Get coordinates of center atom and coordination number
+		if mic_coords.ndim == 1:
+			cnum = 1
+		else:
+			cnum = np.shape(mic_coords)[0]
+		center_coord = read(atoms_filepath)[site_idx].position
+
+		#Calculate relevant quantities based on coordination number
+		if cnum == 1:
+			#Define direction as colinear with center atom and
+			#coordinating atom
+			normal_vec = mic_coords
+		elif cnum == 2:
+			#Define direction based on line perpendicular to
+			#the two coordinating atoms
+			normal_vec = OLS_fit(mic_coords)
+		elif cnum >= 3:
+			#Calculate normal vector to best-fit plane and the
+			#sum of Euclidean vectors
+			scaled_mic_coords = mic_coords*scale_factor/np.linalg.norm(
+				mic_coords,axis=1)[np.newaxis].T
+			scaled_sum_dist = sum(scaled_mic_coords)
+			sum_dist = sum(mic_coords)
+			norm_scaled = np.linalg.norm(scaled_sum_dist)
+			rmse, normal_vec = TLS_fit(mic_coords)
+
+		#Get adsorption site based on coordination number
+		if cnum == 1:
+			dist = self.get_dist_planar(normal_vec)
+			ads_site = center_coord-dist
+		elif cnum == 2:
+			ads_site = self.get_bi_ads_site(normal_vec,center_coord,site_idx)
+		elif cnum == 3 and norm_scaled > sum_tol:
+			ads_site = self.get_tri_ads_site(normal_vec,sum_dist,center_coord,
+				site_idx)
+		elif norm_scaled <= sum_tol or rmse <= rmse_tol:
+			dist = self.get_dist_planar(normal_vec)
+			ads_site = self.get_planar_ads_site(center_coord,site_idx)
+		else:
+			ads_site = self.get_nonplanar_ads_site(sum_dist,center_coord)
+
+		return ads_site
+
+	def add_ads_species(self,ads_site):
+		"""
+		Add adsorbate to the ASE atoms object
+
+		Args:
+			ads_site (numpy array): 1D numpy array for the proposed
+			adsorption position
+		Returns:
+			new_mof (ASE Atoms object): Atoms object for new
+			structure with adsorbate
+		"""
+		ads_species = self.ads_species
+		atoms_filepath = self.atoms_filepath
+		new_mof = read(atoms_filepath)
+		adsorbate = Atoms([Atom(ads_species,ads_site)])
+		new_mof.extend(adsorbate)
+
+		return new_mof
+
+	def get_new_atoms_zeo_oms(self,ads_sites,best_to_worst_idx,cluster):
+		"""
+		Construct new Atoms object with adsorbate based on Zeo++ OMS
+		detection
+
+		Args:
+			ads_sites (numpy array): 2D numpy array for the proposed
+			adsorption positions
+			best_to_worst_idx (list of ints): sorted adsorption sites from best
+			to worst
+			cluster (list of ints): atomic numbers for each atom in coordination
+			environment (useful for debugging) 
+		Returns:
+			new_mof (ASE Atoms object): new ASE Atoms object with adsorbate
+			name (string): name of new structure with adsorbate
+		"""
+		overlap_tol = self.overlap_tol
+		ads_species = self.ads_species
+		write_file = self.write_file
+		new_mofs_path = self.new_mofs_path
+		error_path = self.error_path
+		atoms_filepath = self.atoms_filepath
+
+		atoms_filename = os.path.basename(atoms_filepath)
+		name = get_refcode(atoms_filename)
+		basename = name+'_'+ads_species
+		success = False
+
+		#Cycle through all proposed adsorbates and write the best
+		#one that does not overlap with other atoms
+		for idx in best_to_worst_idx:
+			new_mof = self.add_ads_species(ads_sites[idx,:])
+			dist_mat = new_mof.get_distances(len(new_mof)-1,
+				np.arange(0,len(new_mof)-1).tolist(),mic=True)
+			
+			if sum(dist_mat <= overlap_tol) == 0:
+				new_name = basename+'_OMS'+str(idx)
+				if write_file == True:
+					write(os.path.join(new_mofs_path,new_name+'.cif'),new_mof)
+				success = True
+				break
+			else:
+				del new_mof[-1]
+
+		if success == False:
+			if write_file == True:
+				write(os.path.join(error_path,basename+'_'+str(cluster)+'.cif'),
+					new_mof)
+			new_mof = None
+			new_name = None
+
+		return new_mof, new_name
+
+	def get_new_atoms(self,ads_site):
+		"""
+		Write out new CIF file with adsorbate and store the
+		new ASE Atoms object
+
+		Args:
+			ads_site (numpy array): 1D numpy array for the proposed
+			adsorption position
+		Returns:
+			new_mof (ASE Atoms object): new ASE Atoms object with adsorbate
+			name (string): name of new structure with adsorbate
+		"""
+		atoms_filepath = self.atoms_filepath
+		ads_species = self.ads_species
+		overlap_tol = self.overlap_tol
+		write_file = self.write_file
+		new_mofs_path = self.new_mofs_path
+		error_path = self.error_path
+
+		atoms_filename = os.path.basename(atoms_filepath)
+		name = get_refcode(atoms_filename)
+		new_name = name+'_'+ads_species
+
+		new_mof = self.add_ads_species(ads_site)
+		dist_mat = new_mof.get_distances(len(new_mof)-1,
+			np.arange(0,len(new_mof)-1).tolist(),mic=True)
+
+		if sum(dist_mat <= overlap_tol) == 0:
+			if write_file == True:
+				write(os.path.join(new_mofs_path,new_name+'.cif'),new_mof)
+		else:
+			if write_file == True:
+				write(os.path.join(error_path,new_name+'.cif'),new_mof)
+			return None, None
+
+		return new_mof, new_name
+
+	def get_new_atoms_ch4_grid(self,site_pos,ads_pos):
+
+		atoms_filepath = self.atoms_filepath
+		ads_species = self.ads_species
+		overlap_tol = self.overlap_tol
+		write_file = self.write_file
+		new_mofs_path = self.new_mofs_path
+		error_path = self.error_path
+
+		atoms_filename = os.path.basename(atoms_filepath)
+		mof = read(atoms_filepath)
+		name = get_refcode(atoms_filename)
+		new_name = name+'_'+ads_species
+		new_mof = add_CH4(site_pos,ads_pos,mof)
+		n = len(new_mof)-len(mof)
+		overlap = False
+		for i in range(n):
+			dist = new_mof.get_distances(-(i+1),np.arange(0,len(new_mof)-n).tolist(),
+				mic=True)
+			if np.sum(dist <= overlap_tol) > 0:
+				overlap = True
+				if write_file == True:
+					write(error_path+name+'_'+ads_species+'.cif',new_mof)
+				break
+		if overlap == True:
+			return None, None
+		else:
+			if write_file == True:
+				write(new_mofs_path+new_name+'.cif',new_mof)
+
+		return new_mof, new_name
