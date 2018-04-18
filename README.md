@@ -62,7 +62,8 @@ def get_adsorbate_raspa(self,atoms_filepath,grid_path=None,
 		atoms_filepath (string): filepath to the structure file (accepts
 		CIFs, POSCARs, and CONTCARs)
 		grid_path (string): path to the directory containing RASPA energy
-		grids (defaults to 
+		grids (defaults to /energy_grids within the directory of the
+		starting structure files)
 		write_file (bool): if True, the new ASE atoms object should be
 		written to a CIF file (defaults to True)
 		new_mofs_path (string): path to store the new CIF files if
@@ -96,13 +97,68 @@ for filename in os.listdir(mof_path):
 		new_mofs_path=new_mofs_path)
 ```
 ## Atomic Adsorbates
+There are two implemented methods of initializing atomic adsorbates. The first allows for the use of Zeo++'s OMS detection and Voronoi tesselation algorithms. The second allows for the use of one of Pymatgen's nearest neighbor algorithms.
+
 ### Using Zeo++ OMS detection
 ![azixud_O](test/success/add_O/azixud_o.png)
 
+The `get_adsorbate_zeo_oms` function is used to add an atomic adsorbate to the OMS of a MOF using data generated from Zeo++. The `get_adsorbate_zeo_oms` function is described below:
+
+```python
+def get_adsorbate_zeo_oms(self,atoms_filepath,oms_data_path=None,
+	write_file=True,new_mofs_path=None,error_path=None):
+	"""
+	This function adds an adsorbate to each unique OMS in a given
+	structure. In cases of multiple identical OMS, the adsorbate with
+	fewest nearest neighbors is selected. In cases of the same number
+	of nearest neighbors, the adsorbate with the largest minimum distance
+	to extraframework atoms (excluding the adsorption site) is selected.
+
+	Args:
+		atoms_filepath (string): filepath to the structure file (accepts
+		CIFs, POSCARs, and CONTCARs)
+		oms_data_path (string): path to the Zeo++ open metal site data
+		containing .oms and .omsex files (defaults to /oms_data within the
+		directory of the starting structure files)
+		write_file (bool): if True, the new ASE atoms object should be
+		written to a CIF file (defaults to True)
+		new_mofs_path (string): path to store the new CIF files if
+		write_file is True (defaults to /new_mofs within the
+		directory of the starting structure files)
+		error_path (string): path to store any adsorbates flagged as
+		problematic (defaults to /errors within the directory of the
+		starting structure files)
+	Returns:
+		new_atoms_list (list): list of ASE Atoms objects with an adsorbate
+		added to each unique OMS
+		new_name_list (list): list of names associated with each atoms
+		object in new_atoms_list
+	"""
+```
+The script below is taken from `examples/add_O.py`. It reads in CIF files from `mof_path`, adds an O atom 2.0 Å away from an OMS in the CIF file (ensuring that the O adsorbate doesn't overlap within 1.3 Å of the MOF), and stores the new CIF files with O adsorbate in `new_mofs_path`. It assumes that the Zeo++ `.oms` and `.omsex` files are stored in a folder named `examples/bare_MOFs/oms_data` since `oms_data_path` is not set in `get_adsorbate_zeo_oms`. 
+
+```python
+import os
+from mai.adsorbate_constructor import adsorbate_constructor
+
+mof_path = 'examples/bare_MOFs/'
+new_mofs_path = 'examples/add_O/'
+ads_species = 'O'
+bond_length = 2.0
+overlap_tol = 1.3
+
+for filename in os.listdir(mof_path):
+	filepath = os.path.join(mof_path,filename)
+	ads_const = adsorbate_constructor(ads_species,bond_length,
+		overlap_tol=overlap_tol)
+	mof_adsorbate_list, mof_name_list = ads_const.get_adsorbate_zeo_oms(filepath,
+		new_mofs_path=new_mofs_path)
+```
 ### Using Pymatgen NN algorithms
 ![anugia_oh](test/success/add_H/anugia_oh.png)
 
-There are two implemented methods of initializing atomic adsorbates. The first allows for the use of one of Pymatgen's nearest neighbor algorithms to determine the coordination environment of the proposed adsorption site. The second allows for the use of 
+The `get_adsorbate_pm` function is used to add an atomic adsorbate to specified site of a MOF using data generated from Pymatgen's `local_env` structural environment class. The `get_adsorbate_pm` function is described below:
+
 
 ```python
 def get_adsorbate_pm(self,atoms_filepath,NN_method='vire',write_file=True,
@@ -114,21 +170,22 @@ def get_adsorbate_pm(self,atoms_filepath,NN_method='vire',write_file=True,
 		atoms_filepath (string): filepath to the structure file (accepts
 		CIFs, POSCARs, and CONTCARs)
 		NN_method (string): string representing the desired Pymatgen
-		nearest neighbor algorithm (accepts 'vire','voronoi','jmol',
-		'min_dist','okeeffe','brunner', and 'econ')
+		nearest neighbor algorithm (options include 'vire','voronoi',
+		'jmol','min_dist','okeeffe','brunner', and 'econ')
 		write_file (bool): if True, the new ASE atoms object should be
-		written to a CIF file
-		bond_dist (float): distance between adsorbate and surface atom
+		written to a CIF file (defaults to True)
 		new_mofs_path (string): path to store the new CIF files if
-		write_file is True (defaults to atoms_filepath/new_mofs)
+		write_file is True (defaults to /new_mofs within the
+		directory of the starting structure files)
 		error_path (string): path to store any adsorbates flagged as
-		problematic (defaults to atoms_filepath/errors)
+		problematic (defaults to /errors within the directory of the
+		starting structure files)
 	Returns:
-		new_atoms (Atoms object): Atoms object of MOF with adsorbate
+		new_atoms (Atoms object): ASE Atoms object of MOF with adsorbate
 		new_name (string): name of MOF with adsorbate
 	"""
 ```
-
+The script below is taken from `examples/add_H.py`. It reads in CIF files from `mof_path`, adds an H atom 1.0 Å away from the last O atom in the CIF file (ensuring that the H adsorbate doesn't overlap within 0.75 Å of the MOF), and stores the new CIF files with H adsorbate in `new_mofs_path`. It uses the Valence Ionic Radius Evaluator (VIRE) nearest-neighbor algorithm implemented in Pymatgen to determine the geometry of the coordination environment. Note that `get_adsorbate_pm` can be used to add atoms to an OMS as well if desired, so long as the ASE index of the OMS is specified in `adsorbate_constructor`.
 ```python
 import os
 from mai.adsorbate_constructor import adsorbate_constructor
