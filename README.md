@@ -1,5 +1,5 @@
 # MOF Adsorbate Initializer (MAI)
-Python code to initialize the position of adsorbates on MOFs for high-throughput DFT screening
+Python code to initialize the position of adsorbates on MOFs for high-throughput DFT screening workflows
 
 ## Setup
 1. MAI requires Python 3.x. If you do not already have Python installed, the easiest option is to download the [Anaconda](https://www.anaconda.com/download/) distribution.
@@ -31,13 +31,14 @@ class adsorbate_constructor():
 			for the adsorbate from the surface atom
 			
 			site_species (string): string of atomic element for the adsorption
-			site species
+			site species. not needed when calling get_adsorbate_zeo_oms
 			
 			site_idx (int): ASE index for the adsorption site (defaults to
-			the last element of element type site_species)
+			the last element of element type site_species). not needed when
+			calling get_adsorbate_zeo_oms
 			
 			r_cut (float): cutoff distance for calculating nearby atoms when
-			ranking adsorption sites
+			ranking different adsorption sites
 			
 			sum_tol (float): threshold to determine planarity. when the sum
 			of the Euclidean distance vectors of coordinating atoms is less
@@ -48,10 +49,10 @@ class adsorbate_constructor():
 			planarity is assumed
 			
 			overlap_tol (float): distance below which atoms are assumed to be
-			overlapping
+			overlapping so that the structure can be flagged as erroneous
 		"""
 ```
-The only required arguments are `ads_species`, `bond_dist`, and either `site_species` or `site_idx`. Once the `adsorbate_constructor` is instanced, one of three routines can be called: `get_adsorbate_raspa`, `get_adsorbate_pm`, and `get_adsorbate_zeo_oms`. These are described below.
+Once the `adsorbate_constructor` is instanced, one of three routines can be called: `get_adsorbate_raspa`, `get_adsorbate_pm`, and `get_adsorbate_zeo_oms`. These are described below.
 
 ## Molecular Adsorbates
 ![AHOKIR_CH4](test/success/add_CH4/ahokir_ch4.png)
