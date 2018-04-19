@@ -5,7 +5,7 @@ def OLS_fit(xyz):
 	Make ordinary least squares fit to z=a+bx+cy and return the normal vector
 
 	Args:
-		xyz (numpy array): 1D or 2D numpy array of XYZ values (N rows, 3 cols)
+		xyz (numpy array): 2D numpy array of XYZ values (N rows, 3 cols)
 	Returns:
 		normal_vec (numpy array): 1D numpy array for the normal vector
 	"""
@@ -36,7 +36,7 @@ def TLS_fit(xyz):
 	Make total least squares fit to ax+by+cz+d=0 and return the normal vector
 
 	Args:
-		xyz (numpy array): 1D or 2D numpy array of XYZ values (N rows, 3 cols)
+		xyz (numpy array): 2D numpy array of XYZ values (N rows, 3 cols)
 	Returns:
 		rmse (float): root mean square error of fit
 		normal_vec (numpy array): 1D numpy array for the normal vector
