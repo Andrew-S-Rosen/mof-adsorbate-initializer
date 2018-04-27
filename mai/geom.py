@@ -1,5 +1,6 @@
 from pymatgen.analysis.local_env import (MinimumVIRENN, VoronoiNN,
-	JMolNN, MinimumDistanceNN, MinimumOKeeffeNN, BrunnerNN, EconNN)
+	JMolNN, MinimumDistanceNN, MinimumOKeeffeNN, BrunnerNN_real,
+	BrunnerNN_relative, BrunnerNN_reciprocal, EconNN)
 from pymatgen.io import ase as pm_ase
 
 def get_NNs_pm(atoms,site_idx,NN_method):
@@ -11,7 +12,8 @@ def get_NNs_pm(atoms,site_idx,NN_method):
 		site_idx (int): ASE index of adsorption site
 		NN_method (string): string representing the desired Pymatgen
 		nearest neighbor algorithm (accepts 'vire','voronoi','jmol',
-		'min_dist','okeeffe','brunner', and 'econ')
+		'min_dist','okeeffe','brunner_real','brunner_recpirocal',
+		'brunner_relative', and 'econ')
 	Returns:
 		neighbors_idx (list of ints): ASE indices of coordinating atoms
 	"""
@@ -31,8 +33,12 @@ def get_NNs_pm(atoms,site_idx,NN_method):
 		nn_object = MinimumDistanceNN()
 	elif NN_method == 'okeeffe':
 		nn_object = MinimumOKeeffeNN()
-	elif NN_method == 'brunner':
-		nn_object = BrunnerNN()
+	elif NN_method == 'brunner_real':
+		nn_object = BrunnerNN_real()
+	elif NN_method == 'brunner_recpirocal':
+		nn_object = BrunnerNN_reciprocal()
+	elif NN_method == 'brunner_relative':
+		nn_object = BrunnerNN_relative()
 	elif NN_method == 'econ':
 		nn_object = EconNN()
 	else:

@@ -121,7 +121,8 @@ class adsorbate_constructor():
 			CIFs, POSCARs, and CONTCARs)
 			NN_method (string): string representing the desired Pymatgen
 			nearest neighbor algorithm (options include 'vire','voronoi',
-			'jmol','min_dist','okeeffe','brunner', and 'econ')
+			'jmol','min_dist','okeeffe','brunner_relative','brunner_reciprocal',
+			'brunner_real', and 'econ')
 			write_file (bool): if True, the new ASE atoms object should be
 			written to a CIF file (defaults to True)
 			new_mofs_path (string): path to store the new CIF files if
