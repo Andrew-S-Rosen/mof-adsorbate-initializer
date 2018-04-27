@@ -421,7 +421,7 @@ class ads_pos_optimizer():
 
 		return new_mof, new_name
 
-	def get_new_atoms(self,ads_pos):
+	def get_new_atoms(self,ads_pos,site_idx):
 		"""
 		Get new ASE atoms object with adsorbate
 
@@ -444,8 +444,9 @@ class ads_pos_optimizer():
 		new_name = name+'_'+ads_species
 
 		new_mof = self.add_ads_species(ads_pos)
-		dist_mat = new_mof.get_distances(len(new_mof)-1,
-			np.arange(0,len(new_mof)-1).tolist(),mic=True)
+		compare_to = np.arange(0,len(new_mof)-1).tolist()
+		compare_to.remove(site_idx)
+		dist_mat = new_mof.get_distances(len(new_mof)-1,compare_to,mic=True)
 
 		if sum(dist_mat <= overlap_tol) == 0:
 			if write_file == True:

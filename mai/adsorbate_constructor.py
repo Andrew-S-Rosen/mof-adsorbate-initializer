@@ -162,7 +162,7 @@ class adsorbate_constructor():
 		ads_optimizer = ads_pos_optimizer(self,atoms_filepath,
 					new_mofs_path=new_mofs_path,error_path=error_path)
 		ads_pos = ads_optimizer.get_opt_ads_pos(mic_coords,site_idx)
-		new_atoms, new_name = ads_optimizer.get_new_atoms(ads_pos)
+		new_atoms, new_name = ads_optimizer.get_new_atoms(ads_pos,site_idx)
 
 		return new_atoms, new_name
 
