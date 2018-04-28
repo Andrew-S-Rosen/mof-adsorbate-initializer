@@ -80,16 +80,17 @@ def get_best_grid_pos(atoms,max_dist,site_idx,grid_filepath):
 
 	return ads_pos
 
-def add_CH4(site_pos,ads_pos,atoms):
+def add_CH4(site_idx,ads_pos,atoms):
 	"""
 	Add CH4 to the structure
 
 	Args:
-		site_pos (array): 1D numpy array of the adsorption site
+		site_idx (int): ASE index of site
 		ads_pos (array): 1D numpy array for the best adsorbate position
 		atoms (ASE Atoms object): Atoms object of structure
 	Returns:
 		atoms (ASE Atoms object): new ASE Atoms object with adsorbate
+		n_new_atoms (int): number of atoms in adsorbate
 	"""
 	#Get CH4 parameters
 	CH4 = molecule('CH4')
@@ -104,7 +105,7 @@ def add_CH4(site_pos,ads_pos,atoms):
 	CH4[0].position = ads_pos
 
 	#Make one of the H atoms colinear with adsorption site and C
-	D,D_len = get_distances([ads_pos],[site_pos],cell=atoms.cell,pbc=atoms.pbc)
+	D,D_len = get_distances([ads_pos],atoms[site_idx].position,cell=atoms.cell,pbc=atoms.pbc)
 	r_vec = D[0,0]
 	r = (r_vec/np.linalg.norm(r_vec))*CH_length
 
@@ -124,16 +125,17 @@ def add_CH4(site_pos,ads_pos,atoms):
 
 	return atoms, len(CH4)
 
-def add_N2O(site_idx,site_pos,ads_pos,atoms):
+def add_N2O(site_idx,ads_pos,atoms):
 	"""
 	Add N2O to the structure
 
 	Args:
-		site_pos (array): 1D numpy array of the adsorption site
+		site_idx (int): ASE index of site
 		ads_pos (array): 1D numpy array for the best adsorbate position
 		atoms (ASE Atoms object): Atoms object of structure
 	Returns:
 		atoms (ASE Atoms object): new ASE Atoms object with adsorbate
+		n_new_atoms (int): number of atoms in adsorbate
 	"""
 	#Get N2O parameters
 	N2O = molecule('N2O')
@@ -144,7 +146,7 @@ def add_N2O(site_idx,site_pos,ads_pos,atoms):
 	N2O[0].position = ads_pos
 
 	#Make one of the H atoms colinear with adsorption site and C
-	D,D_len = get_distances([ads_pos],[site_pos],cell=atoms.cell,pbc=atoms.pbc)
+	D,D_len = get_distances([ads_pos],atoms[site_idx].position,cell=atoms.cell,pbc=atoms.pbc)
 	r_vec = D[0,0]
 	r_N = (r_vec/np.linalg.norm(r_vec))*NN_length
 	r_O = (r_vec/np.linalg.norm(r_vec))*NO_length

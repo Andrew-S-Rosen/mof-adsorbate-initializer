@@ -484,9 +484,9 @@ class ads_pos_optimizer():
 		name = get_refcode(atoms_filename)
 		new_name = name+'_'+ads_species
 		if ads_species == 'CH4':
-			new_mof, n_new_atoms = add_CH4(site_pos,ads_pos,mof)
+			new_mof, n_new_atoms = add_CH4(site_idx,ads_pos,mof)
 		elif ads_species == 'N2O':
-			new_mof, n_new_atoms = add_N2O(site_idx,site_pos,ads_pos,mof)
+			new_mof, n_new_atoms = add_N2O(site_idx,ads_pos,mof)
 		else:
 			raise ValueError('Unsupported molecular adsorbate')
 
