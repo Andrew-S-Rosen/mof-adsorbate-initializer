@@ -97,16 +97,23 @@ class adsorbate_constructor():
 		grid_filepath = os.path.join(grid_path,name+'.grid')
 
 		if self.site_idx is None:
-			site_idx = [atom.index for atom in atoms if atom.symbol == site_species][-1]
+			self.site_idx = [atom.index for atom in atoms if atom.symbol == site_species][-1]
+		site_idx = self.site_idx
+		
 		site_pos = atoms[site_idx].position
 		ads_pos = get_best_grid_pos(atoms,max_dist,site_idx,grid_filepath)
-		if ads_pos is None:
+		if ads_pos is 'nogrid':
 			print('WARNING: no grid for '+name)
-			return None, None		
+			return None, None
+		elif ads_pos is 'invalid':
+			print('WARNING: all NaNs within cutoff for '+name)
+			return None, None
 		ads_optimizer = ads_pos_optimizer(self,atoms_filepath,
 					new_mofs_path=new_mofs_path,error_path=error_path)
 		if ads_species == 'CH4':
-			new_atoms, new_name = ads_optimizer.get_new_atoms_ch4_grid(site_pos,ads_pos)
+			new_atoms, new_name = ads_optimizer.get_new_atoms_grid(site_pos,ads_pos)
+		elif ads_species == 'N2O':
+			new_atoms, new_name = ads_optimizer.get_new_atoms_grid(site_pos,ads_pos)
 		else:
 			raise ValueError('Unsupported ads_species')
 		return new_atoms, new_name

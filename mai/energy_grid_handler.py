@@ -70,9 +70,11 @@ def get_best_grid_pos(atoms,max_dist,site_idx,grid_filepath):
 	"""
 	df = read_grid(grid_filepath)
 	if df is None:
-		return None
+		return 'nogrid'
 	site_pos = atoms[site_idx].position
 	cut_df = grid_within_cutoff(df,atoms,max_dist,site_pos)
+	if np.sum(cut_df['E']) == 0:
+		return 'invalid'
 	best = cut_df.loc[cut_df['E'].idxmin()]
 	ads_pos = [best['x'],best['y'],best['z']]
 
@@ -120,4 +122,40 @@ def add_CH4(site_pos,ads_pos,atoms):
 	#Add CH4 molecule to the structure
 	atoms.extend(CH4)
 
-	return atoms
+	return atoms, len(CH4)
+
+def add_N2O(site_idx,site_pos,ads_pos,atoms):
+	"""
+	Add N2O to the structure
+
+	Args:
+		site_pos (array): 1D numpy array of the adsorption site
+		ads_pos (array): 1D numpy array for the best adsorbate position
+		atoms (ASE Atoms object): Atoms object of structure
+	Returns:
+		atoms (ASE Atoms object): new ASE Atoms object with adsorbate
+	"""
+	#Get N2O parameters
+	N2O = molecule('N2O')
+	NN_length = N2O.get_distance(0,1)
+	NO_length = N2O.get_distance(1,2)
+
+	#Add N2O to ideal adsorption position
+	N2O[0].position = ads_pos
+
+	#Make one of the H atoms colinear with adsorption site and C
+	D,D_len = get_distances([ads_pos],[site_pos],cell=atoms.cell,pbc=atoms.pbc)
+	r_vec = D[0,0]
+	r_N = (r_vec/np.linalg.norm(r_vec))*NN_length
+	r_O = (r_vec/np.linalg.norm(r_vec))*NO_length
+
+	#Construct rest of CH4 using Z-matrix format
+	N2O[1].position = ads_pos-r_N
+	N2O[2].position = ads_pos+r_O
+
+	#Add CH4 molecule to the structure
+	if site_idx is None:
+		raise ValueError('Site index must not be None')
+	del atoms[site_idx]
+	atoms.extend(N2O)
+	return atoms, len(N2O)

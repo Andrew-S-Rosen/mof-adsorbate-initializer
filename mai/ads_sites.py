@@ -3,7 +3,7 @@ from ase import Atoms, Atom
 from ase.io import read, write
 from mai.regression import OLS_fit, TLS_fit
 from mai.janitor import get_refcode
-from mai.energy_grid_handler import add_CH4
+from mai.energy_grid_handler import add_CH4, add_N2O
 import os
 
 """
@@ -36,6 +36,7 @@ class ads_pos_optimizer():
 		self.r_cut = adsorbate_constructor.r_cut
 		self.sum_tol = adsorbate_constructor.sum_tol
 		self.rmse_tol = adsorbate_constructor.rmse_tol
+		self.site_idx = adsorbate_constructor.site_idx
 		self.atoms_filepath = atoms_filepath
 		self.write_file = write_file
 
@@ -458,7 +459,7 @@ class ads_pos_optimizer():
 
 		return new_mof, new_name
 
-	def get_new_atoms_ch4_grid(self,site_pos,ads_pos):
+	def get_new_atoms_grid(self,site_pos,ads_pos):
 		"""
 		Get new ASE atoms object with CH4 adsorbate from energy grid
 
@@ -475,19 +476,24 @@ class ads_pos_optimizer():
 		write_file = self.write_file
 		new_mofs_path = self.new_mofs_path
 		error_path = self.error_path
+		site_idx = self.site_idx
 
-		#Add CH4 to structure
+		#Add molecule to structure
 		atoms_filename = os.path.basename(atoms_filepath)
 		mof = read(atoms_filepath)
 		name = get_refcode(atoms_filename)
 		new_name = name+'_'+ads_species
-		new_mof = add_CH4(site_pos,ads_pos,mof)
+		if ads_species == 'CH4':
+			new_mof, n_new_atoms = add_CH4(site_pos,ads_pos,mof)
+		elif ads_species == 'N2O':
+			new_mof, n_new_atoms = add_N2O(site_idx,site_pos,ads_pos,mof)
+		else:
+			raise ValueError('Unsupported molecular adsorbate')
 
 		#Confirm no overlapping atoms and write file
-		n = len(new_mof)-len(mof)
 		overlap = False
-		for i in range(n):
-			dist = new_mof.get_distances(-(i+1),np.arange(0,len(new_mof)-n).tolist(),
+		for i in range(n_new_atoms):
+			dist = new_mof.get_distances(-(i+1),np.arange(0,n_new_atoms).tolist(),
 				mic=True)
 			if np.sum(dist <= overlap_tol) > 0:
 				overlap = True
