@@ -1,8 +1,8 @@
 import os
 from mai.adsorbate_constructor import adsorbate_constructor
 
-mof_path = 'oxygenated_MOFs/'
-new_mofs_path = 'add_CH4/'
+mof_path = 'examples/oxygenated_MOFs/'
+new_mofs_path = 'examples/add_CH4/'
 max_dist = 3.0
 overlap_tol = 1.3
 mol_species = 'CH4'
