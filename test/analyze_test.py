@@ -16,5 +16,7 @@ for specie in species:
 			continue
 		mof_test = read(os.path.join(path,file))
 		mof_real = read(os.path.join(success_path,file))
-		if np.sum(np.abs(mof_real.get_positions()-mof_test.get_positions()) >= tol) != 0:
+		diff = np.abs(mof_real.get_positions()-mof_test.get_positions())
+		if np.sum(diff >= tol) != 0:
+			print(diff)
 			raise ValueError('Error with: '+file)
