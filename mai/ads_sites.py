@@ -3,7 +3,7 @@ from ase import Atoms, Atom
 from ase.io import read, write
 from mai.regression import OLS_fit, TLS_fit
 from mai.janitor import get_refcode
-from mai.energy_grid_handler import add_CH4, add_N2O
+from mai.energy_grid_handler import add_CH4, add_N2O, add_N2
 import os
 
 """
@@ -487,6 +487,8 @@ class ads_pos_optimizer():
 			new_mof, n_new_atoms = add_CH4(site_idx,ads_pos,mof)
 		elif ads_species == 'N2O':
 			new_mof, n_new_atoms = add_N2O(site_idx,ads_pos,mof)
+		elif ads_species == 'N2':
+			new_mof, n_new_atoms = add_N2(site_idx,ads_pos,mof)
 		else:
 			raise ValueError('Unsupported molecular adsorbate')
 

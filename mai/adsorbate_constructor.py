@@ -110,12 +110,7 @@ class adsorbate_constructor():
 			return None, None
 		ads_optimizer = ads_pos_optimizer(self,atoms_filepath,
 					new_mofs_path=new_mofs_path,error_path=error_path)
-		if ads_species == 'CH4':
-			new_atoms, new_name = ads_optimizer.get_new_atoms_grid(site_pos,ads_pos)
-		elif ads_species == 'N2O':
-			new_atoms, new_name = ads_optimizer.get_new_atoms_grid(site_pos,ads_pos)
-		else:
-			raise ValueError('Unsupported ads_species')
+		new_atoms, new_name = ads_optimizer.get_new_atoms_grid(site_pos,ads_pos)
 		return new_atoms, new_name
 
 	def get_adsorbate_pm(self,atoms_filepath,NN_method='vire',write_file=True,

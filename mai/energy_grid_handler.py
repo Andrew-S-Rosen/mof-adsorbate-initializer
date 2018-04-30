@@ -125,6 +125,41 @@ def add_CH4(site_idx,ads_pos,atoms):
 
 	return atoms, len(CH4)
 
+def add_N2(site_idx,ads_pos,atoms):
+	"""
+	Add N2 to the structure
+
+	Args:
+		site_idx (int): ASE index of site
+		ads_pos (array): 1D numpy array for the best adsorbate position
+		atoms (ASE Atoms object): Atoms object of structure
+	Returns:
+		atoms (ASE Atoms object): new ASE Atoms object with adsorbate
+		n_new_atoms (int): number of atoms in adsorbate
+	"""
+	#Get N2O parameters
+	N2 = molecule('N2')
+	NN_length = N2.get_distance(0,1)
+
+	#Add N2 to ideal adsorption position
+	N2[0].position = ads_pos
+
+	#Make one of the H atoms colinear with adsorption site and C
+	D,D_len = get_distances([ads_pos],atoms[site_idx].position,cell=atoms.cell,pbc=atoms.pbc)
+	r_vec = D[0,0]
+	r = (r_vec/np.linalg.norm(r_vec))*NN_length
+
+	#Construct rest of N2
+	N2[1].position = ads_pos+r
+
+	#Add N2 molecule to the structure
+	if site_idx is None:
+		raise ValueError('Site index must not be None')
+	del atoms[site_idx]
+	atoms.extend(N2)
+
+	return atoms, len(N2)
+
 def add_N2O(site_idx,ads_pos,atoms):
 	"""
 	Add N2O to the structure
@@ -151,13 +186,14 @@ def add_N2O(site_idx,ads_pos,atoms):
 	r_N = (r_vec/np.linalg.norm(r_vec))*NN_length
 	r_O = (r_vec/np.linalg.norm(r_vec))*NO_length
 
-	#Construct rest of CH4 using Z-matrix format
+	#Construct rest of N2O
 	N2O[1].position = ads_pos-r_N
 	N2O[2].position = ads_pos+r_O
 
-	#Add CH4 molecule to the structure
+	#Add N2O molecule to the structure
 	if site_idx is None:
 		raise ValueError('Site index must not be None')
 	del atoms[site_idx]
 	atoms.extend(N2O)
+	
 	return atoms, len(N2O)
