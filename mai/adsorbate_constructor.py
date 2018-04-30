@@ -86,7 +86,6 @@ class adsorbate_constructor():
 
 		site_species = self.site_species
 		max_dist = self.bond_dist
-		ads_species = self.ads_species
 
 		if write_file == True:
 			prep_paths(new_mofs_path,error_path)

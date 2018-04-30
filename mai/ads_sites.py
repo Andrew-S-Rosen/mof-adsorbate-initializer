@@ -366,7 +366,8 @@ class ads_pos_optimizer():
 		new_mof = read(atoms_filepath)
 		adsorbate = Atoms([Atom(ads_species,ads_pos)])
 		new_mof.extend(adsorbate)
-
+		new_mof.wrap()
+		
 		return new_mof
 
 	def get_new_atoms_zeo_oms(self,ads_poss,best_to_worst_idx,cluster):
@@ -461,7 +462,7 @@ class ads_pos_optimizer():
 
 	def get_new_atoms_grid(self,site_pos,ads_pos):
 		"""
-		Get new ASE atoms object with CH4 adsorbate from energy grid
+		Get new ASE atoms object with adsorbate from energy grid
 
 		Args:
 			ads_pos (numpy array): 1D numpy array for the proposed

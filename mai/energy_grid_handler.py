@@ -122,7 +122,8 @@ def add_CH4(site_idx,ads_pos,atoms):
 
 	#Add CH4 molecule to the structure
 	atoms.extend(CH4)
-
+	atoms.wrap()
+	
 	return atoms, len(CH4)
 
 def add_N2(site_idx,ads_pos,atoms):
@@ -141,22 +142,20 @@ def add_N2(site_idx,ads_pos,atoms):
 	N2 = molecule('N2')
 	NN_length = N2.get_distance(0,1)
 
-	#Add N2 to ideal adsorption position
-	N2[0].position = ads_pos
-
 	#Make one of the H atoms colinear with adsorption site and C
 	D,D_len = get_distances([ads_pos],atoms[site_idx].position,cell=atoms.cell,pbc=atoms.pbc)
 	r_vec = D[0,0]
 	r = (r_vec/np.linalg.norm(r_vec))*NN_length
 
-	#Construct rest of N2
-	N2[1].position = ads_pos+r
+	#Construct N2
+	N2[0].position = ads_pos+r/2
+	N2[1].position = ads_pos-r/2
 
 	#Add N2 molecule to the structure
 	if site_idx is None:
 		raise ValueError('Site index must not be None')
-	del atoms[site_idx]
 	atoms.extend(N2)
+	atoms.wrap()
 
 	return atoms, len(N2)
 
@@ -195,5 +194,6 @@ def add_N2O(site_idx,ads_pos,atoms):
 		raise ValueError('Site index must not be None')
 	del atoms[site_idx]
 	atoms.extend(N2O)
+	atoms.wrap()
 	
 	return atoms, len(N2O)
