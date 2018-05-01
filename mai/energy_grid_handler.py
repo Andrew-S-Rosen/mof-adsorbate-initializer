@@ -147,8 +147,8 @@ def add_N2(site_idx,ads_pos,atoms):
 	r_N = (r_vec/np.linalg.norm(r_vec))*NN_length
 
 	#Construct N2
-	N2[0].position = ads_pos-r_N/2
-	N2[1].position = ads_pos+r_N/2
+	N2[0].position = ads_pos-r_N
+	N2[1].position = ads_pos
 
 	#Add N2 molecule to the structure
 	if site_idx is None:

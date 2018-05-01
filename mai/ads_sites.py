@@ -41,14 +41,12 @@ class ads_pos_optimizer():
 		self.write_file = write_file
 
 		if new_mofs_path is None:
-			self.new_mofs_path = os.path.join(os.path.dirname(atoms_filepath),
+			new_mofs_path = os.path.join(os.path.dirname(atoms_filepath),
 				'new_mofs')
-		else:
-			self.new_mofs_path = new_mofs_path
+		self.new_mofs_path = new_mofs_path
 		if error_path is None:
-			self.error_path = os.path.join(new_mofs_path,'errors')
-		else:
-			self.error_path = error_path
+			error_path = os.path.join(new_mofs_path,'errors')
+		self.error_path = error_path
 
 	def get_dist_planar(self,normal_vec):
 		"""
