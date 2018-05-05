@@ -35,7 +35,7 @@ for filename in os.listdir(mof_path):
 	else:
 		N1_idx = -2
 		N2_idx = -1
-	mof_adsorbate.set_distance(O_idx,N1_idx,max_dist-1.0,fix=0,mic=True)
+	mof_adsorbate.set_distance(O_idx,N1_idx,max_dist-0.5,fix=0,mic=True)
 	mof_adsorbate.set_distance(N1_idx,O_idx,NO_length,fix=0,mic=True)
 	mof_adsorbate.set_distance(N1_idx,N2_idx,NN_length,fix=0,mic=True)
 	write(os.path.join(N2O_mofs_path,refcode+'_N2O.cif'),mof_adsorbate)
