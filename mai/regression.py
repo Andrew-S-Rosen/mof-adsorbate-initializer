@@ -21,12 +21,10 @@ def OLS_fit(xyz):
 	#Test quality of fit
 	z_fit = fit[0]*x+fit[1]*y+fit[2]
 	ss_res = sum((z_fit-z)**2)[0]
-	ss_tot = sum((z-np.mean(z))**2)[0]
 	
 	#Calculate r^2
-	r2 = 1-ss_res/ss_tot
 	normal_vec = np.array([fit[0],fit[1],-1])
-	if r2 < (1-10**-14) and len(x) == 2:
+	if ss_res > (1-10**-14) and len(x) == 2:
 		raise ValueError('Poor linear fit to two points?!')
 
 	return normal_vec
