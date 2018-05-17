@@ -26,7 +26,7 @@ def OLS_fit(xyz):
 	#Calculate r^2
 	r2 = 1-ss_res/ss_tot
 	normal_vec = np.array([fit[0],fit[1],-1])
-	if r2 < 1 and len(x) == 2:
+	if r2 < (1-10**-14) and len(x) == 2:
 		raise ValueError('Poor linear fit to two points?!')
 
 	return normal_vec
