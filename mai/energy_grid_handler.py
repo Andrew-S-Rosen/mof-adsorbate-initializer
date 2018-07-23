@@ -16,7 +16,7 @@ def read_grid(grid_filepath):
 	if not os.path.isfile(grid_filepath):
 		return None
 	df = pd.read_csv(grid_filepath,delim_whitespace=True,na_values='?',
-		usecols=[0,1,2,3])
+		header=None,usecols=[0,1,2,3])
 	df.columns = ['x','y','z','E']
 	
 	return df
