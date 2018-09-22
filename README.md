@@ -7,7 +7,7 @@ A.S. Rosen, J.M. Notestein, R.Q. Snurr. "Identifying Promising Metal-Organic Fra
 High-throughput computational catalysis typically involves the calculation of many different adsorption energies. MAI is a tool meant to automate the process of constructing reasonable initial guesses for adsorbates in MOFs for the purposes of DFT screening workflows.
 
 ## Ready-to-Run Examples
-To get started, sample scripts are provided in the `examples` base directory of MAI. They are summarized below:
+To get started, sample scripts are provided in the `examples` base directory of MAI and include the following:
 1. `add_O.py`. Adds an O adsorbate to `ANUGIA.cif` given a pre-determined Cu site.
 2. `add_O_OMS_zeo.py`. Adds an O adsorbate to `ANUGIA.cif` using the OMS detection algorithm in Zeo++.
 3. `add_O_OMS_omd.py`. Adds an O adsorbate to `ANUGIA.cif` using the OMS detectiong algorithm in [Open_Metal_Detector.py](https://github.com/emmhald/open_metal_detector).
@@ -15,7 +15,7 @@ To get started, sample scripts are provided in the `examples` base directory of 
 5. `add_CH4_PEG_cube.py`. Adds a CH4 adsorbate to a terminal Cu-oxo site in `ANUGIA_clean_min_O.cif` using a cube-based PEG (`todo`).
 
 ## The Adsorbate Constructor
-The main tool to initialize adsorbate positions is the `adsorbate_constructor` class, which is described below:
+The main tool to initialize adsorbate positions is the `adsorbate_constructor` class:
 
 ```python
 class adsorbate_constructor():
@@ -56,12 +56,13 @@ class adsorbate_constructor():
 			overlapping so that the structure can be flagged as erroneous
 		"""
 ```
-Once the `adsorbate_constructor` is instanced, one of three routines can be called: `get_adsorbate_pm`, `get_adsorbate_oms`,`get_adsorbate_grid`. These are described below.
+Once the `adsorbate_constructor` is instanced, one of three routines can be called: `get_adsorbate_pm`, `get_adsorbate_oms`,`get_adsorbate_grid`. These are described in the following sections.
 
 ## Adding Adsorbates via Molecular Symmetry
 Open metal sites (OMSs), or coordinatively unsaturated metal sites, are commonly studied for catalytic applications. MAI makes it possible to systematically initialize the positions of adsorbates to OMSs in MOFs for further DFT analysis by orienting the adsorbate in such a way that the symmetry of the new coordination environment is maximized.
 
-The simplest method is to specify the atom index where the adsorbate should be added. This can be done using the `get_adsorbate_pm` function. This function uses Pymatgen's [`local_env`](http://pymatgen.org/_modules/pymatgen/analysis/local_env.html) features to determind the coordination environment of a given active site and then adds an adsorbate based on molecular symmetry and the degree of planarity.
+### get_adsorbate_pm
+The simplest method is to specify the atom index where the adsorbate should be added. This can be done using the `get_adsorbate_pm` function. This function uses Pymatgen's [`local_env`](http://pymatgen.org/_modules/pymatgen/analysis/local_env.html) features to determine the coordination environment of a given active site and then adds an adsorbate to that site.
 
 ```python
 def get_adsorbate_pm(self,atoms_filepath,NN_method='vire',write_file=True,
@@ -90,7 +91,7 @@ def get_adsorbate_pm(self,atoms_filepath,NN_method='vire',write_file=True,
 	"""
 ```
 
-The following is minimal example using MAI's `adsorbate_constructor` class with the `get_adsorbate_pm` function:
+The following is a minimal example using MAI's `adsorbate_constructor` class with the `get_adsorbate_pm` function:
 
 ```python
 from mai.adsorbate_constructor import adsorbate_constructor
@@ -105,8 +106,9 @@ ads = adsorbate_constructor(adsorbate,r,site_idx=site_idx)
 new_mof, new_mof_name = ads.get_adsorbate_pm(mof_path)
 ```
 
-Here, we have used MAI's `adsorbate_constructor` class and `get_adsorbate_pm` function to tell the program what kind of adsorbate we'd like and where we want it (i.e. an 'O' atom 2.0 Å away from `site_idx=0` in `ANUGIA.cif`). 
+Here, we have used MAI's `adsorbate_constructor` class and the `get_adsorbate_pm` function to tell the program what kind of adsorbate we'd like and where we want it (i.e. an 'O' atom 2.0 Å away from `site_idx=0` in `ANUGIA.cif`). 
 
+### get_adsorbate_oms
 Since OMSs are widely investigated for catalysis in MOFs, `get_adsorbate_oms` will automatically detect chemically unique OMSs in a given MOF and will add an adsorbate accordingly. This means that neither `site_idx` nor `site_species` need to be specified in `adsorbate_constructor`. The details for `get_adsorbate_oms` are described below:
 
 ```python
@@ -142,7 +144,7 @@ def get_adsorbate_oms(self,atoms_filepath,oms_data_path=None,
 ```
 
 MAI relies on one of two programs to automatically compute information about OMSs: 
-[OpenMetalDetector (OMD)](https://github.com/emmhald/open_metal_detector) or [Zeo++](http://www.zeoplusplus.org/about.html). For a purely Python implementation, we recommend OMD. A minimal example using MAI with `get_adsorbate_oms` and OMD is shown below:
+[OpenMetalDetector (OMD)](https://github.com/emmhald/open_metal_detector) or [Zeo++](http://www.zeoplusplus.org/about.html). For a pure Python implementation, we recommend OMD. A minimal example using MAI with `get_adsorbate_oms` is shown below:
 
 ```python
 from omsdetector import MofCollection
@@ -162,9 +164,10 @@ new_mof_atoms, new_mof_name = ads.get_adsorbate_oms(mof_path,oms_format='OMD')
 ## Adding Adsorbates via a Potential Energy Grid
 Occasionally, symmetry arguments may not be sufficient for initializing the position of an adsorbate. For instance, if we want to know where to consider putting a molecule (like CH4) around the  active site of a MOF, it may not be immediately obvious how to systematically do this for a wide range of MOFs. Molecular mechanics-based potential energy grids (PEGs) can be used to provide an inexpensive, robust, and systematic initial guess based on local minima in the PEG.
 
-The `get_adsorbate_grid` function is used to add an adsorbate to the adsorption site of a MOF based on a molecular mechanics PEG. MAI supports two types of PEG formats: ASCII and cube. The ASCII file format is simply an (x,y,z,E) formatted file such that there are four columns (i.e. one for x, y, z, and E). The cube file format is described [here](http://paulbourke.net/dataformats/cube/). PEGs can be computed using one of a variety of programs, but we recommend [RASPA](https://www.tandfonline.com/doi/abs/10.1080/08927022.2015.1010082) (generates ASCII-formatted grids) [PorousMaterials.jl](https://github.com/SimonEnsemble/PorousMaterials.jl) (generates cube-formatted grids).
+### get_adsorbate_grid
+The `get_adsorbate_grid` function is used to add an adsorbate to the adsorption site of a MOF based on a molecular mechanics PEG. MAI supports two types of PEG formats: ASCII and cube. The ASCII file format is simply an (x,y,z,E) formatted file with with four columns (i.e. one for x, y, z, and E) and n rows (where n is the number of points in the PEG). The cube file format is described [here](http://paulbourke.net/dataformats/cube/). PEGs can be computed using one of a variety of programs, but we recommend [RASPA](https://www.tandfonline.com/doi/abs/10.1080/08927022.2015.1010082) (generates ASCII-formatted grids) or [PorousMaterials.jl](https://github.com/SimonEnsemble/PorousMaterials.jl) (generates cube-formatted grids).
 
-The molecular adsorbate constructed via `get_adsorbate_grid` is initialized in the lowest energy position within some cutoff distance from the proposed adsorption site. It currently only supports CH4 adsorption but can be readily extended to support other molecular adsorbates. The `get_adsorbate_grid` function is described below:
+The molecular adsorbate is initialized in the lowest energy position within some cutoff distance from the proposed adsorption site. MAI currently only supports CH4 adsorption but can be readily extended to support other molecular adsorbates. The `get_adsorbate_grid` function is described below:
 
 ```python
 def get_adsorbate_grid(self,atoms_filepath,grid_path=None,
@@ -198,7 +201,7 @@ def get_adsorbate_grid(self,atoms_filepath,grid_path=None,
 	"""
 ```
 
-A minimal example using MAI with `get_adsorbate_grid` and a cube-formatted grid from PorousMaterials.jl is shown below:
+A minimal example using MAI with `get_adsorbate_grid` and a cube-formatted grid previously generated from [PorousMaterials.jl](https://github.com/SimonEnsemble/PorousMaterials.jl) is shown below:
 
 ```python
 from mai.adsorbate_constructor import adsorbate_constructor

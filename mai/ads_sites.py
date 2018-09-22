@@ -21,12 +21,15 @@ class ads_pos_optimizer():
 		Args:
 			adsorbate_constructor (class): adsorbate_constructor class
 			containing many relevant defaults
+
 			atoms_filepath (string): path to the structure file
+			
 			write_file (bool): if True, the new ASE atoms object should be
-			written to a CIF file
-			write_file is True (defaults to atoms_filepath/new_mofs)
+			written to a CIF file (defaults to True)
+			
 			new_mofs_path (string): path to store the new CIF files if
 			write_file is True (defaults to atoms_filepath/new_mofs)
+			
 			error_path (string): path to store any adsorbates flagged as
 			problematic (defaults to atoms_filepath/errors)
 		"""
@@ -54,6 +57,7 @@ class ads_pos_optimizer():
 
 		Args:
 			normal_vec (numpy array): 1D numpy array for normal vector
+		
 		Returns:
 			dist (float): distance vector scaled to bond_dist
 		"""
@@ -71,7 +75,9 @@ class ads_pos_optimizer():
 		Args:
 			ads_pos (numpy array): 1D numpy array for the proposed
 			adsorption position
+			
 			site_idx (int): ASE index for adsorption site
+		
 		Returns:
 			NN (int): number of neighbors within r_cut
 			min_dist (float): distance from adsorbate to nearest atom
@@ -102,7 +108,9 @@ class ads_pos_optimizer():
 		Args:
 			ads_poss (numpy array): 2D numpy array for the proposed
 			adsorption positions
+			
 			site_idx_list (list of ints): ASE indices for adsorption sites
+		
 		Returns:
 			best_to_worst_idx (list of ints): sorted adsorption sites from best
 			to worst
@@ -135,7 +143,9 @@ class ads_pos_optimizer():
 		Args:
 			center_coord (numpy array): 1D numpy array for adsorption site
 			(i.e. the central atom)
+			
 			site_idx (int): ASE index for adsorption site
+		
 		Returns:
 			ads_pos (numpy array): 1D numpy array for the proposed
 			adsorption position
@@ -174,7 +184,9 @@ class ads_pos_optimizer():
 			scaled_sum_dist (numpy array): 2D numpy array for the
 			scaled Euclidean distance vectors between each coordinating
 			atom and the central atom (i.e. the adsorption site)
+			
 			center_coord (numpy array): 1D numpy array for adsorption site
+		
 		Returns:
 			ads_pos (numpy array): 1D numpy array for the proposed
 			adsorption position
@@ -194,8 +206,11 @@ class ads_pos_optimizer():
 		Args:
 			normal_vec (numpy array): 1D numpy array for the
 			normal vector to the line
+			
 			center_coord (numpy array): 1D numpy array for adsorption site
+			
 			site_idx (int): ASE index of adsorption site
+		
 		Returns:
 			ads_pos (numpy array): 1D numpy array for the proposed
 			adsorption position
@@ -257,11 +272,15 @@ class ads_pos_optimizer():
 		Args:
 			normal_vec (numpy array): 1D numpy array for the
 			normal vector to the line
+			
 			scaled_sum_dist (numpy array): 2D numpy array for the
 			scaled Euclidean distance vectors between each coordinating
 			atom and the central atom (i.e. the adsorption site)
+			
 			center_coord (numpy array): 1D numpy array for adsorption site
+			
 			site_idx (int): ASE index of adsorption site
+		
 		Returns:
 			ads_pos (numpy array): 1D numpy array for the proposed
 			adsorption position
@@ -296,7 +315,9 @@ class ads_pos_optimizer():
 			mic_coords (numpy array): 2D numpy array for the
 			coordinates of each coordinating atom using the central
 			atom (i.e. adsorption site) as the origin
+			
 			site_idx (int): ASE index of adsorption site
+		
 		Returns:
 			ads_pos (numpy array): 1D numpy array for the proposed
 			adsorption position
@@ -355,6 +376,7 @@ class ads_pos_optimizer():
 		Args:
 			ads_pos (numpy array): 1D numpy array for the proposed
 			adsorption position
+		
 		Returns:
 			new_mof (ASE Atoms object): Atoms object for new
 			structure with adsorbate
@@ -376,12 +398,16 @@ class ads_pos_optimizer():
 		Args:
 			ads_poss (numpy array): 2D numpy array for the proposed
 			adsorption positions
+			
 			best_to_worst_idx (list of ints): sorted adsorption sites from best
 			to worst
+			
 			cluster (list of ints): atomic numbers for each atom in coordination
 			environment (useful for debugging) 
+		
 		Returns:
 			new_mof (ASE Atoms object): new ASE Atoms object with adsorbate
+			
 			name (string): name of new structure with adsorbate
 		"""
 		overlap_tol = self.overlap_tol
@@ -428,8 +454,10 @@ class ads_pos_optimizer():
 		Args:
 			ads_pos (numpy array): 1D numpy array for the proposed
 			adsorption position
+		
 		Returns:
 			new_mof (ASE Atoms object): new ASE Atoms object with adsorbate
+		
 			name (string): name of new structure with adsorbate
 		"""
 		atoms_filepath = self.atoms_filepath
@@ -465,8 +493,10 @@ class ads_pos_optimizer():
 		Args:
 			ads_pos (numpy array): 1D numpy array for the proposed
 			adsorption position
+		
 		Returns:
 			new_mof (ASE Atoms object): new ASE Atoms object with adsorbate
+		
 			name (string): name of new structure with adsorbate
 		"""
 		atoms_filepath = self.atoms_filepath

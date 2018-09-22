@@ -7,6 +7,7 @@ def prep_paths(new_mofs_path,error_path):
 	Args:
 		new_mofs_path (string): path to store the new CIF files if
 		write_file is True (defaults to atoms_filepath/new_mofs)
+
 		error_path (string): path to store any adsorbates flagged as
 		problematic (defaults to atoms_filepath/errors)
 	"""
@@ -22,6 +23,7 @@ def get_refcode(atoms_filename):
 	Args:
 		atoms_filename (string): filename of the ASE Atoms object (accepts
 		CIFS, POSCARs, and CONTCARs)
+		
 	Return:
 		refcode (string): name of MOF (defaults to 'mof' if the original
 		filename is just named CONTCAR or POSCAR)

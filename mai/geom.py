@@ -9,11 +9,14 @@ def get_NNs_pm(atoms,site_idx,NN_method):
 
 	Args:
 		atoms (Atoms object): atoms object of MOF
+
 		site_idx (int): ASE index of adsorption site
+		
 		NN_method (string): string representing the desired Pymatgen
 		nearest neighbor algorithm (accepts 'vire','voronoi','jmol',
 		'min_dist','okeeffe','brunner_real','brunner_recpirocal',
 		'brunner_relative', and 'econ')
+	
 	Returns:
 		neighbors_idx (list of ints): ASE indices of coordinating atoms
 	"""

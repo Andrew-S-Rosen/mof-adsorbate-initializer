@@ -9,6 +9,7 @@ def get_n_oms(oms_path):
 
 	Args:
 		oms_path (string): path to the Zeo++ .oms file
+
 	Returns:
 		n_OMS (float): number of open metal sites
 	"""
@@ -25,10 +26,14 @@ def get_omsex_line(line):
 
 	Args:
 		line (string): line in OMSEX file
+
 	Returns:
 		oms_symbol (string): atomic symbol for the OMS
+		
 		cnum (int): coordination number for the OMS
+		
 		oms_coord (numpy array): array of coordinates for the OMS
+		
 		coords (numpy array): array of coordinates for the nearest neighbors
 	"""
 	oms_symbol = line.split('|')[0].strip()
@@ -45,7 +50,9 @@ def get_ase_NN_idx(atoms,coords):
 
 	Args:
 		atoms (Atoms object): ASE Atoms object for the MOF
+		
 		coords (numpy array): coordinates of the coordinating atoms
+	
 	Returns:
 		ase_NN_idx (list of ints): ASE indices of the coordinating atoms
 	"""
@@ -65,6 +72,17 @@ def get_ase_NN_idx(atoms,coords):
 	return ase_NN_idx
 
 def get_ase_oms_idx(atoms,coords):
+	"""
+	Get the ASE index of the OMS
+
+	Args:
+		atoms (Atoms object): ASE Atoms object for the MOF
+		
+		coords (numpy array): coordinates of the OMS
+	
+	Returns:
+		ase_oms_idx (int): ASE index of OMS
+	"""
 	zeo_tol = 0.01
 	oms_idx_fail = True
 	for i, element in enumerate(atoms):
@@ -84,8 +102,11 @@ def get_zeo_data(oms_data_path,name,atoms):
 
 	Args:
 		oms_data_path (string): path to the Zeo++ OMS and OMSEX data
+
 		name (string): name of the MOF
+		
 		atoms (ASE Atoms object): Atoms object for the MOF
+	
 	Returns:
 		omsex_dict (dict): dictionary of data from the Zeo++ OMSEX file
 	"""
@@ -123,7 +144,20 @@ def get_zeo_data(oms_data_path,name,atoms):
 	return omsex_dict
 
 def get_omd_data(oms_data_path,name,atoms):
+	"""
+	Get info about the open metal site from OpenMetalDetector
+	results files
 
+	Args:
+		oms_data_path (string): path to the OpenMetalDetector results
+
+		name (string): name of the MOF
+		
+		atoms (ASE Atoms object): Atoms object for the MOF
+	
+	Returns:
+		omsex_dict (dict): dictionary of data from the OpenMetalDetector results
+	"""
 	cnums_all = []
 	oms_coords_all = []
 	oms_idx_all = []
@@ -163,4 +197,5 @@ def get_omd_data(oms_data_path,name,atoms):
 	omsex_dict = {'cnums':cnums_all,'oms_coords':oms_coords_all,
 	'oms_idx':oms_idx_all,'oms_sym':oms_sym_all,'NN_coords':NN_coords_all,
 	'NN_idx':NN_idx_all}
+	
 	return omsex_dict

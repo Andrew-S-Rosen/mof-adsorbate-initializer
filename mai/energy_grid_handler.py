@@ -6,10 +6,11 @@ from ase.geometry import get_distances
 
 def read_grid(grid_filepath):
 	"""
-	Convert ASCII energy grid to pandas dataframe
+	Convert energy grid to pandas dataframe
 
 	Args:
-		grid_filepath (string): path to ASCII energy grid
+		grid_filepath (string): path to energy grid (must be .cube or .grid)
+
 	Returns:
 		df (pandas df object): df containing energy grid details (x,y,z,E)
 	"""
@@ -33,12 +34,17 @@ def grid_within_cutoff(df,atoms,max_dist,site_pos,partition=1e6):
 
 	Args:
 		df (pandas df object): df containing energy grid details (x,y,z,E)
+
 		atoms (ASE Atoms object): Atoms object of structure
+		
 		max_dist (float): maximum distance from active site to consider
+		
 		site_pos (array): numpy array of the adsorption site
+		
 		partition (float): how many data points to partition the df for. This
 		is used to prevent memory overflow errors. Decrease if memory errors
 		arise.
+	
 	Returns:
 		new_df (pandas df object): modified df only around max_dist from active
 		site and also with a new distance (d) column
@@ -68,9 +74,13 @@ def get_best_grid_pos(atoms,max_dist,site_idx,grid_filepath):
 
 	Args:
 		atoms (ASE Atoms object): Atoms object of structure
+		
 		max_dist (float): maximum distance from active site to consider
+		
 		site_idx (int): ASE index of adsorption site
-		grid_filepath (string): path to ASCII energy grid
+		
+		grid_filepath (string): path to energy grid
+
 	Returns:
 		ads_pos (array): 1D numpy array for the ideal adsorption position
 	"""
@@ -92,10 +102,14 @@ def add_CH4(site_idx,ads_pos,atoms):
 
 	Args:
 		site_idx (int): ASE index of site based on single-site model
+
 		ads_pos (array): 1D numpy array for the best adsorbate position
+		
 		atoms (ASE Atoms object): Atoms object of structure
+	
 	Returns:
 		atoms (ASE Atoms object): new ASE Atoms object with adsorbate
+	
 		n_new_atoms (int): number of atoms in adsorbate
 	"""
 	#Get CH4 parameters
@@ -138,10 +152,14 @@ def add_N2(site_idx,ads_pos,atoms):
 
 	Args:
 		site_idx (int): ASE index of site
+		
 		ads_pos (array): 1D numpy array for the best adsorbate position
+		
 		atoms (ASE Atoms object): Atoms object of structure
+	
 	Returns:
 		atoms (ASE Atoms object): new ASE Atoms object with adsorbate
+	
 		n_new_atoms (int): number of atoms in adsorbate
 	"""
 	#Get N2 parameters
@@ -165,16 +183,22 @@ def add_N2(site_idx,ads_pos,atoms):
 	return atoms, len(N2)
 
 def cube_to_xyzE(cube_file):
-# Adopted from code by Julen Larrucea
-# Original source: https://github.com/julenl/molecular_modeling_scripts
+	"""
+	Converts cube to ASCII file
+	Adopted from code by Julen Larrucea
+	Original source: https://github.com/julenl/molecular_modeling_scripts
 
-# Read cube file and parse all data
+	Args:
+		cube_file (string): path to cube file
+	
+	Returns:
+		pd_data (Pandas dataframe): dataframe of (x,y,z,E) grid
+	"""
 	at_coord=[]
 	spacing_vec=[]
 	nline = 0
 	values=[]
 	data = []
-	 # Read cube file and parse all data
 	with open(cube_file,'r') as rw:
 		for line in rw:
 			nline += 1
@@ -194,4 +218,5 @@ def cube_to_xyzE(cube_file):
 				idx += 1
 				x,y,z = i*float(spacing_vec[0][1]),j*float(spacing_vec[1][2]),k*float(spacing_vec[2][3])
 				data.append([x,y,z,values[idx]])
-	return pd.DataFrame(data)
+	pd_data = pd.DataFrame(data)
+	return pd_data

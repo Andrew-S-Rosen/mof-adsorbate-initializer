@@ -6,6 +6,7 @@ def OLS_fit(xyz):
 
 	Args:
 		xyz (numpy array): 2D numpy array of XYZ values (N rows, 3 cols)
+
 	Returns:
 		normal_vec (numpy array): 1D numpy array for the normal vector
 	"""
@@ -35,8 +36,10 @@ def TLS_fit(xyz):
 
 	Args:
 		xyz (numpy array): 2D numpy array of XYZ values (N rows, 3 cols)
+	
 	Returns:
 		rmse (float): root mean square error of fit
+	
 		normal_vec (numpy array): 1D numpy array for the normal vector
 	"""
 	#Use SVD method to perform TLS regression. TLS is recommended over OLS
