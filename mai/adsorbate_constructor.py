@@ -49,7 +49,7 @@ class adsorbate_constructor():
 		self.site_idx = site_idx
 
 	def get_adsorbate_grid(self,atoms_filepath,grid_path=None,
-		write_file=True,new_mofs_path=None,error_path=None):
+		grid_format='ascii',write_file=True,new_mofs_path=None,error_path=None):
 		"""
 		This function adds a molecular adsorbate based on an ASCII-formatted
 		energy grid (such as via RASPA)
@@ -76,6 +76,13 @@ class adsorbate_constructor():
 		if not os.path.isfile(atoms_filepath):
 			print('WARNING: No MOF found for '+atoms_filepath)
 			return None, None
+		grid_format = grid_format.lower()
+		if grid_format == 'ascii':
+			grid_ext = '.grid'
+		elif grid_format == 'cube':
+			grid_ext = '.cube'
+		else:
+			raise ValueError('Unsupported grid_format '+grid_format)
 		if self.site_species is None and self.site_idx is None:
 			raise ValueError('site_species or site_idx must be specified')
 
@@ -95,7 +102,7 @@ class adsorbate_constructor():
 		atoms_filename = os.path.basename(atoms_filepath)
 		name = get_refcode(atoms_filename)
 		atoms = read(atoms_filepath)
-		grid_filepath = os.path.join(grid_path,name+'.grid')
+		grid_filepath = os.path.join(grid_path,name+grid_ext)
 
 		if self.site_idx is None:
 			self.site_idx = [atom.index for atom in atoms if atom.symbol == site_species][-1]

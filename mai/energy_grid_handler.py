@@ -15,8 +15,14 @@ def read_grid(grid_filepath):
 	"""
 	if not os.path.isfile(grid_filepath):
 		return None
-	df = pd.read_csv(grid_filepath,delim_whitespace=True,na_values='?',
-		header=None,usecols=[0,1,2,3])
+	grid_ext = grid_filepath.split('.')[-1]
+	if grid_ext == 'cube':
+		df = cube_to_xyzE(grid_filepath)
+	elif grid_ext == 'grid':
+		df = pd.read_csv(grid_filepath,delim_whitespace=True,na_values='?',
+			header=None,usecols=[0,1,2,3])
+	else:
+		raise ValueError('Unsupported grid format for file '+grid_filepath)
 	df.columns = ['x','y','z','E']
 	
 	return df
@@ -157,3 +163,35 @@ def add_N2(site_idx,ads_pos,atoms):
 	atoms.wrap()
 
 	return atoms, len(N2)
+
+def cube_to_xyzE(cube_file):
+# Adopted from code by Julen Larrucea
+# Original source: https://github.com/julenl/molecular_modeling_scripts
+
+# Read cube file and parse all data
+	at_coord=[]
+	spacing_vec=[]
+	nline = 0
+	values=[]
+	data = []
+	 # Read cube file and parse all data
+	with open(cube_file,'r') as rw:
+		for line in rw:
+			nline += 1
+			if nline == 3:
+				nat=int(line.split()[0])
+			elif nline >3 and nline <= 6:
+				spacing_vec.append(line.split())
+			elif nline > 6 and nline <= 6+nat:
+				at_coord.append(line.split())
+			elif nline > 5 and nline > 6+nat:
+				for i in line.split():
+					values.append(float(i))
+	idx = -1
+	for i in range(0,int(spacing_vec[0][0])):
+		for j in range(0,int(spacing_vec[1][0])):
+			for k in range(0,int(spacing_vec[2][0])):
+				idx += 1
+				x,y,z = i*float(spacing_vec[0][1]),j*float(spacing_vec[1][2]),k*float(spacing_vec[2][3])
+				data.append([x,y,z,values[idx]])
+	return pd.DataFrame(data)
