@@ -22,27 +22,27 @@ class adsorbate_constructor():
 	"""
 	This class constructs an ASE atoms object with an adsorbate
 	"""
-	def __init__(self,ads_species,bond_dist,site_species=None,site_idx=None,
+	def __init__(self,ads_species,bond_dist,site_idx=None,site_species=None,
 		r_cut=2.5,sum_tol=0.5,rmse_tol=0.25,overlap_tol=0.75):
 		"""
 		Initialized variables
 
 		Args:
-			ads_species (string): string of atomic element for adsorbate (e.g. 'O')
-			
+			ads_species (string): string of atomic element for adsorbate
+			(e.g. 'O')
+
 			bond_dist (float): distance between adsorbate and surface atom. If
-			used with get_adsorbate_raspa, it represents the maximum distance
-			for the adsorbate from the surface atom
+			used with get_adsorbate_grid, it represents the maximum distance
+
+			site_idx (int): ASE index for the adsorption site
 			
-			site_species (string): string of atomic element for the adsorption
-			site species. not needed when calling get_adsorbate_zeo_oms
-			
-			site_idx (int): ASE index for the adsorption site (defaults to
-			the last element of element type site_species). not needed when
-			calling get_adsorbate_zeo_oms
+			site_species (string): if site_idx is not specified, can specify
+			the site_species as a string of the atomic element for the adsorption
+			site (autoamtically picks the ASE index for the last atom of type
+			site_species in the Atoms object)
 			
 			r_cut (float): cutoff distance for calculating nearby atoms when
-			ranking different adsorption sites
+			ranking adsorption sites
 			
 			sum_tol (float): threshold to determine planarity. when the sum
 			of the Euclidean distance vectors of coordinating atoms is less
@@ -53,7 +53,7 @@ class adsorbate_constructor():
 			planarity is assumed
 			
 			overlap_tol (float): distance below which atoms are assumed to be
-			overlapping so that the structure can be flagged as erroneous
+			overlapping
 		"""
 ```
 Once the `adsorbate_constructor` is instanced, one of three routines can be called: `get_adsorbate_pm`, `get_adsorbate_oms`,`get_adsorbate_grid`. These are described in the following sections.
@@ -65,30 +65,37 @@ Open metal sites (OMSs), or coordinatively unsaturated metal sites, are commonly
 The simplest method is to specify the atom index where the adsorbate should be added. This can be done using the `get_adsorbate_pm` function. This function uses Pymatgen's [`local_env`](http://pymatgen.org/_modules/pymatgen/analysis/local_env.html) features to determine the coordination environment of a given active site and then adds an adsorbate to that site.
 
 ```python
-def get_adsorbate_pm(self,atoms_filepath,NN_method='vire',write_file=True,
+def get_adsorbate_pm(self,atoms_filepath,NN_method='okeeffe',write_file=True,
 	new_mofs_path=None,error_path=None):
 	"""
 	Use Pymatgen's nearest neighbors algorithms to add an adsorbate
 
 	Args:
-		atoms_filepath (string): filepath to the structure file (accepts
-		CIFs, POSCARs, and CONTCARs)
+
+		atoms_filepath (string): filepath to the CIF file
+		
 		NN_method (string): string representing the desired Pymatgen
 		nearest neighbor algorithm (options include 'vire','voronoi',
 		'jmol','min_dist','okeeffe','brunner_relative','brunner_reciprocal',
-		'brunner_real', and 'econ')
+		'brunner_real', and 'econ') (defaults to 'okeeffe')
+
 		write_file (bool): if True, the new ASE atoms object should be
 		written to a CIF file (defaults to True)
+		
 		new_mofs_path (string): path to store the new CIF files if
-		write_file is True (defaults to /new_mofs within the
-		directory of the starting structure files)
+		write_file is True (defaults to /new_mofs within the directory
+		containing the starting CIF file)
+		
 		error_path (string): path to store any adsorbates flagged as
-		problematic (defaults to /errors within the directory of the
-		starting structure files)
+		problematic (defaults to /errors within the directory
+		containing the starting CIF file)
+
 	Returns:
 		new_atoms (Atoms object): ASE Atoms object of MOF with adsorbate
+
 		new_name (string): name of MOF with adsorbate
 	"""
+	#Check for file and prepare paths
 ```
 
 The following is a minimal example using MAI's `adsorbate_constructor` class with the `get_adsorbate_pm` function:
@@ -113,34 +120,44 @@ Since OMSs are widely investigated for catalysis in MOFs, `get_adsorbate_oms` wi
 
 ```python
 def get_adsorbate_oms(self,atoms_filepath,oms_data_path=None,
-		write_file=True,new_mofs_path=None,error_path=None):
-		"""
-		This function adds an adsorbate to each unique OMS in a given
-		structure. In cases of multiple identical OMS, the adsorbate with
-		fewest nearest neighbors is selected. In cases of the same number
-		of nearest neighbors, the adsorbate with the largest minimum distance
-		to extraframework atoms (excluding the adsorption site) is selected.
+	oms_format='OMD',write_file=True,new_mofs_path=None,error_path=None):
+	"""
+	This function adds an adsorbate to each unique OMS in a given
+	structure. In cases of multiple identical OMS, the adsorbate with
+	fewest nearest neighbors is selected. In cases of the same number
+	of nearest neighbors, the adsorbate with the largest minimum distance
+	to extraframework atoms (excluding the adsorption site) is selected.
 
-		Args:
-			atoms_filepath (string): filepath to the structure file (accepts
-			CIFs, POSCARs, and CONTCARs)
-			oms_data_path (string): path to the Zeo++ open metal site data
-			containing .oms and .omsex files (defaults to /oms_data within the
-			directory of the starting structure files)
-			write_file (bool): if True, the new ASE atoms object should be
-			written to a CIF file (defaults to True)
-			new_mofs_path (string): path to store the new CIF files if
-			write_file is True (defaults to /new_mofs within the
-			directory of the starting structure files)
-			error_path (string): path to store any adsorbates flagged as
-			problematic (defaults to /errors within the directory of the
-			starting structure files)
-		Returns:
-			new_atoms_list (list): list of ASE Atoms objects with an adsorbate
-			added to each unique OMS
-			new_name_list (list): list of names associated with each atoms
-			object in new_atoms_list
-		"""
+	Args:
+
+		atoms_filepath (string): filepath to the CIF file
+
+		oms_data_path (string): path to the data describing the OMS
+		environments in either Zeo++ or OpenMetalDetector format (defaults
+		to /oms_results within the directory containing the starting CIF file)
+
+		oms_format (string): accepts either 'zeo' or 'OMD' for either a
+		Zeo++-formatted .oms and .omsex file or OpenMetalDetector results
+		(defaults to OMD)
+
+		write_file (bool): if True, the new ASE atoms object should be
+		written to a CIF file (defaults to True)
+		
+		new_mofs_path (string): path to store the new CIF files if
+		write_file is True (defaults to /new_mofs within the directory
+		containing the starting CIF file)
+		
+		error_path (string): path to store any adsorbates flagged as
+		problematic (defaults to /errors within the directory
+		containing the starting CIF file)
+
+	Returns:
+		new_atoms_list (list): list of ASE Atoms objects with an adsorbate
+		added to each unique OMS
+		
+		new_name_list (list): list of names associated with each atoms
+		object in new_atoms_list
+	"""
 ```
 
 MAI relies on one of two programs to automatically compute information about OMSs: 
@@ -171,29 +188,32 @@ The molecular adsorbate is initialized in the lowest energy position within some
 
 ```python
 def get_adsorbate_grid(self,atoms_filepath,grid_path=None,
-	write_file=True,new_mofs_path=None,error_path=None):
+	grid_format='ASCII',write_file=True,new_mofs_path=None,error_path=None):
 	"""
-	This function adds a molecular adsorbate based on an energy grid
-	generated using RASPA
+	This function adds a molecular adsorbate based on an ASCII-formatted
+	energy grid (such as via RASPA)
 
 	Args:
-		atoms_filepath (string): filepath to the structure file (accepts
-		CIFs, POSCARs, and CONTCARs)
+		atoms_filepath (string): filepath to the CIF file
 		
-		grid_path (string): path to the directory containing RASPA energy
-		grids (defaults to /energy_grids within the directory of the
-		starting structure files)
-		
+		grid_path (string): path to the directory containing the PEG
+		(defaults to /energy_grids within the directory containing
+		the starting CIF file)
+
+		grid_format (string): accepts either 'ASCII' or 'cube' and
+		is the file format for the PEG (defaults to ASCII)
+
 		write_file (bool): if True, the new ASE atoms object should be
 		written to a CIF file (defaults to True)
 		
 		new_mofs_path (string): path to store the new CIF files if
-		write_file is True (defaults to /new_mofs within the
-		directory of the starting structure files)
+		write_file is True (defaults to /new_mofs within the directory
+		containing the starting CIF file)
 		
 		error_path (string): path to store any adsorbates flagged as
-		problematic (defaults to /errors within the directory of the
-		starting structure files)
+		problematic (defaults to /errors within the directory
+		containing the starting CIF file)
+
 	Returns:
 		new_atoms (Atoms object): ASE Atoms object of MOF with adsorbate
 		

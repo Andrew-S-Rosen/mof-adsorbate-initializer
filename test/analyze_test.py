@@ -2,17 +2,15 @@ import os
 from ase.io import read
 import numpy as np
 
-success_basepath = 'test/success/add_'
-test_basepath = 'examples/add_'
-species = ['O','H','CH4']
+success_basepath = os.path.join('test','success')
+test_basepath = os.path.join('examples','new_mofs')
+jobs = ['add_O','add_O_OMS_omd','add_O_OMS_zeo','add_CH4_PEG_ASCII']
 tol = 1E-3
-for specie in species:
-	path = os.path.join(test_basepath,specie)
-	success_path = os.path.join(success_basepath,specie)
+for job in jobs:
+	path = os.path.join(test_basepath,job)
+	success_path = os.path.join(success_basepath,job)
 	for file in os.listdir(success_path):
-		if not os.path.isfile(os.path.join(path,file)):
-			continue
-		if '.cif' not in file:
+		if not os.path.isfile(os.path.join(path,file)) or '.cif' not in file:
 			continue
 		mof_test = read(os.path.join(path,file))
 		mof_real = read(os.path.join(success_path,file))

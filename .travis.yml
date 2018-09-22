@@ -1,6 +1,6 @@
 language: python
 python:
-  - "3.6"
+  - "3.7"
 install:
   - sudo apt-get update
   - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
@@ -15,6 +15,10 @@ install:
   - source activate test-environment
   - pip install pymatgen
   - pip install ase
+  - git clone https://github.com/emmhald/open_metal_detector.git
+  - cd open_metal_detector
+  - pip install .
+  - cd ../
   - pip install .
 script:
   - bash test/run_travis_tests.sh
