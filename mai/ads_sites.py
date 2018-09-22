@@ -497,12 +497,12 @@ class ads_pos_optimizer():
 			if np.sum(dist <= overlap_tol) > 0:
 				overlap = True
 				if write_file == True:
-					write(error_path+name+'_'+ads_species+'.cif',new_mof)
+					write(os.path.join(error_path,name+'_'+ads_species+'.cif'),new_mof)
 				break
 		if overlap == True:
 			return None, None
 		else:
 			if write_file == True:
-				write(new_mofs_path+new_name+'.cif',new_mof)
+				write(os.path.join(new_mofs_path,new_name+'.cif'),new_mof)
 
 		return new_mof, new_name

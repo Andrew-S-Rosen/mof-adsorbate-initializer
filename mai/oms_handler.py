@@ -1,5 +1,7 @@
 import numpy as np
 import os
+import json
+from ase.io import read
 
 def get_n_oms(oms_path):
 	"""
@@ -50,19 +52,32 @@ def get_ase_NN_idx(atoms,coords):
 	ase_NN_idx = []
 	zeo_tol = 0.1
 	for i in range(np.shape(coords)[0]):
-		nn_fail = False
+		nn_fail = True
 		for j, element in enumerate(atoms):
 			if (sum(coords[i,:] >= element.position-zeo_tol) == 3 and 
 			sum(coords[i,:] <= element.position+zeo_tol) == 3):
 				ase_NN_idx.append(j)
-				nn_fail = True
+				nn_fail = False
 				break
-		if nn_fail == False:
-			raise ValueError('Zeo++ index does not match ASE index')
+		if nn_fail:
+			raise ValueError('Could not match to ASE index')
 
 	return ase_NN_idx
 
-def get_omsex_data(oms_data_path,name,atoms):
+def get_ase_oms_idx(atoms,coords):
+	zeo_tol = 0.01
+	oms_idx_fail = True
+	for i, element in enumerate(atoms):
+		if (sum(coords >= element.position-zeo_tol) == 3 and 
+			sum(coords <= element.position+zeo_tol) == 3):
+			ase_oms_idx = i
+			oms_idx_fail = False
+			break
+	if oms_idx_fail:
+		raise ValueError('Could not match to ASE index')
+	return ase_oms_idx
+
+def get_zeo_data(oms_data_path,name,atoms):
 	"""
 	Get info about the open metal site from Zeo++ OMSEX file using modified
 	'network.cc' file
@@ -82,7 +97,6 @@ def get_omsex_data(oms_data_path,name,atoms):
 	oms_sym_all = []
 	cnums_all = []
 	NN_idx_all = []
-	zeo_tol = 0.01
 	with open(os.path.join(oms_data_path,name+'.omsex'),'r') as rf:
 		for i, line in enumerate(rf):
 			(oms_sym_temp, cnum_temp, oms_coords_all[i,:],
@@ -95,11 +109,8 @@ def get_omsex_data(oms_data_path,name,atoms):
 				NN_coords_all = np.vstack((NN_coords_all,NN_coords_temp))
 			NN_idx_temp = get_ase_NN_idx(atoms,NN_coords_temp)
 			NN_idx_all.append(NN_idx_temp)
-			for j, element in enumerate(atoms):
-				if (sum(oms_coords_all[i,:] >= element.position-zeo_tol) == 3
-					and sum(oms_coords_all[i,:] <= element.position+zeo_tol) == 3):
-					oms_idx_all.append(j)
-					break
+			oms_idx = get_ase_oms_idx(atoms,oms_coords_all[i,:])
+			oms_idx_all.append(oms_idx)
 			if len(oms_idx_all) < i+1:
 				raise ValueError('ERROR with '+name+': a zeo++ OMS (#'+
 					str(i)+') is not in same spot as in ASE')
@@ -109,4 +120,47 @@ def get_omsex_data(oms_data_path,name,atoms):
 	'oms_idx':oms_idx_all,'oms_sym':oms_sym_all,'NN_coords':NN_coords_all,
 	'NN_idx':NN_idx_all}
 
+	return omsex_dict
+
+def get_omd_data(oms_data_path,name,atoms):
+
+	cnums_all = []
+	oms_coords_all = []
+	oms_idx_all = []
+	oms_sym_all = []
+	NN_coords_all = []
+	NN_idx_all = []
+	oms_sym_all = []
+
+	json_path = os.path.join(oms_data_path,name,name+'.json')
+	if os.stat(json_path).st_size == 0:
+		return None
+	with open(json_path) as f:
+		oms_results = json.load(f)
+	if not oms_results['cif_okay'] or oms_results['problematic']:
+		print(name+': Open Metal Detector failed')
+		return None
+	if not oms_results['has_oms']:
+		return None
+
+	for i, site in enumerate(oms_results['metal_sites']):
+		if site['problematic']:
+			continue
+		cnum = site['number_of_linkers']
+		sphere = read(os.path.join(oms_data_path,name,'first_coordination_sphere'+str(i)+'.cif'))
+		oms_coords = sphere[0].position
+		oms_sym = sphere[0].symbol
+		oms_idx = get_ase_oms_idx(atoms,oms_coords)
+		NN_coords = sphere[1:].positions
+		NN_idx = get_ase_NN_idx(atoms,NN_coords)
+
+		cnums_all.append(cnum)
+		oms_coords_all.append(oms_coords)
+		oms_idx_all.append(oms_idx)
+		oms_sym_all.append(oms_sym)
+		NN_coords_all.append(NN_coords)
+		NN_idx_all.append(NN_idx)
+	omsex_dict = {'cnums':cnums_all,'oms_coords':oms_coords_all,
+	'oms_idx':oms_idx_all,'oms_sym':oms_sym_all,'NN_coords':NN_coords_all,
+	'NN_idx':NN_idx_all}
 	return omsex_dict

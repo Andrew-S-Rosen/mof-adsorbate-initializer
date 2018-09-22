@@ -41,14 +41,14 @@ def grid_within_cutoff(df,atoms,max_dist,site_pos,partition=1e6):
 	n_loops = int(np.ceil(len(df)/partition))
 	new_df = pd.DataFrame()
 
-	#Only onsider data within max_dist of active site. Cut up the original
+	#Only consider data within max_dist of active site. Cut up the original
 	#dataframe into chunks defined by partition to prevent memory issues
 	for i in range(n_loops):
 		if i == n_loops-1:
 			idx = np.arange(i*int(partition),len(df))
 		else:
 			idx = np.arange(i*int(partition),(i+1)*int(partition))
-		D,D_len = get_distances([site_pos],df.loc[idx,['x','y','z']].as_matrix(),
+		D,D_len = get_distances([site_pos],df.loc[idx,['x','y','z']].values,
 			cell=atoms.cell,pbc=atoms.pbc)
 		D_len.shape = (-1,)
 		df.loc[idx,'d'] = D_len

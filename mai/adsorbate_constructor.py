@@ -3,7 +3,7 @@ import os
 from ase.io import read
 from mai.ads_sites import ads_pos_optimizer
 from mai.janitor import prep_paths, get_refcode
-from mai.zeo_handler import get_omsex_data
+from mai.oms_handler import get_zeo_data, get_omd_data
 from mai.geom import get_NNs_pm
 from mai.energy_grid_handler import get_best_grid_pos
 """
@@ -22,7 +22,7 @@ class adsorbate_constructor():
 			ads_species (string): string of atomic element for adsorbate
 			(e.g. 'O')
 			bond_dist (float): distance between adsorbate and surface atom. If
-			used with get_adsorbate_raspa, it represents the maximum distance
+			used with get_adsorbate_grid, it represents the maximum distance
 			for the adsorbate
 			site_species (string): string of atomic element for the adsorption
 			site species
@@ -48,16 +48,16 @@ class adsorbate_constructor():
 		self.site_species = site_species
 		self.site_idx = site_idx
 
-	def get_adsorbate_raspa(self,atoms_filepath,grid_path=None,
+	def get_adsorbate_grid(self,atoms_filepath,grid_path=None,
 		write_file=True,new_mofs_path=None,error_path=None):
 		"""
-		This function adds a molecular adsorbate based on an energy grid
-		generated using RASPA
+		This function adds a molecular adsorbate based on an ASCII-formatted
+		energy grid (such as via RASPA)
 
 		Args:
 			atoms_filepath (string): filepath to the structure file (accepts
 			CIFs, POSCARs, and CONTCARs)
-			grid_path (string): path to the directory containing RASPA energy
+			grid_path (string): path to the directory containing ASCII energy
 			grids (defaults to /energy_grids within the directory of the
 			starting structure files)
 			write_file (bool): if True, the new ASE atoms object should be
@@ -74,15 +74,17 @@ class adsorbate_constructor():
 		"""
 		#Check for file and prepare paths
 		if not os.path.isfile(atoms_filepath):
+			print('WARNING: No MOF found for '+atoms_filepath)
 			return None, None
+		if self.site_species is None and self.site_idx is None:
+			raise ValueError('site_species or site_idx must be specified')
+
 		if grid_path is None:
-			grid_path = os.path.join(os.path.dirname(atoms_filepath),
-				'energy_grids')
+			grid_path = os.path.join(os.path.dirname(atoms_filepath),'energy_grids')
 		if new_mofs_path is None:
-			new_mofs_path = os.path.join(os.path.dirname(atoms_filepath),
-				'new_mofs')
+			new_mofs_path = os.path.join(os.getcwd(),'new_mofs')
 		if error_path is None:
-			error_path = os.path.join(new_mofs_path,'errors')
+			error_path = os.path.join(os.getcwd(),'errors')
 
 		site_species = self.site_species
 		max_dist = self.bond_dist
@@ -138,12 +140,15 @@ class adsorbate_constructor():
 		"""
 		#Check for file and prepare paths
 		if not os.path.isfile(atoms_filepath):
+			print('WARNING: No MOF found for '+atoms_filepath)
 			return None, None
+		if self.site_species is None and self.site_idx is None:
+			raise ValueError('site_species or site_idx must be specified')
+
 		if new_mofs_path is None:
-			new_mofs_path = os.path.join(os.path.dirname(atoms_filepath),
-				'new_mofs')
+			new_mofs_path = os.path.join(os.getcwd(),'new_mofs')
 		if error_path is None:
-			error_path = os.path.join(new_mofs_path,'errors')
+			error_path = os.path.join(os.getcwd(),'errors')
 
 		#Get ASE index of adsorption site
 		site_species = self.site_species
@@ -168,8 +173,8 @@ class adsorbate_constructor():
 
 		return new_atoms, new_name
 
-	def get_adsorbate_zeo_oms(self,atoms_filepath,oms_data_path=None,
-		write_file=True,new_mofs_path=None,error_path=None):
+	def get_adsorbate_oms(self,atoms_filepath,oms_data_path=None,
+		oms_format='zeo',write_file=True,new_mofs_path=None,error_path=None):
 		"""
 		This function adds an adsorbate to each unique OMS in a given
 		structure. In cases of multiple identical OMS, the adsorbate with
@@ -181,7 +186,7 @@ class adsorbate_constructor():
 			atoms_filepath (string): filepath to the structure file (accepts
 			CIFs, POSCARs, and CONTCARs)
 			oms_data_path (string): path to the Zeo++ open metal site data
-			containing .oms and .omsex files (defaults to /oms_data within the
+			containing .oms and .omsex files (defaults to /oms_results within the
 			directory of the starting structure files)
 			write_file (bool): if True, the new ASE atoms object should be
 			written to a CIF file (defaults to True)
@@ -199,15 +204,14 @@ class adsorbate_constructor():
 		"""
 		#Check for file and prepare paths
 		if not os.path.isfile(atoms_filepath):
+			print('WARNING: No MOF found for '+atoms_filepath)
 			return None, None
 		if oms_data_path is None:
-			oms_data_path = os.path.join(os.path.dirname(atoms_filepath),
-					'oms_data')
+			oms_data_path = os.path.join(os.path.dirname(atoms_filepath),'oms_results')
 		if new_mofs_path is None:
-			new_mofs_path = os.path.join(os.path.dirname(atoms_filepath),
-				'new_mofs')
+			new_mofs_path = os.path.join(os.getcwd(),'new_mofs')
 		if error_path is None:
-			error_path = os.path.join(new_mofs_path,'errors')
+			error_path = os.path.join(os.getcwd(),'errors')
 
 		if write_file == True:
 			prep_paths(new_mofs_path,error_path)
@@ -217,8 +221,14 @@ class adsorbate_constructor():
 		name = get_refcode(atoms_filename)
 		atoms = read(atoms_filepath)
 
-		#Get Zeo++ OMS data
-		omsex_dict = get_omsex_data(oms_data_path,name,atoms)
+		#Get OMS data
+		oms_format = oms_format.lower()
+		if oms_format == 'zeo':
+			omsex_dict = get_zeo_data(oms_data_path,name,atoms)
+		elif oms_format == 'omd':
+			omsex_dict = get_omd_data(oms_data_path,name,atoms)
+		else:
+			raise ValueError('Unknown oms_format for '+oms_format)
 		if omsex_dict is None:
 			return None, None
 

@@ -1,18 +1,47 @@
 # MOF Adsorbate Initializer (MAI)
-Python code to initialize the position of adsorbates on MOFs for high-throughput DFT screening workflows
+Python code to initialize the position of adsorbates in MOFs for high-throughput DFT screening workflows. Relevant details for the code can be found in the following manuscript (once published):
 
-## Setup
-1. MAI requires Python 3.x. If you do not already have Python installed, the easiest option is to download the [Anaconda](https://www.anaconda.com/download/) distribution.
-2. Install the most recent versions of Pymatgen and ASE. This can be easily done using `pip install pymatgen ase` 
-3. Download or clone the MAI repository and run `pip install .` from the MAI base directory.
-4. (recommended) To detect open metal sites (OMSs), download and install [Zeo++](http://www.zeoplusplus.org/download.html) (any version >= 0.3). By default, Zeo++'s OMS detection algorithm does not output a lot of information necessary to add adsorbates to OMSs. To address this, copy `network.cc` from `network/network.cc` in the MAI directory and replace the corresponding `network.cc` file in the base directory of Zeo++ before installation. The relevant changes can be found starting on line 1165.
-5. (recommended) To generate energy grids for the adsorption of molecular adsorbates (**`Todo`**)
+A.S. Rosen, J.M. Notestein, R.Q. Snurr. "Identifying Promising Metal-Organic Frameworks for Heterogeneous Catalysis via High-Throughput Periodic Density Functional Theory." Under review. 
+
+## What is MAI?
+High-throughput computational catalysis typically involves the calculation of many different adsorption energies. MAI is a tool meant to automate the process of constructing reasonable initial guesses for adsorbates in MOFs for the purposes of DFT screening workflows. Currently, MAI supports two main types of calculations, which are described below.
+
+### Adding Adsorbates via Molecular Symmetry
+Open metal sites (OMSs), or coordinatively unsaturated metal sites, are commonly studied for catalytic applications. MAI makes it possible to systematically initialize the positions of adsorbates to OMSs in MOFs for further DFT analysis by orienting the adsorbate in such a way that the symmetry of the new coordination environment is maximized.
+
+The simplest method is to specify the atom index where the adsorbate should be added (more complex methods are discussed below). The following is minimal example using MAI:
+
+```python
+from mai.adsorbate_constructor import adsorbate_constructor
+
+mof_path = 'ANUGIA.cif' #path to the CIF file
+site_idx = 0 #atom index of adsorption site
+adsorbate = 'O' #adsorbate species
+r = 2.0 #desired bond length
+
+#add adsorbate
+ads = adsorbate_constructor(adsorbate,r,site_idx=site_idx)
+new_mof, new_mof_name = ads.get_adsorbate_pm(mof_path)
+```
+
+Here, we have used MAI's `adsorbate_constructor` class to tell the program what kind of adsorbate we'd like and where we want it (i.e. an 'O' atom 2.0 Å away from `site_idx=0` in `ANUGIA.cif`). The `adsorbate_constructor` class has a variety of functions to add adsorbates. The one in this example is `get_adsorbate_pm`, which uses the [local environment features](https://www.frontiersin.org/articles/10.3389/fmats.2017.00034/full) of Pymatgen ("pm") to add an adsorbate based on the detected bonding topology of the metal center.
+
+### Adding Adsorbates via a Potential Energy Grid
+Occasionally, symmetry arguments may not be sufficient for initializing the position of an adsorbate. For instance, if we want to know where to consider putting a molecule (like CH4) around the vacinity of an active site in a MOF, this may not be immediately obvious, especially for a wide range of MOF structures. The use molecular mechanics-based potential energy grids (PEGs) can be used to provide an inexpensive, robust, and systematic initial guess based on local minima in the PEG.
+
+The minimal example for this scenario is fundamentally similar to that in the prior section, except we replace `get_adsorbate_pm` with `get_adsorbate_grid`. The `adsorbate_constructor` class is therefore very flexible and allows for a variety of methods to initialize adsorbate positions. Details for the various functions within the `adsorbate_constructor` class are described in the following sections. 
 
 ## Ready-to-Run Examples
-The main use of MAI is to add a single-atom adsorbate or a molecular adsorbate to a given adsorption site on a MOF. Sample scripts are provided in `/examples` that can be used to: 1) add a CH4 adsorbate to an O adsorption site using a RASPA-generated energy grid (`add_CH4.py`); 2) add an O adsorbate to an OMS using Zeo++'s OMS detection algorithm (`add_O.py`); 3) add an H adsorbate to an O adsorption site using one of Pymatgen's nearest neighbor algorithms (`add_H.py`).
+To get started, sample scripts are provided in the `examples` base directory of MAI. They are summarized below:
+1. `add_O.py`. Adds an O adsorbate to `ANUGIA.cif` given a pre-determined Cu site.
+2. `add_O_OMS_zeo.py`. Adds an O adsorbate to `ANUGIA.cif` using the OMS detection algorithm in Zeo++.
+3. `add_O_OMS_omd.py`. Adds an O adsorbate to `ANUGIA.cif` using the OMS detectiong algorithm in [Open_Metal_Detector.py](https://github.com/emmhald/open_metal_detector).
+4. `add_CH4_PEG_ASCII.py`. Adds a CH4 adsorbate to a terminal Cu-oxo site in `AHOKIR01-O.cif` using an ASCII-based PEG.
+5. `add_CH4_PEG_cube.py`. Adds a CH4 adsorbate to a terminal Cu-oxo site in `ANUGIA_clean_min_O.cif` using a cube-based PEG (`todo`).
 
-## adsorbate_constructor
-The main tool to initialize adsorbate positions is the `adsorbate_constructor`, as described below:
+## `adsorbate_constructor`
+As previously discussed, the main tool to initialize adsorbate positions is the `adsorbate_constructor`, which is described below:
+
 ```python
 class adsorbate_constructor():
 	"""
@@ -52,13 +81,94 @@ class adsorbate_constructor():
 			overlapping so that the structure can be flagged as erroneous
 		"""
 ```
-Once the `adsorbate_constructor` is instanced, one of three routines can be called: `get_adsorbate_raspa`, `get_adsorbate_pm`, and `get_adsorbate_zeo_oms`. These are described below.
+Once the `adsorbate_constructor` is instanced, one of three routines can be called: `get_adsorbate_pm`, `get_adsorbate_oms`,`get_adsorbate_grid`. These are described below.
 
-## Molecular Adsorbates
-The `get_adsorbate_raspa` function is used to add a molecular adsorbate to the adsorption site of a MOF based on a molecular mechanics energy grid generated by the molecular simulation program RASPA, and the molecular adsorbate is initialized in the lowest energy position within some cutoff distance from the proposed adsorption site. It currently only supports CH4 adsorption but can be readily extended to support other molecular adsorbates. The `get_adsorbate_raspa` function is described below:
+## `get_adsorbate_pm`
+This function uses Pymatgen's [`local_env`](http://pymatgen.org/_modules/pymatgen/analysis/local_env.html) features to determind the coordination environment of a given active site and then adds an adsorbate based on molecular symmetry and the degree of planarity. By combining MAI with other toolkits such as [ASE](https://gitlab.com/ase/ase) or [Pymatgen](http://pymatgen.org), it is possible to carry out significantly more complex tasks by automatically determining the desired `site_idx` based on your particular needs.
 
 ```python
-def get_adsorbate_raspa(self,atoms_filepath,grid_path=None,
+def get_adsorbate_pm(self,atoms_filepath,NN_method='vire',write_file=True,
+	new_mofs_path=None,error_path=None):
+	"""
+	Use Pymatgen's nearest neighbors algorithms to add an adsorbate
+
+	Args:
+		atoms_filepath (string): filepath to the structure file (accepts
+		CIFs, POSCARs, and CONTCARs)
+		NN_method (string): string representing the desired Pymatgen
+		nearest neighbor algorithm (options include 'vire','voronoi',
+		'jmol','min_dist','okeeffe','brunner_relative','brunner_reciprocal',
+		'brunner_real', and 'econ')
+		write_file (bool): if True, the new ASE atoms object should be
+		written to a CIF file (defaults to True)
+		new_mofs_path (string): path to store the new CIF files if
+		write_file is True (defaults to /new_mofs within the
+		directory of the starting structure files)
+		error_path (string): path to store any adsorbates flagged as
+		problematic (defaults to /errors within the directory of the
+		starting structure files)
+	Returns:
+		new_atoms (Atoms object): ASE Atoms object of MOF with adsorbate
+		new_name (string): name of MOF with adsorbate
+	"""
+```
+
+## `get_adsorbate_oms`
+Since OMSs are widely investigated for catalysis in MOFs, `get_adsorbate_oms` will automatically detect chemically unique OMSs in a given MOF and will add an adsorbate accordingly. This means that neither `site_idx` nor `site_species` need to be specified in `adsorbate_constructor`. The details for `get_adsorbate_oms` are described below:
+
+```python
+def get_adsorbate_oms(self,atoms_filepath,oms_data_path=None,
+		write_file=True,new_mofs_path=None,error_path=None):
+		"""
+		This function adds an adsorbate to each unique OMS in a given
+		structure. In cases of multiple identical OMS, the adsorbate with
+		fewest nearest neighbors is selected. In cases of the same number
+		of nearest neighbors, the adsorbate with the largest minimum distance
+		to extraframework atoms (excluding the adsorption site) is selected.
+
+		Args:
+			atoms_filepath (string): filepath to the structure file (accepts
+			CIFs, POSCARs, and CONTCARs)
+			oms_data_path (string): path to the Zeo++ open metal site data
+			containing .oms and .omsex files (defaults to /oms_data within the
+			directory of the starting structure files)
+			write_file (bool): if True, the new ASE atoms object should be
+			written to a CIF file (defaults to True)
+			new_mofs_path (string): path to store the new CIF files if
+			write_file is True (defaults to /new_mofs within the
+			directory of the starting structure files)
+			error_path (string): path to store any adsorbates flagged as
+			problematic (defaults to /errors within the directory of the
+			starting structure files)
+		Returns:
+			new_atoms_list (list): list of ASE Atoms objects with an adsorbate
+			added to each unique OMS
+			new_name_list (list): list of names associated with each atoms
+			object in new_atoms_list
+		"""
+```
+To effectively use `get_adsorbate_oms`, one of two programs must be used to generate the OMS data needed for MAI to properly work: [OpenMetalDetector (OMD)](https://github.com/emmhald/open_metal_detector) or [Zeo++](http://www.zeoplusplus.org/about.html). For ease-of-use, we recommend OMD. A minimal example using MAI with OMS is shown below:
+
+```python
+from omsdetector import MofCollection
+from mai.adsorbate_constructor import adsorbate_constructor
+
+mof_path = 'MyMOFFolder' #path to CIFs
+analysis_path = mof_path #path to store the OMS results
+mof_coll = MofCollection.from_folder(collection_folder=mof_path,analysis_folder=analysis_path) #import MOFs
+ads_species = 'O' #adsorbate species
+bond_length = 2.0 #desired distance between OMS and ads_species
+
+#add adsorbate
+ads = adsorbate_constructor(ads_species,bond_length)
+new_mof_atoms, new_mof_name = ads.get_adsorbate_oms(mof_path,oms_format='OMD')
+```
+
+## `get_adsorbate_grid`
+The `get_adsorbate_grid` function is used to add an adsorbate to the adsorption site of a MOF based on a molecular mechanics PEG, such as that comptued by [RASPA](https://www.tandfonline.com/doi/abs/10.1080/08927022.2015.1010082) or [PorousMaterials.jl](https://github.com/SimonEnsemble/PorousMaterials.jl). The molecular adsorbate is initialized in the lowest energy position within some cutoff distance from the proposed adsorption site. It currently only supports CH4 adsorption but can be readily extended to support other molecular adsorbates. The `get_adsorbate_grid` function is described below:
+
+```python
+def get_adsorbate_grid(self,atoms_filepath,grid_path=None,
 	write_file=True,new_mofs_path=None,error_path=None):
 	"""
 	This function adds a molecular adsorbate based on an energy grid
@@ -88,144 +198,34 @@ def get_adsorbate_raspa(self,atoms_filepath,grid_path=None,
 		new_name (string): name of MOF with adsorbate
 	"""
 ```
-The script below is taken from `examples/add_CH4.py`. It reads in CIF files from `mof_path`, adds CH4 within 3.0 Å of the last O atom in the CIF file (ensuring none of the atoms in CH4 overlap within 1.3 Å of the MOF), and stores the new CIF files with CH4 adsorbate in `new_mofs_path`. It assumes that the RASPA-generated energy grids are located in a folder named `examples/oxygenated_MOFs/energy_grids` since `grid_path` is not set in `get_adsorbate_raspa`. 
 
-```python
-import os
-from mai.adsorbate_constructor import adsorbate_constructor
+`get_adsorbate_grid` requires a PEG in one of two formats: ASCII or .cube.
 
-mof_path = 'examples/oxygenated_MOFs/'
-new_mofs_path = 'examples/add_CH4/'
-max_dist = 3.0
-overlap_tol = 1.3
-mol_species = 'CH4'
-site_species = 'O'
-for filename in os.listdir(mof_path):
-	filepath = os.path.join(mof_path,filename)
-	ads_const = adsorbate_constructor(mol_species,max_dist,
-		site_species=site_species,overlap_tol=overlap_tol)
-	mof_adsorbate, mof_name = ads_const.get_adsorbate_raspa(filepath,
-		new_mofs_path=new_mofs_path)
-```
-![AHOKIR_CH4](test/success/add_CH4/ahokir_ch4.png)
-## Atomic Adsorbates
-There are two implemented methods of initializing atomic adsorbates. The first allows for the use of Zeo++'s OMS detection and Voronoi tesselation algorithms. The second allows for the use of one of Pymatgen's nearest neighbor algorithms.
+The ASCII format required by MAI is that generated by RASPA. Specifically, for each point in the PEG, it must contain three columns consisting of the x, y, and z direct coordinates and the computed energy (any values of `?` for the energy column and any additional columns are ignored). An example is provided in `examples/example_MOFs/energy_grids/AHOKIR01-O.grid` for reference. 
 
-### Using Zeo++ OMS detection
-The `get_adsorbate_zeo_oms` function is used to add an atomic adsorbate to the OMS of a MOF using data generated from Zeo++. The `get_adsorbate_zeo_oms` function is described below:
+`Todo`: Support for the .cube format is under development.
 
-```python
-def get_adsorbate_zeo_oms(self,atoms_filepath,oms_data_path=None,
-	write_file=True,new_mofs_path=None,error_path=None):
-	"""
-	This function adds an adsorbate to each unique OMS in a given
-	structure. In cases of multiple identical OMS, the adsorbate with
-	fewest nearest neighbors is selected. In cases of the same number
-	of nearest neighbors, the adsorbate with the largest minimum distance
-	to extraframework atoms (excluding the adsorption site) is selected.
+## Setup
 
-	Args:
-		atoms_filepath (string): filepath to the structure file (accepts
-		CIFs, POSCARs, and CONTCARs)
-		
-		oms_data_path (string): path to the Zeo++ open metal site data
-		containing .oms and .omsex files (defaults to /oms_data within the
-		directory of the starting structure files)
-		
-		write_file (bool): if True, the new ASE atoms object should be
-		written to a CIF file (defaults to True)
-		
-		new_mofs_path (string): path to store the new CIF files if
-		write_file is True (defaults to /new_mofs within the
-		directory of the starting structure files)
-		
-		error_path (string): path to store any adsorbates flagged as
-		problematic (defaults to /errors within the directory of the
-		starting structure files)
-	Returns:
-		new_atoms_list (list): list of ASE Atoms objects with an adsorbate
-		added to each unique OMS
-		
-		new_name_list (list): list of names associated with each atoms
-		object in new_atoms_list
-	"""
-```
-The script below is taken from `examples/add_O.py`. It reads in CIF files from `mof_path`, adds an O atom 2.0 Å away from an OMS in the CIF file (ensuring that the O adsorbate doesn't overlap within 1.3 Å of the MOF), and stores the new CIF files with O adsorbate in `new_mofs_path`. It assumes that the Zeo++ `.oms` and `.omsex` files are stored in a folder named `examples/bare_MOFs/oms_data` since `oms_data_path` is not set in `get_adsorbate_zeo_oms`. Note that neither `site_species` or `site_idx` should be specified for `get_adsorbate_zeo_oms` since the algorithm identifies the adsorption OMS from Zeo++.
+### Installing MAI
+1. MAI requires [Python](https://www.python.org/) 3.6 or newer. If you do not already have Python installed, the easiest option is to download the [Anaconda](https://www.anaconda.com/download/) distribution.
+2. Download or clone the MAI repository and run `pip install .` from the MAI base directory.
 
-```python
-import os
-from mai.adsorbate_constructor import adsorbate_constructor
+### Required Dependencies
+MAI requires the following Python packages:
+1. [ASE](https://wiki.fysik.dtu.dk/ase/) 3.16.0 or newer
+2. [Pymatgen](http://pymatgen.org/) 2018.7.15 or newer.
 
-mof_path = 'examples/bare_MOFs/'
-new_mofs_path = 'examples/add_O/'
-ads_species = 'O'
-bond_length = 2.0
-overlap_tol = 1.3
+Both packages can be installed via `pip install ase pymatgen`. 
 
-for filename in os.listdir(mof_path):
-	filepath = os.path.join(mof_path,filename)
-	ads_const = adsorbate_constructor(ads_species,bond_length,
-		overlap_tol=overlap_tol)
-	mof_adsorbate_list, mof_name_list = ads_const.get_adsorbate_zeo_oms(filepath,
-		new_mofs_path=new_mofs_path)
-```
-![azixud_O](test/success/add_O/azixud_o.png)
-### Using Pymatgen NN algorithms
-The `get_adsorbate_pm` function is used to add an atomic adsorbate to specified site of a MOF using data generated from Pymatgen's `local_env` structural environment class. The `get_adsorbate_pm` function is described below:
+### External Programs
 
+#### Detecting Open Metal Sites
+MAI relies on one of two programs to automatically identify OMSs via `add_adsorbate_oms`.
+1. [OpenMetalDetector (OMD)](https://github.com/emmhald/open_metal_detector). To install, download or clone the OMD repository and run `pip install .` frmo the OMD base directory. Refer to the `README` on the OMD GitHub page for details of how to use the program.
+2. [Zeo++](http://www.zeoplusplus.org/) version 0.3. To install, just download the source folder to your desired directory. By default, Zeo++'s OMS detection algorithm does not output the positions of each OMS and its coordinating atoms, which are needed for MAI. To address this, copy `network.cc` from `patches/network.cc` in the MAI base directory and replace the corresponding `network.cc` file in the base directory of Zeo++ before installation. The relevant changes can be found starting on line 1165. To use Zeo++'s' OMS detection algorithm, run `/zeo++-0.3/network -omsex filepath`, where `-omsex` requests OMS detection with extended output, and `filepath` is the path to the CIF file of the MOF. This will produce the required `.oms` and `.omsex` files for each MOF.
 
-```python
-def get_adsorbate_pm(self,atoms_filepath,NN_method='vire',write_file=True,
-	new_mofs_path=None,error_path=None):
-	"""
-	Use Pymatgen's nearest neighbors algorithms to add an adsorbate
-
-	Args:
-		atoms_filepath (string): filepath to the structure file (accepts
-		CIFs, POSCARs, and CONTCARs)
-		
-		NN_method (string): string representing the desired Pymatgen
-		nearest neighbor algorithm (options include 'vire','voronoi',
-		'jmol','min_dist','okeeffe','brunner', and 'econ')
-		
-		write_file (bool): if True, the new ASE atoms object should be
-		written to a CIF file (defaults to True)
-		
-		new_mofs_path (string): path to store the new CIF files if
-		write_file is True (defaults to /new_mofs within the
-		directory of the starting structure files)
-		
-		error_path (string): path to store any adsorbates flagged as
-		problematic (defaults to /errors within the directory of the
-		starting structure files)
-	Returns:
-		new_atoms (Atoms object): ASE Atoms object of MOF with adsorbate
-		
-		new_name (string): name of MOF with adsorbate
-	"""
-```
-The script below is taken from `examples/add_H.py`. It reads in CIF files from `mof_path`, adds an H atom 1.0 Å away from the last O atom in the CIF file (ensuring that the H adsorbate doesn't overlap within 0.75 Å of the MOF), and stores the new CIF files with H adsorbate in `new_mofs_path`. It uses the Valence Ionic Radius Evaluator (VIRE) nearest-neighbor algorithm implemented in Pymatgen to determine the geometry of the coordination environment. Note that `get_adsorbate_pm` can be used to add atoms to an OMS as well if desired, so long as the ASE index of the OMS is specified in `adsorbate_constructor`.
-```python
-import os
-from mai.adsorbate_constructor import adsorbate_constructor
-
-mof_path = 'examples/oxygenated_MOFs/'
-new_mofs_path = 'examples/add_H/'
-site_species = 'O'
-ads_species = 'H'
-bond_length = 1.0
-NN_method = 'vire'
-
-for filename in os.listdir(mof_path):
-	filepath = os.path.join(mof_path,filename)
-	ads_const = adsorbate_constructor(ads_species,bond_length,
-		site_species=site_species)
-	mof_adsorbate, mof_name = ads_const.get_adsorbate_pm(filepath,NN_method,
-		new_mofs_path=new_mofs_path)
-```
-![anugia_oh](test/success/add_H/anugia_oh.png)
-## External Tools
-### Running RASPA for Generating Energy Grids
-`Todo`
-### Running Zeo++ for OMS Detection
-Zeo++ is the recommended method for detecting OMSs in combination with MAI. To use the Zeo++ OMS detection algorithm, one simply has to run `.../zeo++-0.3/network -omsex filepath`, where `-omsex` requests OMS detection with extended output, and `filepath` is the path to the CIF file of the MOF. This will produce a `.oms` and `.omsex` file for each MOF, which must be stored if MAI is to be used to add adsorbates to the OMSs.
+#### Potential Energy Grids
+MAI relies on one of two programs to add adsorbates based on computed PEGs via `add_adsorbate_grid`.
+1. [RASPA](https://www.tandfonline.com/doi/full/10.1080/08927022.2015.1010082).
+2. [PorousMaterials.jl](https://github.com/SimonEnsemble/PorousMaterials.jl).
