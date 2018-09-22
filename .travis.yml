@@ -13,11 +13,11 @@ install:
   - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION numpy scipy pandas
   - conda update -q --all
   - source activate test-environment
-  - pip install pymatgen
-  - pip install ase
   - git clone https://github.com/emmhald/open_metal_detector.git
   - cd open_metal_detector
   - pip install .
+  - pip install pymatgen
+  - pip install ase
   - cd ../
   - pip install .
 script:
