@@ -95,7 +95,6 @@ def get_adsorbate_pm(self,atoms_filepath,NN_method='okeeffe',write_file=True,
 
 		new_name (string): name of MOF with adsorbate
 	"""
-	#Check for file and prepare paths
 ```
 
 The following is a minimal example using MAI's `adsorbate_constructor` class with the `get_adsorbate_pm` function:
@@ -103,7 +102,7 @@ The following is a minimal example using MAI's `adsorbate_constructor` class wit
 ```python
 from mai.adsorbate_constructor import adsorbate_constructor
 
-mof_path = 'ANUGIA.cif' #path to the CIF file
+mof_path = 'MyMOF.cif' #path to the CIF file
 site_idx = 0 #atom index of adsorption site
 adsorbate = 'O' #adsorbate species
 r = 2.0 #desired bond length
@@ -168,10 +167,13 @@ from omsdetector import MofCollection
 from mai.adsorbate_constructor import adsorbate_constructor
 
 mof_path = 'MyMOFFolder' #path to CIFs
-analysis_path = mof_path #path to store the OMS results
-mof_coll = MofCollection.from_folder(collection_folder=mof_path,analysis_folder=analysis_path) #import MOFs
+analysis_path = 'MyResultsFolder' #path to store the OMS results
 ads_species = 'O' #adsorbate species
 bond_length = 2.0 #desired distance between OMS and ads_species
+
+#Use OpenMetalDetector
+mof_coll = MofCollection.from_folder(collection_folder=mof_path,analysis_folder=analysis_path)
+mof_coll.analyse_mofs()
 
 #add adsorbate
 ads = adsorbate_constructor(ads_species,bond_length)
@@ -239,12 +241,12 @@ The result might look something like this:
 
 ### Installing MAI
 1. MAI requires [Python](https://www.python.org/) 3.6 or newer. If you do not already have Python installed, the easiest option is to download the [Anaconda](https://www.anaconda.com/download/) distribution.
-2. Download or clone the MAI repository and run `pip install -r requirements.txt` followed by `pip install .` from the MAI base directory. This will install MAI as well ase the necessary packages ASE and Pymatgen as well as the highly recommended OpenMetalDetector (see below).
+2. Download or clone the MAI repository and run `pip install -r requirements.txt` followed by `pip install .` from the MAI base directory. This will install MAI, the required dependencies (ASE, Pymatgen), and the highly recommended OpenMetalDetector (see below).
 
 ### Required Dependencies
 MAI requires the following Python packages:
 1. [ASE](https://wiki.fysik.dtu.dk/ase/) 3.16.0 or newer
-2. [Pymatgen](http://pymatgen.org/) 2018.7.15 or newer.
+2. [Pymatgen](http://pymatgen.org/) 2018.9.12 or newer.
 
 ### Additional Dependencies
 
@@ -254,6 +256,6 @@ MAI relies on one of two programs to automatically identify OMSs via `add_adsorb
 2. [Zeo++](http://www.zeoplusplus.org/) version 0.3. To install, just download the source folder to your desired directory. By default, Zeo++'s OMS detection algorithm does not output the positions of each OMS and its coordinating atoms, which are needed for MAI. To address this, copy `network.cc` from `patches/network.cc` in the MAI base directory and replace the corresponding `network.cc` file in the base directory of Zeo++ before installation. The relevant changes can be found starting on line 1165. To use Zeo++'s' OMS detection algorithm, run `/zeo++-0.3/network -omsex filepath`, where `-omsex` requests OMS detection with extended output, and `filepath` is the path to the CIF file of the MOF. This will produce the required `.oms` and `.omsex` files for each MOF.
 
 #### Potential Energy Grids
-MAI relies on one of two programs to add adsorbates based on computed PEGs via `add_adsorbate_grid`.
+For using `add_adsorbate_grid`, MAI can read in PEGs from ASCII-based (x,y,z,E) files and cube files, as previously mentioned. Two programs to compute the PEGs are:
 1. [RASPA](https://www.tandfonline.com/doi/full/10.1080/08927022.2015.1010082).
 2. [PorousMaterials.jl](https://github.com/SimonEnsemble/PorousMaterials.jl). Refer to the PorousMaterials.jl GitHub page for installation instructions.
