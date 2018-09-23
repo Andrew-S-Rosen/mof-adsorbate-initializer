@@ -113,6 +113,7 @@ new_mof, new_mof_name = ads.get_adsorbate_pm(mof_path)
 ```
 
 Here, we have used MAI's `adsorbate_constructor` class and the `get_adsorbate_pm` function to tell the program what kind of adsorbate we'd like and where we want it (i.e. an 'O' atom 2.0 Å away from `site_idx=0` in `ANUGIA.cif`). The result might look something like this:
+
 ![ANUGIA_O](test/success/add_O/ANUGIA_O.png)
 ### get_adsorbate_oms
 Since OMSs are widely investigated for catalysis in MOFs, `get_adsorbate_oms` will automatically detect chemically unique OMSs in a given MOF and will add an adsorbate accordingly. This means that neither `site_idx` nor `site_species` need to be specified in `adsorbate_constructor`. The details for `get_adsorbate_oms` are described below:
@@ -236,6 +237,7 @@ ads = adsorbate_constructor(adsorbate,max_dist,site_species=site)
 mof_adsorbate, mof_name = ads.get_adsorbate_grid(mof_path,grid_format='cube')
 ```
 The result might look something like this:
+
 ![AHOKIR01_CH4](test/success/add_CH4_PEG_ASCII/ahokir_ch4.png)
 ## Setup
 
