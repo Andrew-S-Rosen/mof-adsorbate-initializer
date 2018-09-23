@@ -1,5 +1,5 @@
 from pymatgen.analysis.local_env import (MinimumVIRENN, VoronoiNN,
-	JMolNN, MinimumDistanceNN, MinimumOKeeffeNN, BrunnerNN_real,
+	JmolNN, MinimumDistanceNN, MinimumOKeeffeNN, BrunnerNN_real,
 	BrunnerNN_relative, BrunnerNN_reciprocal, EconNN)
 from pymatgen.io import ase as pm_ase
 
@@ -31,7 +31,7 @@ def get_NNs_pm(atoms,site_idx,NN_method):
 	elif NN_method == 'voronoi':
 		nn_object = VoronoiNN()
 	elif NN_method == 'jmol':
-		nn_object = JMolNN()
+		nn_object = JmolNN()
 	elif NN_method == 'min_dist':
 		nn_object = MinimumDistanceNN()
 	elif NN_method == 'okeeffe':
