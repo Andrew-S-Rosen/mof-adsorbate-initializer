@@ -3,7 +3,8 @@ from ase.io import read
 import numpy as np
 
 success_basepath = os.path.join('test','success')
-test_basepath = os.path.join('examples','new_mofs')
+test_basepath = os.path.join('test','new_mofs')
+print(success_basepath,test_basepath)
 jobs = ['add_O','add_O_OMS_omd','add_O_OMS_zeo','add_CH4_PEG_ASCII']
 tol = 1E-3
 for job in jobs:
