@@ -80,6 +80,7 @@ class ads_pos_optimizer():
 		
 		Returns:
 			NN (int): number of neighbors within r_cut
+			
 			min_dist (float): distance from adsorbate to nearest atom
 		"""
 		ads_species = self.ads_species
