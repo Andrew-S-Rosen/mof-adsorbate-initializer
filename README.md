@@ -3,6 +3,8 @@ Python code to initialize the position of adsorbates in MOFs for high-throughput
 
 A.S. Rosen, J.M. Notestein, R.Q. Snurr. "Identifying Promising Metal-Organic Frameworks for Heterogeneous Catalysis via High-Throughput Periodic Density Functional Theory." In preparation. 
 
+![TOC](toc.png)
+
 ## What is MAI?
 High-throughput computational catalysis typically involves the calculation of many different adsorption energies. MAI is a tool meant to automate the process of constructing reasonable initial guesses for adsorbates in MOFs for the purposes of DFT screening workflows.
 
