@@ -166,23 +166,26 @@ MAI relies on one of two programs to automatically compute information about OMS
 [OpenMetalDetector (OMD)](https://github.com/emmhald/open_metal_detector) or [Zeo++](http://www.zeoplusplus.org/about.html). For a pure Python implementation, we recommend OMD. A minimal example using MAI with `get_adsorbate_oms` is shown below:
 
 ```python
+import os
 from omsdetector import MofCollection
 from mai.adsorbate_constructor import adsorbate_constructor
-import os
 
-mof_path = 'MyMOFFolder' #path to CIFs
-analysis_path = 'MyResultsFolder' #path to store the OMS results
-oms_data_path = os.path.join(analysis_path,'oms_results') #OMS results from OMD
+mofs_path = 'example_MOFs' #path to folder of CIFs
+oms_data_path = mofs_path #path to store the OMS results
 ads_species = 'O' #adsorbate species
 bond_length = 2.0 #desired distance between OMS and ads_species
 
-#Use OpenMetalDetector
-mof_coll = MofCollection.from_folder(collection_folder=mof_path,analysis_folder=analysis_path) #read in MOFs
-mof_coll.analyse_mofs() #compute OMS data, store in `oms_results` folder
+#Run the Open Metal Detector
+mof_coll = MofCollection.from_folder(collection_folder=mofs_path,analysis_folder=mofs_path)
+mof_coll.analyse_mofs()
 
-#add adsorbate
-ads = adsorbate_constructor(ads_species,bond_length)
-new_mof_atoms, new_mof_name = ads.get_adsorbate_oms(mof_path,oms_data_path=oms_data_path,oms_format='OMD')
+#add adsorbate for every CIF in mofs_path
+for file in os.listdir(mofs_path):
+	if '.cif' not in file:
+		continue
+	mof_path = os.path.join(mofs_path,file)
+	ads = adsorbate_constructor(ads_species,bond_length)
+	new_mof_atoms, new_mof_name = ads.get_adsorbate_oms(mof_path,oms_format='OMD')
 ```
 
 ## Adding Adsorbates via a Potential Energy Grid
