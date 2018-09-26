@@ -181,8 +181,6 @@ mof_coll.analyse_mofs()
 
 #add adsorbate for every CIF in mofs_path
 for file in os.listdir(mofs_path):
-	if '.cif' not in file:
-		continue
 	mof_path = os.path.join(mofs_path,file)
 	ads = adsorbate_constructor(ads_species,bond_length)
 	new_mof_atoms, new_mof_name = ads.get_adsorbate_oms(mof_path,oms_format='OMD')
