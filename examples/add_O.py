@@ -9,4 +9,4 @@ NN_method = 'okeeffe' #Pymatgen algorithm to detect bonding environment
 
 #add adsorbate
 ads = adsorbate_constructor(ads_species,bond_length,site_idx=site_idx)
-new_mof_atoms, new_mof_name = ads.get_adsorbate_pm(mof_path,NN_method)
+new_mof_atoms, new_mof_name = ads.get_adsorbate_pm(mof_path,NN_method=NN_method)
