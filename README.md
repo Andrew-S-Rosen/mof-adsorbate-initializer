@@ -3,6 +3,8 @@ Python code to initialize the position of adsorbates in MOFs for high-throughput
 
 A.S. Rosen, J.M. Notestein, R.Q. Snurr. "Identifying Promising Metal-Organic Frameworks for Heterogeneous Catalysis via High-Throughput Periodic Density Functional Theory." In preparation. 
 
+[![DOI](https://zenodo.org/badge/127307047.svg)](https://zenodo.org/badge/latestdoi/127307047)
+
 ![TOC](toc.png)
 
 ## What is MAI?
