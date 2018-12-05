@@ -157,11 +157,7 @@ texinfo_documents = [
 
 
 # -- Extension configuration -------------------------------------------------
-extensions = [
-    ...
-    'sphinx.ext.napoleon',
-]
- 
+extensions = ['sphinx.ext.napoleon']
 napoleon_google_docstring = False
 napoleon_use_param = False
 napoleon_use_ivar = True
