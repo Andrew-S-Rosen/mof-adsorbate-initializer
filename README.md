@@ -1,10 +1,14 @@
 # MOF Adsorbate Initializer (MAI)
 Python code to initialize the position of adsorbates in MOFs for high-throughput DFT screening workflows. Relevant details for the code can be found in the following manuscript (once published):
 
-A.S. Rosen, J.M. Notestein, R.Q. Snurr. "Identifying Promising Metal-Organic Frameworks for Heterogeneous Catalysis via High-Throughput Periodic Density Functional Theory." In preparation. 
+A.S. Rosen, J.M. Notestein, R.Q. Snurr. "Identifying Promising Metal-Organic Frameworks for Heterogeneous Catalysis via High-Throughput Periodic Density Functional Theory." Submitted. 
+
+[![DOI](https://zenodo.org/badge/127307047.svg)](https://zenodo.org/badge/latestdoi/127307047)
+
+![TOC](toc.png)
 
 ## What is MAI?
-High-throughput computational catalysis typically involves the calculation of many different adsorption energies. MAI is a tool meant to automate the process of constructing reasonable initial guesses for adsorbates in MOFs for the purposes of DFT screening workflows.
+High-throughput computational catalysis typically involves the calculation of many different adsorption energies. MAI is a tool meant to automate the process of constructing reasonable initial guesses for adsorbates in MOFs for the purposes of DFT screening workflows. For implementing a high-throughput DFT workflow, refer to our [PyMOFScreen](https://github.com/arosen93/mof_screen) code.
 
 ## Ready-to-Run Examples
 To get started, sample scripts are provided in the `examples` base directory of MAI and include the following:
@@ -12,7 +16,7 @@ To get started, sample scripts are provided in the `examples` base directory of 
 2. `add_O_OMS_zeo.py`. Adds an O adsorbate to `ANUGIA.cif` using the OMS detection algorithm in Zeo++.
 3. `add_O_OMS_omd.py`. Adds an O adsorbate to `ANUGIA.cif` using the OMS detectiong algorithm in [Open_Metal_Detector.py](https://github.com/emmhald/open_metal_detector).
 4. `add_CH4_PEG_ASCII.py`. Adds a CH4 adsorbate to a terminal Cu-oxo site in `AHOKIR01-O.cif` using an ASCII-based PEG.
-5. `add_CH4_PEG_cube.py`. Adds a CH4 adsorbate to a terminal Cu-oxo site in `ANUGIA_clean_min_O.cif` using a cube-based PEG (`todo`).
+5. `add_CH4_PEG_cube.py`. Adds a CH4 adsorbate to a terminal Cu-oxo site in `ANUGIA_clean_min_O.cif` using a cube-based PEG.
 
 ## The Adsorbate Constructor
 The main tool to initialize adsorbate positions is the `adsorbate_constructor` class:
@@ -164,23 +168,24 @@ MAI relies on one of two programs to automatically compute information about OMS
 [OpenMetalDetector (OMD)](https://github.com/emmhald/open_metal_detector) or [Zeo++](http://www.zeoplusplus.org/about.html). For a pure Python implementation, we recommend OMD. A minimal example using MAI with `get_adsorbate_oms` is shown below:
 
 ```python
+import os
 from omsdetector import MofCollection
 from mai.adsorbate_constructor import adsorbate_constructor
-import os
 
-mof_path = 'MyMOFFolder' #path to CIFs
-analysis_path = 'MyResultsFolder' #path to store the OMS results
-oms_data_path = os.path.join(analysis_path,'oms_results') #OMS results from OMD
+mofs_path = 'example_MOFs' #path to folder of CIFs
+oms_data_path = mofs_path #path to store the OMS results
 ads_species = 'O' #adsorbate species
 bond_length = 2.0 #desired distance between OMS and ads_species
 
-#Use OpenMetalDetector
-mof_coll = MofCollection.from_folder(collection_folder=mof_path,analysis_folder=analysis_path) #read in MOFs
-mof_coll.analyse_mofs() #compute OMS data, store in `oms_results` folder
+#Run the Open Metal Detector
+mof_coll = MofCollection.from_folder(collection_folder=mofs_path,analysis_folder=mofs_path)
+mof_coll.analyse_mofs()
 
-#add adsorbate
-ads = adsorbate_constructor(ads_species,bond_length)
-new_mof_atoms, new_mof_name = ads.get_adsorbate_oms(mof_path,oms_data_path=oms_data_path,oms_format='OMD')
+#add adsorbate for every CIF in mofs_path
+for f in os.listdir(mofs_path):
+	mof_path = os.path.join(mofs_path,f)
+	ads = adsorbate_constructor(ads_species,bond_length)
+	new_mof_atoms, new_mof_name = ads.get_adsorbate_oms(mof_path,oms_format='OMD')
 ```
 
 ## Adding Adsorbates via a Potential Energy Grid
