@@ -1,9 +1,10 @@
 import numpy as np
 from ase import Atoms, Atom
 from ase.io import read, write
+from ase.build import molecule
 from mai.regression import OLS_fit, TLS_fit
 from mai.janitor import get_refcode
-from mai.energy_grid_handler import add_CH4, add_N2
+from mai.gases import add_CH4_SS, add_N2
 import os
 
 """
@@ -514,8 +515,10 @@ class ads_pos_optimizer():
 		name = get_refcode(atoms_filename)
 		new_name = name+'_'+ads_species
 		if ads_species == 'CH4':
-			new_mof, n_new_atoms = add_CH4(site_idx,ads_pos,mof)
+			new_mof, n_new_atoms = add_CH4_SS(site_idx,ads_pos,mof)
 		elif ads_species == 'N2':
+			N2 = molecule('N2')
+			NN_length = N2.get_distance(0,1)
 			new_mof, n_new_atoms = add_N2(site_idx,ads_pos,mof)
 		else:
 			raise ValueError('Unsupported molecular adsorbate')
