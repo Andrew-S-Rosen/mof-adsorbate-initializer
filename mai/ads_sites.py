@@ -1,10 +1,9 @@
 import numpy as np
 from ase import Atoms, Atom
 from ase.io import read, write
-from ase.build import molecule
 from mai.regression import OLS_fit, TLS_fit
-from mai.janitor import get_refcode
-from mai.gases import add_CH4_SS, add_N2
+from mai.tools import get_refcode, get_n_atoms
+from mai.species_rules import add_monoatomic, add_CH4_SS
 import os
 
 """
@@ -371,28 +370,7 @@ class ads_pos_optimizer():
 
 		return ads_pos
 
-	def add_ads_species(self,ads_pos):
-		"""
-		Add adsorbate to the ASE atoms object
-
-		Args:
-			ads_pos (numpy array): 1D numpy array for the proposed
-			adsorption position
-		
-		Returns:
-			new_mof (ASE Atoms object): Atoms object for new
-			structure with adsorbate
-		"""
-		ads_species = self.ads_species
-		atoms_filepath = self.atoms_filepath
-		new_mof = read(atoms_filepath)
-		adsorbate = Atoms([Atom(ads_species,ads_pos)])
-		new_mof.extend(adsorbate)
-		new_mof.wrap()
-		
-		return new_mof
-
-	def get_new_atoms_zeo_oms(self,ads_poss,best_to_worst_idx,cluster):
+	def get_new_atoms_auto_oms(self,ads_poss,best_to_worst_idx,cluster):
 		"""
 		Construct new Atoms object with adsorbate based on Zeo++ OMS
 		detection
@@ -418,16 +396,17 @@ class ads_pos_optimizer():
 		new_mofs_path = self.new_mofs_path
 		error_path = self.error_path
 		atoms_filepath = self.atoms_filepath
-
+		
 		atoms_filename = os.path.basename(atoms_filepath)
 		name = get_refcode(atoms_filename)
 		basename = name+'_'+ads_species
 		success = False
+		mof = read(atoms_filepath)
 
 		#Cycle through all proposed adsorbates and write the best
 		#one that does not overlap with other atoms
 		for idx in best_to_worst_idx:
-			new_mof = self.add_ads_species(ads_poss[idx,:])
+			new_mof = add_monoatomic(mof,ads_species,ads_poss[idx,:])
 			dist_mat = new_mof.get_distances(len(new_mof)-1,
 				np.arange(0,len(new_mof)-1).tolist(),mic=True)
 			
@@ -464,26 +443,19 @@ class ads_pos_optimizer():
 		"""
 		atoms_filepath = self.atoms_filepath
 		ads_species = self.ads_species
-		overlap_tol = self.overlap_tol
-		write_file = self.write_file
-		new_mofs_path = self.new_mofs_path
-		error_path = self.error_path
 
 		atoms_filename = os.path.basename(atoms_filepath)
 		name = get_refcode(atoms_filename)
 		new_name = name+'_'+ads_species
-
-		new_mof = self.add_ads_species(ads_pos)
-		compare_to = np.arange(0,len(new_mof)-1).tolist()
-		compare_to.remove(site_idx)
-		dist_mat = new_mof.get_distances(len(new_mof)-1,compare_to,mic=True)
-
-		if sum(dist_mat <= overlap_tol) == 0:
-			if write_file == True:
-				write(os.path.join(new_mofs_path,new_name+'.cif'),new_mof)
+		mof = read(atoms_filepath)
+		n_new_atoms = get_n_atoms(ads_species)
+		if n_new_atoms == 1:
+			new_mof = add_monoatomic(mof,ads_species,ads_pos)
 		else:
-			if write_file == True:
-				write(os.path.join(error_path,new_name+'.cif'),new_mof)
+			raise ValueError('Unsupported adsorbate: '+ads_species)
+
+		overlap = self.check_and_write(new_mof)
+		if overlap:
 			return None, None
 
 		return new_mof, new_name
@@ -501,42 +473,49 @@ class ads_pos_optimizer():
 		
 			name (string): name of new structure with adsorbate
 		"""
-		atoms_filepath = self.atoms_filepath
 		ads_species = self.ads_species
-		overlap_tol = self.overlap_tol
-		write_file = self.write_file
-		new_mofs_path = self.new_mofs_path
-		error_path = self.error_path
 		site_idx = self.site_idx
+		atoms_filepath = self.atoms_filepath
+		name = get_refcode(os.path.basename(atoms_filepath))
+		new_name = name+'_'+ads_species
 
 		#Add molecule to structure
-		atoms_filename = os.path.basename(atoms_filepath)
 		mof = read(atoms_filepath)
-		name = get_refcode(atoms_filename)
-		new_name = name+'_'+ads_species
 		if ads_species == 'CH4':
-			new_mof, n_new_atoms = add_CH4_SS(site_idx,ads_pos,mof)
-		elif ads_species == 'N2':
-			N2 = molecule('N2')
-			NN_length = N2.get_distance(0,1)
-			new_mof, n_new_atoms = add_N2(site_idx,ads_pos,mof)
+			new_mof = add_CH4_SS(mof,site_idx,ads_pos)
 		else:
-			raise ValueError('Unsupported molecular adsorbate')
+			raise ValueError('Unsupported adsorbate: '+ads_species)
 
 		#Confirm no overlapping atoms and write file
+		overlap = self.check_and_write(new_mof)
+		if overlap:
+			return None, None
+
+		return new_mof, new_name
+
+	def check_and_write(self,new_mof):
+		overlap_tol = self.overlap_tol
+		write_file = self.write_file
+		error_path = self.error_path
+		ads_species = self.ads_species
+		atoms_filepath = self.atoms_filepath
+		new_mofs_path = self.new_mofs_path
+
+		name = get_refcode(os.path.basename(atoms_filepath))
+		new_name = name+'_'+ads_species
+		n_new_atoms = get_n_atoms(ads_species)
 		overlap = False
 		for i in range(n_new_atoms):
-			dist = new_mof.get_distances(-(i+1),np.arange(0,n_new_atoms).tolist(),
-				mic=True)
+			dist = new_mof.get_distances(-(i+1),
+				np.arange(0,len(new_mof))[0:len(new_mof)-n_new_atoms],mic=True)
 			if np.sum(dist <= overlap_tol) > 0:
 				overlap = True
 				if write_file == True:
 					write(os.path.join(error_path,name+'_'+ads_species+'.cif'),new_mof)
 				break
 		if overlap == True:
-			return None, None
+			return True
 		else:
 			if write_file == True:
 				write(os.path.join(new_mofs_path,new_name+'.cif'),new_mof)
-
-		return new_mof, new_name
+		return False

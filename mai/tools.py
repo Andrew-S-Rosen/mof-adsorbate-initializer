@@ -1,4 +1,5 @@
 import os
+import re
 
 def prep_paths(new_mofs_path,error_path):
 	"""
@@ -40,3 +41,9 @@ def get_refcode(atoms_filename):
 		raise ValueError('Unknown file naming scheme')
 		
 	return refcode
+
+def get_n_atoms(species_string):
+	n_syms = len(re.findall('[A-Z]',species_string))
+	stoichs = re.findall('\d+',species_string)
+	n_atoms = sum(int(i) for i in re.findall('\d+',species_string))+(n_syms-len(stoichs))
+	return n_atoms

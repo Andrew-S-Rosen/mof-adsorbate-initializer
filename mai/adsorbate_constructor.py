@@ -2,9 +2,9 @@ import numpy as np
 import os
 from ase.io import read
 from mai.ads_sites import ads_pos_optimizer
-from mai.janitor import prep_paths, get_refcode
+from mai.tools import prep_paths, get_refcode
 from mai.oms_handler import get_zeo_data, get_omd_data
-from mai.geom import get_NNs_pm
+from mai.NN_algos import get_NNs_pm
 from mai.energy_grid_handler import get_best_grid_pos
 """
 This module provides classes to add adsorbates to a MOF
@@ -326,7 +326,7 @@ class adsorbate_constructor():
 				oms_idx_cluster)
 
 			#Get new atoms object with adsorbate
-			new_atoms, new_name = ads_optimizer.get_new_atoms_zeo_oms(
+			new_atoms, new_name = ads_optimizer.get_new_atoms_auto_oms(
 				ads_positions,best_to_worst_idx,unique_cluster_sym)
 
 			new_atoms_list.append(new_atoms)
