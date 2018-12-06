@@ -3,7 +3,7 @@ from ase import Atoms, Atom
 from ase.io import read, write
 from mai.regression import OLS_fit, TLS_fit
 from mai.tools import get_refcode, get_n_atoms
-from mai.species_rules import add_monoatomic, add_CH4_SS
+from mai.species_rules import add_monoatomic, add_diatomic, add_CH4_SS
 import os
 
 """
@@ -83,13 +83,12 @@ class ads_pos_optimizer():
 			
 			min_dist (float): distance from adsorbate to nearest atom
 		"""
-		ads_species = self.ads_species
 		r_cut = self.r_cut
 		atoms_filepath = self.atoms_filepath
 
 		#Add proposed adsorbate
 		mof_temp = read(atoms_filepath)
-		adsorbate = Atoms([Atom(ads_species,ads_pos)])
+		adsorbate = Atoms([Atom('X',ads_pos)])
 		mof_temp.extend(adsorbate)
 
 		#Determine the number of nearby atoms and minimum distance
@@ -219,7 +218,6 @@ class ads_pos_optimizer():
 		bond_dist = self.bond_dist
 		r_cut = self.r_cut
 		overlap_tol = self.overlap_tol
-		ads_species = self.ads_species
 		atoms_filepath = self.atoms_filepath
 		dist = self.get_dist_planar(normal_vec)
 
@@ -227,8 +225,8 @@ class ads_pos_optimizer():
 		try_angles = np.arange(0,360,10)
 		ads_pos_temp_unrotated1 = center_coord + dist
 		ads_pos_temp_unrotated2 = center_coord - dist
-		ads_temp1 = Atoms([Atom(ads_species,ads_pos_temp_unrotated1)])
-		ads_temp2 = Atoms([Atom(ads_species,ads_pos_temp_unrotated2)])
+		ads_temp1 = Atoms([Atom('X',ads_pos_temp_unrotated1)])
+		ads_temp2 = Atoms([Atom('X',ads_pos_temp_unrotated2)])
 		mof_temp_orig = read(atoms_filepath)
 
 		#Rotate one of the adsorbates about the axis
@@ -443,6 +441,7 @@ class ads_pos_optimizer():
 		"""
 		atoms_filepath = self.atoms_filepath
 		ads_species = self.ads_species
+		site_idx = self.site_idx
 
 		atoms_filename = os.path.basename(atoms_filepath)
 		name = get_refcode(atoms_filename)
@@ -451,6 +450,8 @@ class ads_pos_optimizer():
 		n_new_atoms = get_n_atoms(ads_species)
 		if n_new_atoms == 1:
 			new_mof = add_monoatomic(mof,ads_species,ads_pos)
+		elif n_new_atoms == 2:
+			new_mof = add_diatomic(mof,ads_species,ads_pos,site_idx)
 		else:
 			raise ValueError('Unsupported adsorbate: '+ads_species)
 
