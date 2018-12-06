@@ -19,7 +19,7 @@ def add_monoatomic(mof,ads_species,ads_pos):
 	try:
 		adsorbate = Atoms([Atom(ads_species,ads_pos)])
 	except:
-		raise ValueError('Unsupported adsorbate: ',ads_species)
+		raise ValueError('Unsupported adsorbate: '+ads_species)
 	mof.extend(adsorbate)
 	mof.wrap()
 	

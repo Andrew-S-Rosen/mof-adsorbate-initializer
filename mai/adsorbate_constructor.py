@@ -5,7 +5,7 @@ from mai.ads_sites import ads_pos_optimizer
 from mai.tools import prep_paths, get_refcode
 from mai.oms_handler import get_zeo_data, get_omd_data
 from mai.NN_algos import get_NNs_pm
-from mai.energy_grid_handler import get_best_grid_pos
+from mai.grid_handler import get_best_grid_pos
 """
 This module provides classes to add adsorbates to a MOF
 """
