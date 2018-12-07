@@ -40,6 +40,9 @@ class ads_pos_optimizer():
 		self.sum_tol = adsorbate_constructor.sum_tol
 		self.rmse_tol = adsorbate_constructor.rmse_tol
 		self.site_idx = adsorbate_constructor.site_idx
+		self.d_bond = adsorbate_constructor.d_bond
+		self.angle = adsorbate_constructor.angle
+		self.eta = adsorbate_constructor.eta
 		self.atoms_filepath = atoms_filepath
 		self.write_file = write_file
 
@@ -221,7 +224,7 @@ class ads_pos_optimizer():
 		atoms_filepath = self.atoms_filepath
 		dist = self.get_dist_planar(normal_vec)
 
-		#Prepare 2 overlapping adsorbates
+		#Prepare 2 temporary adsorbates
 		try_angles = np.arange(0,360,10)
 		ads_pos_temp_unrotated1 = center_coord + dist
 		ads_pos_temp_unrotated2 = center_coord - dist
@@ -243,15 +246,15 @@ class ads_pos_optimizer():
 			mof_temp[-1].position += 1e-6
 
 			#Set the new angle
-			mof_temp.set_distance(site_idx,len(mof_temp)-1,bond_dist,
+			mof_temp.set_distance(site_idx,-1,bond_dist,
 				fix=0,mic=True)
-			mof_temp.set_distance(site_idx,len(mof_temp)-2,bond_dist,
+			mof_temp.set_distance(site_idx,-2,bond_dist,
 				fix=0,mic=True)	
-			mof_temp.set_angle(len(mof_temp)-1,site_idx,len(mof_temp)-2,angle)
+			mof_temp.set_angle(-1,site_idx,-2,angle)
 
 			#Determine number of nearby atoms
-			dist_mat = mof_temp.get_distances(len(mof_temp)-2,
-				np.arange(0,len(mof_temp)-2).tolist(),mic=True)
+			dist_mat = mof_temp.get_distances(-2,np.arange(0,
+				len(mof_temp)-2).tolist(),mic=True)
 			NNs = sum(dist_mat <= r_cut)
 
 			#Select best option
@@ -405,8 +408,8 @@ class ads_pos_optimizer():
 		#one that does not overlap with other atoms
 		for idx in best_to_worst_idx:
 			new_mof = add_monoatomic(mof,ads_species,ads_poss[idx,:])
-			dist_mat = new_mof.get_distances(len(new_mof)-1,
-				np.arange(0,len(new_mof)-1).tolist(),mic=True)
+			dist_mat = new_mof.get_distances(-1,np.arange(0,
+				len(new_mof)-1).tolist(),mic=True)
 			
 			if sum(dist_mat <= overlap_tol) == 0:
 				new_name = basename+'_OMS'+str(idx)
@@ -442,6 +445,11 @@ class ads_pos_optimizer():
 		atoms_filepath = self.atoms_filepath
 		ads_species = self.ads_species
 		site_idx = self.site_idx
+		r_cut = self.r_cut
+		overlap_tol = self.overlap_tol
+		d_bond = self.d_bond
+		angle = self.angle
+		eta = self.eta
 
 		atoms_filename = os.path.basename(atoms_filepath)
 		name = get_refcode(atoms_filename)
@@ -451,7 +459,9 @@ class ads_pos_optimizer():
 		if n_new_atoms == 1:
 			new_mof = add_monoatomic(mof,ads_species,ads_pos)
 		elif n_new_atoms == 2:
-			new_mof = add_diatomic(mof,ads_species,ads_pos,site_idx)
+
+			new_mof = add_diatomic(mof,ads_species,ads_pos,site_idx,
+				d_bond=d_bond,angle=angle,eta=eta,r_cut=r_cut,overlap_tol=overlap_tol)
 		else:
 			raise ValueError('Unsupported adsorbate: '+ads_species)
 

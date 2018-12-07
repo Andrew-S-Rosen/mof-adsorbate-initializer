@@ -2,18 +2,21 @@ from ase.build import molecule
 from ase.geometry import get_distances
 from ase import Atoms, Atom
 import numpy as np
-
+from ase.io import write
 def add_monoatomic(mof,ads_species,ads_pos):
 	"""
 	Add adsorbate to the ASE atoms object
 
 	Args:
+		mof (ASE Atoms object): starting ASE Atoms object of structure
+
+		ads_species (string): adsorbate species
+
 		ads_pos (numpy array): 1D numpy array for the proposed
 		adsorption position
 	
 	Returns:
-		new_mof (ASE Atoms object): Atoms object for new
-		structure with adsorbate
+		mof (ASE Atoms object): ASE Atoms object with adsorbate
 	"""
 
 	try:
@@ -25,35 +28,40 @@ def add_monoatomic(mof,ads_species,ads_pos):
 	
 	return mof
 
-def add_diatomic(mof,ads_species,ads_pos,site_idx,d_bond=1.25,angle=180.0,eta=1):
+def add_diatomic(mof,ads_species,ads_pos,site_idx,d_bond=1.25,angle=None,eta=1,
+	r_cut=2.5,overlap_tol=0.75):
 	"""
 	Add diatomic to the structure
 
 	Args:
-		site_idx (int): ASE index of site
-		
+		mof (ASE Atoms object): starting ASE Atoms object of structure
+
+		ads_species (string): adsorbate species
+
 		ads_pos (array): 1D numpy array for the best adsorbate position
 		
-		atoms (ASE Atoms object): Atoms object of structure
-	
-		X1 (string): chemical symbol for atom 1 of diatomic
+		site_idx (int): ASE index of site
 
-		X2 (string): chemical symbol for atom 2 of diatomic (defualts to X1)
-	
-		d_bond (float): X1-X2 bond length (defaults to 2 A)
+		d_bond (float): X1-X2 bond length (defaults to 1.25)
 
-		angle (float): site-X1-X2 angle (defaults to 180 degrees)
+		angle (float): site-X1-X2 angle (defaults to 180 degrees except for
+		side-on in which it defaults to 90 or end-on O2 in which it defaults
+		to 120)
 
-		center (bool): if center of diatomic should be put at ads_site,
-		as opposed to X1 (defaults to False)
+		eta (int): denticity of end-on (1) or side-on (2) (defaults to 1)
+
+		r_cut (float): cutoff distance for calculating nearby atoms when
+		ranking adsorption sites (defualts to 2.5)
+
+		overlap_tol (float): distance below which atoms are assumed to be
+		overlapping (defualts to 0.75)
 
 	Returns:
-		atoms (ASE Atoms object): new ASE Atoms object with adsorbate
-	
-		n_new_atoms (int): number of atoms in adsorbate
+		mof (ASE Atoms object): ASE Atoms object with adsorbate
 	"""
 	
-	mol = molecule('H2')
+	#Construct X2 diatomic from string
+	mol = Atoms([Atom('X',ads_pos),Atom('X',ads_pos)])
 	X1 = ads_species[0]
 	if ads_species[1] == '2':
 		X2 = X1
@@ -65,25 +73,77 @@ def add_diatomic(mof,ads_species,ads_pos,site_idx,d_bond=1.25,angle=180.0,eta=1)
 	except:
 		raise ValueError('Invalid chemical species: '+ads_species)
 
-	D,D_len = get_distances([ads_pos],mof[site_idx].position,cell=mof.cell,pbc=mof.pbc)
-	r_vec = D[0,0]
-	r_bond = (r_vec/np.linalg.norm(r_vec))*d_bond
+	#Set default bond angle
+	if angle is None:
+		if eta == 1 and ads_species in ['O2','OO']:
+			angle = 120.0
+		elif eta == 2:
+			angle = 90.0
+		else:
+			angle = 180.0
+	while angle > 180:
+		angle -= 180
 
-	if eta == 1:
-		mol[0].position = ads_pos
-		mol[1].position = ads_pos+r_bond
-	elif eta == 2:#fixme
-		mol[0].position = ads_pos
-		mol[1].position = ads_pos+r_bond
-	else:
-		raise ValueError('Invalid value for eta: '+str(eta))
+	#Set X1 position and placeholder X2 position
+	r_vec = mof.get_distance(-2,site_idx,vector=True,mic=True)
+	unit_r_vec = r_vec/np.linalg.norm(r_vec)
+	r_bond = unit_r_vec*d_bond
+	mol[0].position = ads_pos
+	mol[1].position = ads_pos+r_bond
 
 	#Add diatomic to the structure
 	if site_idx is None:
 		raise ValueError('Site index must not be None')
 	mof.extend(mol)
-	mof.set_angle(site_idx,-2,-1,angle=angle)
+	mof.set_angle(site_idx,-2,-1,angle)
 	mof.wrap()
+
+	#Make adsorption mode side-on if requested
+	if eta == 2:
+		line = mof.get_distance(-1,-2,vector=True,mic=True)
+		shift = (line/np.linalg.norm(line))*d_bond/2
+		mof[-2].position += shift
+		mof[-1].position += shift
+		mof.wrap()
+	elif eta > 2:
+		raise ValueError('Wrong value for eta: '+str(eta))
+
+	#If not linear, sweep possible angles for X2 to minimize sterics
+	if angle != 180:
+		dtheta = 10
+		n_angles = int(360/dtheta)
+		for i in range(n_angles):
+			mof_temp = mof.copy()
+			if eta == 1:
+				temp_atoms = 2
+				mof_temp.extend(Atoms([Atom('X',ads_pos+r_bond)]))
+				mof_temp.set_angle(site_idx,-3,-1,360-angle)
+			elif eta == 2:
+				temp_atoms = 1
+
+			r_temp = mof_temp.get_distance(-1,-2,vector=True,mic=True)
+			d_temp = mof_temp.get_distance(-1,-2,vector=False,mic=True)
+			pos_temp = mof_temp[-1].position+(r_temp/np.linalg.norm(r_temp))*d_temp/2
+			mof_temp.extend(Atoms([Atom('X',pos_temp)]))
+
+			ads_temp = mof_temp.copy()[-(1+temp_atoms):]
+			ads_temp.rotate(i*dtheta,mof_temp.get_distance(site_idx,-1,
+				vector=True,mic=True),pos_temp)
+			del mof_temp[-temp_atoms:]
+			mof_temp[-1].position = ads_temp[-(1+temp_atoms)].position
+			mof_temp.wrap()
+
+			dist_mat = mof_temp.get_distances(-1,np.arange(0,
+				len(mof_temp)-1).tolist(),mic=True)
+			NNs = sum(dist_mat <= r_cut)
+
+			if i == 0:
+				ads_pos2 = mof_temp[-1].position
+				old_min_NNs = NNs
+			elif sum(dist_mat <= overlap_tol) == 0 and NNs < old_min_NNs:
+				ads_pos2 = mof_temp[-1].position
+				old_min_NNs = NNs
+		mof[-1].position = ads_pos2
 
 	return mof
 
@@ -92,14 +152,14 @@ def add_CH4_SS(mof,site_idx,ads_pos):
 	Add CH4 to the structure
 
 	Args:
+		mof (ASE Atoms object): starting ASE Atoms object of structure
+
 		site_idx (int): ASE index of site based on single-site model
 
 		ads_pos (array): 1D numpy array for the best adsorbate position
-		
-		atoms (ASE Atoms object): Atoms object of structure
-	
+			
 	Returns:
-		atoms (ASE Atoms object): new ASE Atoms object with adsorbate
+		mof (ASE Atoms object): ASE Atoms object with adsorbate
 	"""
 	
 	#Get CH4 parameters

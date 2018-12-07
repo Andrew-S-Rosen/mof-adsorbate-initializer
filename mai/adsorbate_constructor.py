@@ -138,8 +138,8 @@ class adsorbate_constructor():
 		new_atoms, new_name = ads_optimizer.get_new_atoms_grid(site_pos,ads_pos)
 		return new_atoms, new_name
 
-	def get_adsorbate_pm(self,atoms_filepath,NN_method='okeeffe',write_file=True,
-		new_mofs_path=None,error_path=None):
+	def get_adsorbate_pm(self,atoms_filepath,NN_method='okeeffe',d_bond=1.25,
+		angle=None,eta=1,write_file=True,new_mofs_path=None,error_path=None):
 		"""
 		Use Pymatgen's nearest neighbors algorithms to add an adsorbate
 
@@ -151,6 +151,14 @@ class adsorbate_constructor():
 			nearest neighbor algorithm (options include 'vire','voronoi',
 			'jmol','min_dist','okeeffe','brunner_relative','brunner_reciprocal',
 			'brunner_real', and 'econ') (defaults to 'okeeffe')
+
+			d_bond (float): X1-X2 bond length (defaults to 1.25)
+
+			angle (float): site-X1-X2 angle (defaults to 180 degrees except for
+			side-on in which it defaults to 90 or end-on O2 in which it defaults
+			to 120)
+
+			eta (int): denticity of end-on (1) or side-on (2) (defaults to 1)
 
 			write_file (bool): if True, the new ASE atoms object should be
 			written to a CIF file (defaults to True)
@@ -180,6 +188,10 @@ class adsorbate_constructor():
 		if error_path is None:
 			error_path = os.path.join(os.getcwd(),'errors')
 
+		self.d_bond = d_bond
+		self.angle = angle
+		self.eta = eta
+		
 		#Get ASE index of adsorption site
 		site_species = self.site_species
 		site_idx = self.site_idx
