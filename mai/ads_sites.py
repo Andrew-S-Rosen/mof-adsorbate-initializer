@@ -2,8 +2,8 @@ import numpy as np
 from ase import Atoms, Atom
 from ase.io import read, write
 from mai.regression import OLS_fit, TLS_fit
-from mai.tools import get_refcode, get_n_atoms
-from mai.species_rules import add_monoatomic, add_diatomic, add_CH4_SS
+from mai.tools import get_refcode, string_to_formula
+from mai.species_rules import add_monoatomic, add_diatomic, add_triatomic, add_CH4_SS
 import os
 
 """
@@ -41,8 +41,11 @@ class ads_pos_optimizer():
 		self.rmse_tol = adsorbate_constructor.rmse_tol
 		self.site_idx = adsorbate_constructor.site_idx
 		self.d_bond = adsorbate_constructor.d_bond
+		self.d_bond2 = adsorbate_constructor.d_bond2
 		self.angle = adsorbate_constructor.angle
+		self.angle2 = adsorbate_constructor.angle2
 		self.eta = adsorbate_constructor.eta
+		self.connect = adsorbate_constructor.connect
 		self.atoms_filepath = atoms_filepath
 		self.write_file = write_file
 
@@ -448,22 +451,29 @@ class ads_pos_optimizer():
 		r_cut = self.r_cut
 		overlap_tol = self.overlap_tol
 		d_bond = self.d_bond
+		d_bond2 = self.d_bond2
 		angle = self.angle
+		angle2 = self.angle2
 		eta = self.eta
+		connect = self.connect
 
 		atoms_filename = os.path.basename(atoms_filepath)
 		name = get_refcode(atoms_filename)
 		new_name = name+'_'+ads_species
 		mof = read(atoms_filepath)
-		n_new_atoms = get_n_atoms(ads_species)
+		n_new_atoms = len(string_to_formula(ads_species))
 		if n_new_atoms == 1:
 			new_mof = add_monoatomic(mof,ads_species,ads_pos)
 		elif n_new_atoms == 2:
-
 			new_mof = add_diatomic(mof,ads_species,ads_pos,site_idx,
-				d_bond=d_bond,angle=angle,eta=eta,r_cut=r_cut,overlap_tol=overlap_tol)
+				d_bond=d_bond,angle=angle,eta=eta,connect=connect,
+				r_cut=r_cut,overlap_tol=overlap_tol)
+		elif n_new_atoms == 3:
+			new_mof = add_triatomic(mof,ads_species,ads_pos,site_idx,
+				d_bond1=d_bond,d_bond2=d_bond2,angle1=angle,angle2=angle2,
+				connect=connect,r_cut=r_cut,overlap_tol=overlap_tol)		
 		else:
-			raise ValueError('Unsupported adsorbate: '+ads_species)
+			raise ValueError('Too many atoms in adsorbate: '+ads_species)
 
 		overlap = self.check_and_write(new_mof)
 		if overlap:
@@ -514,7 +524,7 @@ class ads_pos_optimizer():
 
 		name = get_refcode(os.path.basename(atoms_filepath))
 		new_name = name+'_'+ads_species
-		n_new_atoms = get_n_atoms(ads_species)
+		n_new_atoms = len(string_to_formula(ads_species))
 		overlap = False
 		for i in range(n_new_atoms):
 			dist = new_mof.get_distances(-(i+1),

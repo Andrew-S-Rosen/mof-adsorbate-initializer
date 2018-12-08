@@ -139,7 +139,8 @@ class adsorbate_constructor():
 		return new_atoms, new_name
 
 	def get_adsorbate_pm(self,atoms_filepath,NN_method='okeeffe',d_bond=1.25,
-		angle=None,eta=1,write_file=True,new_mofs_path=None,error_path=None):
+		angle=None,eta=1,d_bond2=None,angle2=None,connect=1,write_file=True,
+		new_mofs_path=None,error_path=None):
 		"""
 		Use Pymatgen's nearest neighbors algorithms to add an adsorbate
 
@@ -154,9 +155,10 @@ class adsorbate_constructor():
 
 			d_bond (float): X1-X2 bond length (defaults to 1.25)
 
-			angle (float): site-X1-X2 angle (defaults to 180 degrees except for
-			side-on in which it defaults to 90 or end-on O2 in which it defaults
-			to 120)
+			angle (float): site-X1-X2 angle (for diatomics, defaults to 180 degrees
+			except for side-on in which it defaults to 90 or end-on O2 in which
+			it defaults to 120; for triatomics, defaults to 180 except for H2O
+			in which it defaults to 104.5)
 
 			eta (int): denticity of end-on (1) or side-on (2) (defaults to 1)
 
@@ -189,8 +191,11 @@ class adsorbate_constructor():
 			error_path = os.path.join(os.getcwd(),'errors')
 
 		self.d_bond = d_bond
+		self.d_bond2 = d_bond2
 		self.angle = angle
+		self.angle2 = angle2
 		self.eta = eta
+		self.connect = connect
 		
 		#Get ASE index of adsorption site
 		site_species = self.site_species

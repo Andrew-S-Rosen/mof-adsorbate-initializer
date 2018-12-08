@@ -1,6 +1,7 @@
 from ase.build import molecule
 from ase.geometry import get_distances
 from ase import Atoms, Atom
+from mai.tools import string_to_formula
 import numpy as np
 from ase.io import write
 def add_monoatomic(mof,ads_species,ads_pos):
@@ -29,7 +30,7 @@ def add_monoatomic(mof,ads_species,ads_pos):
 	return mof
 
 def add_diatomic(mof,ads_species,ads_pos,site_idx,d_bond=1.25,angle=None,eta=1,
-	r_cut=2.5,overlap_tol=0.75):
+	connect=1,r_cut=2.5,overlap_tol=0.75):
 	"""
 	Add diatomic to the structure
 
@@ -62,11 +63,11 @@ def add_diatomic(mof,ads_species,ads_pos,site_idx,d_bond=1.25,angle=None,eta=1,
 	
 	#Construct X2 diatomic from string
 	mol = Atoms([Atom('X',ads_pos),Atom('X',ads_pos)])
-	X1 = ads_species[0]
-	if ads_species[1] == '2':
-		X2 = X1
-	else:
-		X2 = ads_species[1]
+	ads_formula = string_to_formula(ads_species)
+	if connect == 2:
+		ads_formula[0], ads_formula[1] = ads_formula[1], ads_formula[0]
+	X1 = ads_formula[0]
+	X2 = ads_formula[1]
 	try:
 		mol[0].symbol = X1
 		mol[1].symbol = X2
@@ -86,8 +87,7 @@ def add_diatomic(mof,ads_species,ads_pos,site_idx,d_bond=1.25,angle=None,eta=1,
 
 	#Set X1 position and placeholder X2 position
 	r_vec = mof.get_distance(-2,site_idx,vector=True,mic=True)
-	unit_r_vec = r_vec/np.linalg.norm(r_vec)
-	r_bond = unit_r_vec*d_bond
+	r_bond = d_bond*(r_vec/np.linalg.norm(r_vec))
 	mol[0].position = ads_pos
 	mol[1].position = ads_pos+r_bond
 
@@ -114,6 +114,7 @@ def add_diatomic(mof,ads_species,ads_pos,site_idx,d_bond=1.25,angle=None,eta=1,
 		n_angles = int(360/dtheta)
 		for i in range(n_angles):
 			mof_temp = mof.copy()
+			
 			if eta == 1:
 				temp_atoms = 2
 				mof_temp.extend(Atoms([Atom('X',ads_pos+r_bond)]))
@@ -131,10 +132,9 @@ def add_diatomic(mof,ads_species,ads_pos,site_idx,d_bond=1.25,angle=None,eta=1,
 				vector=True,mic=True),pos_temp)
 			del mof_temp[-temp_atoms:]
 			mof_temp[-1].position = ads_temp[-(1+temp_atoms)].position
-			mof_temp.wrap()
 
 			dist_mat = mof_temp.get_distances(-1,np.arange(0,
-				len(mof_temp)-1).tolist(),mic=True)
+				len(mof_temp)-1).tolist(),vector=False,mic=True)
 			NNs = sum(dist_mat <= r_cut)
 
 			if i == 0:
@@ -144,6 +144,48 @@ def add_diatomic(mof,ads_species,ads_pos,site_idx,d_bond=1.25,angle=None,eta=1,
 				ads_pos2 = mof_temp[-1].position
 				old_min_NNs = NNs
 		mof[-1].position = ads_pos2
+	mof.wrap()
+
+	return mof
+
+def add_triatomic(mof,ads_species,ads_pos,site_idx,d_bond1=1.25,d_bond2=None,
+	angle1=None,angle2=None,connect=1,r_cut=2.5,overlap_tol=0.75):
+	"""
+	Add triatomic to the structure
+	"""
+	ads_formula = string_to_formula(ads_species)
+	X3 = ads_formula[2]
+
+	if d_bond2 is None:
+		d_bond2 = d_bond1 
+	if angle1 is None:
+		if ads_species in ['H2O','HOO','OHH']:
+			angle1 = 104.5
+		else:
+			angle1 = 180.0
+	if angle2 is None:
+		angle2 = angle1
+	if connect == 3:
+		ads_formula[0], ads_formula[2] = ads_formula[2], ads_formula[0]
+
+	di_ads_species = ''.join(ads_formula[0:2])
+	mof = add_diatomic(mof,di_ads_species,ads_pos,site_idx,d_bond=d_bond1,
+		angle=angle1,r_cut=r_cut,overlap_tol=overlap_tol)
+
+	if connect == 1 or connect == 3:
+		r_vec = mof.get_distance(-2,-1,vector=True,mic=True)
+		pos_temp = mof[-1].position+d_bond2*(r_vec/np.linalg.norm(r_vec))
+		mof.extend(Atoms([Atom(X3,pos_temp)]))
+		mof.set_angle(-3,-2,-1,angle2)
+	elif connect == 2:
+		r_vec = mof.get_distance(-2,site_idx,vector=True,mic=True)
+		pos_temp = ads_pos+d_bond2*(r_vec/np.linalg.norm(r_vec))
+		mof.extend(Atoms([Atom(X3,pos_temp)]))
+		mof.set_angle(site_idx,-3,-1,360-angle2)
+		#set dihedral
+	else:
+		raise ValueError('Connecting atom must have value of <= 3')
+	mof.wrap()
 
 	return mof
 

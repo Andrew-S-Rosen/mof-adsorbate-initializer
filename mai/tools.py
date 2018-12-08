@@ -42,8 +42,20 @@ def get_refcode(atoms_filename):
 		
 	return refcode
 
-def get_n_atoms(species_string):
-	n_syms = len(re.findall('[A-Z]',species_string))
-	stoichs = re.findall('\d+',species_string)
-	n_atoms = sum(int(i) for i in re.findall('\d+',species_string))+(n_syms-len(stoichs))
-	return n_atoms
+def string_to_formula(species_string):
+	syms = re.findall('[A-Z][a-z]?',species_string)
+	formula = []
+	for sym in syms:
+		end_idx = re.search(sym,species_string).end()
+		try:
+			diff = len(species_string)-len(species_string[end_idx:])
+			next_idx = (diff-1)+re.search('[A-Z][a-z]?',species_string[end_idx:]).end()
+			end_char = species_string[end_idx:next_idx]
+		except:
+			end_char = species_string[end_idx:]	
+		try:
+			stoich = int(end_char)
+		except:
+			stoich = 1
+		formula.extend([sym]*stoich)
+	return formula
