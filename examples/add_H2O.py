@@ -4,7 +4,7 @@ from mai.adsorbate_constructor import adsorbate_constructor
 mof_path = os.path.join('example_MOFs','Fe-MOF-74.cif') #path to CIF of MOF
 site_idx = 0 #index of adsorption site
 bond_length = 2.0 #desired distance between site_index and ads_species
-NN_method = 'okeeffe' #Pymatgen algorithm to detect bonding environment
+NN_method = 'crystal' #Pymatgen algorithm to detect bonding environment
 
 #add adsorbate
 ads_species = 'HOH' #adsorbate species (eta1-O)

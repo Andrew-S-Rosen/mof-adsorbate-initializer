@@ -1,10 +1,10 @@
 import os
 from mai.adsorbate_constructor import adsorbate_constructor
 
-mof_path = os.path.join('example_MOFs','ANUGIA.cif') #path to CIF of MOF
+mof_path = os.path.join('example_MOFs','Sc-MIL-88B.cif') #path to CIF of MOF
 site_idx = 0 #index of adsorption site
 bond_length = 2.0 #desired distance between site_index and ads_species
-neighbor_algo = 'okeeffe' #Pymatgen algorithm to detect bonding environment
+neighbor_algo = 'crystal' #Pymatgen algorithm to detect bonding environment
 
 #add adsorbate
 ads_species = 'ON2' #adsorbate species (eta1-O)

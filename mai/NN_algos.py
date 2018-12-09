@@ -1,6 +1,7 @@
 from pymatgen.analysis.local_env import (MinimumVIRENN, VoronoiNN,
 	JmolNN, MinimumDistanceNN, MinimumOKeeffeNN, BrunnerNN_real,
-	BrunnerNN_relative, BrunnerNN_reciprocal, EconNN)
+	BrunnerNN_relative, BrunnerNN_reciprocal, EconNN, CutOffDictNN,
+	Critic2NN, OpenBabelNN, CovalentBondNN, CrystalNN)
 from pymatgen.io import ase as pm_ase
 
 def get_NNs_pm(atoms,site_idx,NN_method):
@@ -13,9 +14,8 @@ def get_NNs_pm(atoms,site_idx,NN_method):
 		site_idx (int): ASE index of adsorption site
 		
 		NN_method (string): string representing the desired Pymatgen
-		nearest neighbor algorithm (accepts 'vire','voronoi','jmol',
-		'min_dist','okeeffe','brunner_real','brunner_recpirocal',
-		'brunner_relative', and 'econ')
+		nearest neighbor algorithm:
+		refer to http://pymatgen.org/_modules/pymatgen/analysis/local_env.html
 	
 	Returns:
 		neighbors_idx (list of ints): ASE indices of coordinating atoms
@@ -44,6 +44,17 @@ def get_NNs_pm(atoms,site_idx,NN_method):
 		nn_object = BrunnerNN_relative()
 	elif NN_method == 'econ':
 		nn_object = EconNN()
+	elif NN_method == 'dict':
+		nn_object = CutOffDictNN(cut_off_dict='cut_off_dict.txt')
+	elif NN_method == 'critic2':
+		nn_object = Critic2NN()
+	elif NN_method == 'openbabel':
+		nn_object = OpenBabelNN()
+	elif NN_method == 'covalent':
+		nn_object = CovalentBondNN()
+	elif NN_method == 'crystal':
+		nn_object = CrystalNN(weighted_cn=True,
+			porous_adjustment=True)
 	else:
 		raise ValueError('Invalid NN algorithm specified')
 

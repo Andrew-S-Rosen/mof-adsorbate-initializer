@@ -17,8 +17,11 @@ def construct_mof(ads_pos_optimizer,mof,ads_pos,site_idx):
 	connect = ads_pos_optimizer.connect
 
 	n_new_atoms = len(string_to_formula(ads_species))
-	if full_ads_species == 'CH4_grid':
-		new_mof = add_CH4_SS(mof,site_idx,ads_pos)
+	if '_grid' in full_ads_species:
+		if ads_species == 'CH4':
+			new_mof = add_CH4_SS(mof,site_idx,ads_pos)
+		else:
+			raise ValueError('Unsupported species for grid method')
 	else:
 		if n_new_atoms == 1:
 			new_mof = add_monoatomic(mof,ads_species,ads_pos)
@@ -31,7 +34,7 @@ def construct_mof(ads_pos_optimizer,mof,ads_pos,site_idx):
 				d_bond1=d_bond,d_bond2=d_bond2,angle1=angle,angle2=angle2,
 				connect=connect,r_cut=r_cut,overlap_tol=overlap_tol)	
 		else:
-			raise ValueError('Too many atoms in adsorbate: '+ads_species)
+			raise ValueError('Too many atoms in adsorbate')
 
 	return new_mof
 

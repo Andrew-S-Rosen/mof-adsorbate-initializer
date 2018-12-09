@@ -148,7 +148,7 @@ class adsorbate_constructor():
 		new_atoms, new_name = ads_optimizer.get_new_atoms_grid(site_pos,ads_pos)
 		return new_atoms, new_name
 
-	def get_adsorbate_pm(self,atoms_filepath,NN_method='okeeffe',d_bond=1.25,
+	def get_adsorbate_pm(self,atoms_filepath,NN_method='crystal',d_bond=1.25,
 		angle=None,eta=1,d_bond2=None,angle2=None,connect=1,write_file=True,
 		new_mofs_path=None,error_path=None):
 		"""
@@ -159,9 +159,8 @@ class adsorbate_constructor():
 			atoms_filepath (string): filepath to the CIF file
 			
 			NN_method (string): string representing the desired Pymatgen
-			nearest neighbor algorithm (options include 'vire','voronoi',
-			'jmol','min_dist','okeeffe','brunner_relative','brunner_reciprocal',
-			'brunner_real', and 'econ') (defaults to 'okeeffe')
+			nearest neighbor algorithm. options include 'crystal',vire','okeefe',
+			and others. See NN_algos.py (defaults to 'crystal')
 
 			d_bond (float): X1-X2 bond length (defaults to 1.25)
 
