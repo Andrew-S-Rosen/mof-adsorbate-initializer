@@ -33,7 +33,8 @@ class ads_pos_optimizer():
 			error_path (string): path to store any adsorbates flagged as
 			problematic (defaults to atoms_filepath/errors)
 		"""
-		self.ads_species = adsorbate_constructor.ads_species
+		self.full_ads_species = adsorbate_constructor.ads_species
+		self.ads_species = adsorbate_constructor.ads_species.split('_')[0]
 		self.bond_dist = adsorbate_constructor.bond_dist
 		self.overlap_tol = adsorbate_constructor.overlap_tol
 		self.r_cut = adsorbate_constructor.r_cut
@@ -415,6 +416,7 @@ class ads_pos_optimizer():
 			name (string): name of new structure with adsorbate
 		"""
 		overlap_tol = self.overlap_tol
+		full_ads_species = self.full_ads_species
 		ads_species = self.ads_species
 		write_file = self.write_file
 		new_mofs_path = self.new_mofs_path
@@ -423,7 +425,7 @@ class ads_pos_optimizer():
 		
 		atoms_filename = os.path.basename(atoms_filepath)
 		name = get_refcode(atoms_filename)
-		basename = name+'_'+ads_species
+		basename = name+'_'+full_ads_species
 		success = False
 		mof = read(atoms_filepath)
 
@@ -466,6 +468,7 @@ class ads_pos_optimizer():
 			name (string): name of new structure with adsorbate
 		"""
 		atoms_filepath = self.atoms_filepath
+		full_ads_species = self.full_ads_species
 		ads_species = self.ads_species
 		site_idx = self.site_idx
 		r_cut = self.r_cut
@@ -479,7 +482,7 @@ class ads_pos_optimizer():
 		
 		atoms_filename = os.path.basename(atoms_filepath)
 		name = get_refcode(atoms_filename)
-		new_name = name+'_'+ads_species
+		new_name = name+'_'+full_ads_species
 		mof = read(atoms_filepath)
 		n_new_atoms = len(string_to_formula(ads_species))
 		if n_new_atoms == 1:
@@ -514,11 +517,12 @@ class ads_pos_optimizer():
 		
 			name (string): name of new structure with adsorbate
 		"""
+		full_ads_species = self.full_ads_species
 		ads_species = self.ads_species
 		site_idx = self.site_idx
 		atoms_filepath = self.atoms_filepath
 		name = get_refcode(os.path.basename(atoms_filepath))
-		new_name = name+'_'+ads_species
+		new_name = name+'_'+full_ads_species
 
 		#Add molecule to structure
 		mof = read(atoms_filepath)
@@ -538,12 +542,13 @@ class ads_pos_optimizer():
 		overlap_tol = self.overlap_tol
 		write_file = self.write_file
 		error_path = self.error_path
+		full_ads_species = self.full_ads_species
 		ads_species = self.ads_species
 		atoms_filepath = self.atoms_filepath
 		new_mofs_path = self.new_mofs_path
 
 		name = get_refcode(os.path.basename(atoms_filepath))
-		new_name = name+'_'+ads_species
+		new_name = name+'_'+full_ads_species
 		n_new_atoms = len(string_to_formula(ads_species))
 		overlap = False
 		for i in range(n_new_atoms):
@@ -552,7 +557,7 @@ class ads_pos_optimizer():
 			if np.sum(dist <= overlap_tol) > 0:
 				overlap = True
 				if write_file == True:
-					write(os.path.join(error_path,name+'_'+ads_species+'.cif'),new_mof)
+					write(os.path.join(error_path,name+'_'+full_ads_species+'.cif'),new_mof)
 				break
 		if overlap == True:
 			return True

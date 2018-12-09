@@ -3,7 +3,7 @@ from ase.geometry import get_distances
 from ase import Atoms, Atom
 from mai.tools import string_to_formula
 import numpy as np
-from ase.io import write
+
 def add_monoatomic(mof,ads_species,ads_pos):
 	"""
 	Add adsorbate to the ASE atoms object
