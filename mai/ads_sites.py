@@ -40,14 +40,34 @@ class ads_pos_optimizer():
 		self.sum_tol = adsorbate_constructor.sum_tol
 		self.rmse_tol = adsorbate_constructor.rmse_tol
 		self.site_idx = adsorbate_constructor.site_idx
-		self.d_bond = adsorbate_constructor.d_bond
-		self.d_bond2 = adsorbate_constructor.d_bond2
-		self.angle = adsorbate_constructor.angle
-		self.angle2 = adsorbate_constructor.angle2
-		self.eta = adsorbate_constructor.eta
-		self.connect = adsorbate_constructor.connect
 		self.atoms_filepath = atoms_filepath
 		self.write_file = write_file
+
+		#Add function-specific variables (if available)
+		try:
+			self.d_bond = adsorbate_constructor.d_bond
+		except:
+			pass
+		try:
+			self.d_bond2 = adsorbate_constructor.d_bond2
+		except:
+			pass
+		try:
+			self.angle = adsorbate_constructor.angle
+		except:
+			pass
+		try:
+			self.angle2 = adsorbate_constructor.angle2
+		except:
+			pass
+		try:
+			self.eta = adsorbate_constructor.eta
+		except:
+			pass
+		try:
+			self.connect = adsorbate_constructor.connect
+		except:
+			pass
 
 		if new_mofs_path is None:
 			new_mofs_path = os.path.join(os.path.dirname(atoms_filepath),
@@ -456,7 +476,7 @@ class ads_pos_optimizer():
 		angle2 = self.angle2
 		eta = self.eta
 		connect = self.connect
-
+		
 		atoms_filename = os.path.basename(atoms_filepath)
 		name = get_refcode(atoms_filename)
 		new_name = name+'_'+ads_species
