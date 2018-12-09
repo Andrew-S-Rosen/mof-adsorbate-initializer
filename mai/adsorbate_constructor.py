@@ -55,6 +55,14 @@ class adsorbate_constructor():
 		self.site_species = site_species
 		self.site_idx = site_idx
 
+		#initialize certain variables as None
+		self.d_bond = None
+		self.d_bond2 = None
+		self.angle = None
+		self.angle2 = None
+		self.eta = None
+		self.connect = None
+
 	def get_adsorbate_grid(self,atoms_filepath,grid_path=None,
 		grid_format='ASCII',write_file=True,new_mofs_path=None,error_path=None):
 		"""
@@ -88,6 +96,8 @@ class adsorbate_constructor():
 			new_name (string): name of MOF with adsorbate
 		"""
 		#Check for file and prepare paths
+		
+		self.ads_species += '_grid'
 		if not os.path.isfile(atoms_filepath):
 			print('WARNING: No MOF found for '+atoms_filepath)
 			return None, None
@@ -216,7 +226,7 @@ class adsorbate_constructor():
 		ads_optimizer = ads_pos_optimizer(self,atoms_filepath,
 					new_mofs_path=new_mofs_path,error_path=error_path)
 		ads_pos = ads_optimizer.get_opt_ads_pos(mic_coords,site_idx)
-		new_atoms, new_name = ads_optimizer.get_new_atoms(ads_pos,site_idx)
+		new_atoms, new_name = ads_optimizer.get_new_atoms_pm(ads_pos,site_idx)
 
 		return new_atoms, new_name
 

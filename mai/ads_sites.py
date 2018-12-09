@@ -3,7 +3,7 @@ from ase import Atoms, Atom
 from ase.io import read, write
 from mai.regression import OLS_fit, TLS_fit
 from mai.tools import get_refcode, string_to_formula
-from mai.species_rules import add_monoatomic, add_diatomic, add_triatomic, add_CH4_SS
+from mai.species_rules import construct_mof
 import os
 
 """
@@ -41,35 +41,15 @@ class ads_pos_optimizer():
 		self.sum_tol = adsorbate_constructor.sum_tol
 		self.rmse_tol = adsorbate_constructor.rmse_tol
 		self.site_idx = adsorbate_constructor.site_idx
+		self.d_bond = adsorbate_constructor.d_bond
+		self.d_bond2 = adsorbate_constructor.d_bond2
+		self.angle = adsorbate_constructor.angle
+		self.angle2 = adsorbate_constructor.angle2
+		self.eta = adsorbate_constructor.eta
+		self.connect = adsorbate_constructor.connect
 		self.atoms_filepath = atoms_filepath
 		self.write_file = write_file
-
-		#Add function-specific variables (if available)
-		try:
-			self.d_bond = adsorbate_constructor.d_bond
-		except:
-			pass
-		try:
-			self.d_bond2 = adsorbate_constructor.d_bond2
-		except:
-			pass
-		try:
-			self.angle = adsorbate_constructor.angle
-		except:
-			pass
-		try:
-			self.angle2 = adsorbate_constructor.angle2
-		except:
-			pass
-		try:
-			self.eta = adsorbate_constructor.eta
-		except:
-			pass
-		try:
-			self.connect = adsorbate_constructor.connect
-		except:
-			pass
-
+		
 		if new_mofs_path is None:
 			new_mofs_path = os.path.join(os.path.dirname(atoms_filepath),
 				'new_mofs')
@@ -417,7 +397,6 @@ class ads_pos_optimizer():
 		"""
 		overlap_tol = self.overlap_tol
 		full_ads_species = self.full_ads_species
-		ads_species = self.ads_species
 		write_file = self.write_file
 		new_mofs_path = self.new_mofs_path
 		error_path = self.error_path
@@ -432,7 +411,7 @@ class ads_pos_optimizer():
 		#Cycle through all proposed adsorbates and write the best
 		#one that does not overlap with other atoms
 		for idx in best_to_worst_idx:
-			new_mof = add_monoatomic(mof,ads_species,ads_poss[idx,:])
+			new_mof = construct_mof(self,mof,ads_poss[idx,:],idx)
 			dist_mat = new_mof.get_distances(-1,np.arange(0,
 				len(new_mof)-1).tolist(),mic=True)
 			
@@ -454,9 +433,9 @@ class ads_pos_optimizer():
 
 		return new_mof, new_name
 
-	def get_new_atoms(self,ads_pos,site_idx):
+	def get_new_atoms_pm(self,ads_pos,site_idx):
 		"""
-		Get new ASE atoms object with adsorbate
+		Get new ASE atoms object with adsorbate from pymatgen analysis
 
 		Args:
 			ads_pos (numpy array): 1D numpy array for the proposed
@@ -469,35 +448,13 @@ class ads_pos_optimizer():
 		"""
 		atoms_filepath = self.atoms_filepath
 		full_ads_species = self.full_ads_species
-		ads_species = self.ads_species
 		site_idx = self.site_idx
-		r_cut = self.r_cut
-		overlap_tol = self.overlap_tol
-		d_bond = self.d_bond
-		d_bond2 = self.d_bond2
-		angle = self.angle
-		angle2 = self.angle2
-		eta = self.eta
-		connect = self.connect
 		
 		atoms_filename = os.path.basename(atoms_filepath)
 		name = get_refcode(atoms_filename)
 		new_name = name+'_'+full_ads_species
 		mof = read(atoms_filepath)
-		n_new_atoms = len(string_to_formula(ads_species))
-		if n_new_atoms == 1:
-			new_mof = add_monoatomic(mof,ads_species,ads_pos)
-		elif n_new_atoms == 2:
-			new_mof = add_diatomic(mof,ads_species,ads_pos,site_idx,
-				d_bond=d_bond,angle=angle,eta=eta,connect=connect,
-				r_cut=r_cut,overlap_tol=overlap_tol)
-		elif n_new_atoms == 3:
-			new_mof = add_triatomic(mof,ads_species,ads_pos,site_idx,
-				d_bond1=d_bond,d_bond2=d_bond2,angle1=angle,angle2=angle2,
-				connect=connect,r_cut=r_cut,overlap_tol=overlap_tol)		
-		else:
-			raise ValueError('Too many atoms in adsorbate: '+ads_species)
-
+		new_mof = construct_mof(self,mof,ads_pos,site_idx)
 		overlap = self.check_and_write(new_mof)
 		if overlap:
 			return None, None
@@ -526,8 +483,8 @@ class ads_pos_optimizer():
 
 		#Add molecule to structure
 		mof = read(atoms_filepath)
-		if ads_species == 'CH4':
-			new_mof = add_CH4_SS(mof,site_idx,ads_pos)
+		if full_ads_species == 'CH4_grid':
+			new_mof = construct_mof(self,mof,ads_pos,site_idx)
 		else:
 			raise ValueError('Unsupported adsorbate: '+ads_species)
 

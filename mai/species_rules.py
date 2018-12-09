@@ -4,6 +4,37 @@ from ase import Atoms, Atom
 from mai.tools import string_to_formula
 import numpy as np
 
+def construct_mof(ads_pos_optimizer,mof,ads_pos,site_idx):
+	full_ads_species = ads_pos_optimizer.full_ads_species
+	ads_species = ads_pos_optimizer.ads_species
+	r_cut = ads_pos_optimizer.r_cut
+	overlap_tol = ads_pos_optimizer.overlap_tol
+	d_bond = ads_pos_optimizer.d_bond
+	d_bond2 = ads_pos_optimizer.d_bond2
+	angle = ads_pos_optimizer.angle
+	angle2 = ads_pos_optimizer.angle2
+	eta = ads_pos_optimizer.eta
+	connect = ads_pos_optimizer.connect
+
+	n_new_atoms = len(string_to_formula(ads_species))
+	if full_ads_species == 'CH4_grid':
+		new_mof = add_CH4_SS(mof,site_idx,ads_pos)
+	else:
+		if n_new_atoms == 1:
+			new_mof = add_monoatomic(mof,ads_species,ads_pos)
+		elif n_new_atoms == 2:
+			new_mof = add_diatomic(mof,ads_species,ads_pos,site_idx,
+				d_bond=d_bond,angle=angle,eta=eta,connect=connect,
+				r_cut=r_cut,overlap_tol=overlap_tol)
+		elif n_new_atoms == 3:
+			new_mof = add_triatomic(mof,ads_species,ads_pos,site_idx,
+				d_bond1=d_bond,d_bond2=d_bond2,angle1=angle,angle2=angle2,
+				connect=connect,r_cut=r_cut,overlap_tol=overlap_tol)	
+		else:
+			raise ValueError('Too many atoms in adsorbate: '+ads_species)
+
+	return new_mof
+
 def add_monoatomic(mof,ads_species,ads_pos):
 	"""
 	Add adsorbate to the ASE atoms object
