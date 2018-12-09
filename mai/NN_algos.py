@@ -45,6 +45,7 @@ def get_NNs_pm(atoms,site_idx,NN_method):
 	elif NN_method == 'econ':
 		nn_object = EconNN()
 	elif NN_method == 'dict':
+		#requires a cutoff dictionary located in the pwd
 		nn_object = CutOffDictNN(cut_off_dict='cut_off_dict.txt')
 	elif NN_method == 'critic2':
 		nn_object = Critic2NN()
@@ -53,8 +54,9 @@ def get_NNs_pm(atoms,site_idx,NN_method):
 	elif NN_method == 'covalent':
 		nn_object = CovalentBondNN()
 	elif NN_method == 'crystal':
-		nn_object = CrystalNN(weighted_cn=True,
-			porous_adjustment=True)
+		nn_object = CrystalNN(porous_adjustment=True)
+	elif NN_method == 'crystal_nonporous':
+		nn_object = CrystalNN(porous_adjustment=False)
 	else:
 		raise ValueError('Invalid NN algorithm specified')
 
