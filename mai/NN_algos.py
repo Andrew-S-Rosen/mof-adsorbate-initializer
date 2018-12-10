@@ -3,6 +3,7 @@ from pymatgen.analysis.local_env import (MinimumVIRENN, VoronoiNN,
 	BrunnerNN_relative, BrunnerNN_reciprocal, EconNN, CutOffDictNN,
 	Critic2NN, OpenBabelNN, CovalentBondNN, CrystalNN)
 from pymatgen.io import ase as pm_ase
+import warnings
 
 def get_NNs_pm(atoms,site_idx,NN_method):
 	"""
@@ -53,15 +54,18 @@ def get_NNs_pm(atoms,site_idx,NN_method):
 		nn_object = OpenBabelNN()
 	elif NN_method == 'covalent':
 		nn_object = CovalentBondNN()
-	elif NN_method == 'crystal':
-		nn_object = CrystalNN(porous_adjustment=True)
-	elif NN_method == 'crystal_nonporous':
-		nn_object = CrystalNN(porous_adjustment=False)
+	elif NN_method == 'crystal' or NN_method == 'crystal_nonporous':
+		if NN_method == 'crystal':
+			nn_object = CrystalNN(porous_adjustment=True)
+		elif NN_method == 'crystal_nonporous':
+			nn_object = CrystalNN(porous_adjustment=False)
 	else:
 		raise ValueError('Invalid NN algorithm specified')
 
 	#Find coordinating atoms
-	neighbors = nn_object.get_nn_info(struct,site_idx)
+	with warnings.catch_warnings():
+		warnings.simplefilter('ignore')
+		neighbors = nn_object.get_nn_info(struct,site_idx)
 	neighbors_idx = []
 	for neighbor in neighbors:
 		neighbors_idx.append(neighbor['site_index'])

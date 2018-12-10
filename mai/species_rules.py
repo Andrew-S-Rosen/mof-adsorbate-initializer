@@ -235,7 +235,7 @@ def add_triatomic(mof,ads_species,ads_pos,site_idx,d_bond1=1.25,d_bond2=None,
 
 def add_CH4_SS(mof,site_idx,ads_pos):
 	"""
-	Add CH4 to the structure
+	Add CH4 to the structure from single-site model
 
 	Args:
 		mof (ASE Atoms object): starting ASE Atoms object of structure
