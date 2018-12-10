@@ -54,11 +54,10 @@ def get_NNs_pm(atoms,site_idx,NN_method):
 		nn_object = OpenBabelNN()
 	elif NN_method == 'covalent':
 		nn_object = CovalentBondNN()
-	elif NN_method == 'crystal' or NN_method == 'crystal_nonporous':
-		if NN_method == 'crystal':
-			nn_object = CrystalNN(porous_adjustment=True)
-		elif NN_method == 'crystal_nonporous':
-			nn_object = CrystalNN(porous_adjustment=False)
+	elif NN_method == 'crystal':
+		nn_object = CrystalNN(porous_adjustment=True)
+	elif NN_method == 'crystal_nonporous':
+		nn_object = CrystalNN(porous_adjustment=False)
 	else:
 		raise ValueError('Invalid NN algorithm specified')
 
