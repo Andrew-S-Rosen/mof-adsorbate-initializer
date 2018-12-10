@@ -222,7 +222,6 @@ class ads_pos_optimizer():
 			ads_pos (numpy array): 1D numpy array for the proposed
 			adsorption position
 		"""
-		bond_dist = self.bond_dist
 		r_cut = self.r_cut
 		overlap_tol = self.overlap_tol
 		atoms_filepath = self.atoms_filepath
@@ -250,11 +249,9 @@ class ads_pos_optimizer():
 			mof_temp[-1].position += 1e-6
 
 			#Set the new angle
-			mof_temp.set_distance(site_idx,-1,bond_dist,
-				fix=0,mic=True)
-			mof_temp.set_distance(site_idx,-2,bond_dist,
-				fix=0,mic=True)	
+			mof_temp.wrap()	
 			mof_temp.set_angle(-1,site_idx,-2,angle)
+			mof_temp.wrap()
 
 			#Determine number of nearby atoms
 			dist_mat = mof_temp.get_distances(-2,np.arange(0,

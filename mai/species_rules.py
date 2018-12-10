@@ -3,6 +3,7 @@ from ase.geometry import get_distances
 from ase import Atoms, Atom
 from mai.tools import string_to_formula
 import numpy as np
+from ase.io import write
 
 def construct_mof(ads_pos_optimizer,mof,ads_pos,site_idx):
 	full_ads_species = ads_pos_optimizer.full_ads_species
@@ -120,7 +121,7 @@ def add_diatomic(mof,ads_species,ads_pos,site_idx,d_bond=1.25,angle=None,eta=1,
 		angle -= 180
 
 	#Set X1 position and placeholder X2 position
-	r_vec = mof.get_distance(-2,site_idx,vector=True,mic=True)
+	r_vec = mof.get_distance(2,site_idx,vector=True,mic=True)
 	r_bond = d_bond*(r_vec/np.linalg.norm(r_vec))
 	mol[0].position = ads_pos
 	mol[1].position = ads_pos+r_bond
@@ -129,6 +130,7 @@ def add_diatomic(mof,ads_species,ads_pos,site_idx,d_bond=1.25,angle=None,eta=1,
 	if site_idx is None:
 		raise ValueError('Site index must not be None')
 	mof.extend(mol)
+	mof.wrap()
 	mof.set_angle(site_idx,-2,-1,angle)
 	mof.wrap()
 
@@ -151,14 +153,15 @@ def add_diatomic(mof,ads_species,ads_pos,site_idx,d_bond=1.25,angle=None,eta=1,
 			
 			if eta == 1:
 				temp_atoms = 2
-				mof_temp.extend(Atoms([Atom('X',ads_pos+r_bond)]))
+				mof_temp.extend(Atoms([Atom('X',ads_pos+r_bond+1e-6)]))
+				mof_temp.wrap()
 				mof_temp.set_angle(site_idx,-3,-1,360-angle)
+				write('mof.cif',mof_temp)
 			elif eta == 2:
 				temp_atoms = 1
 
 			r_temp = mof_temp.get_distance(-1,-2,vector=True,mic=True)
-			d_temp = mof_temp.get_distance(-1,-2,vector=False,mic=True)
-			pos_temp = mof_temp[-1].position+(r_temp/np.linalg.norm(r_temp))*d_temp/2
+			pos_temp = mof_temp[-1].position+r_temp/2
 			mof_temp.extend(Atoms([Atom('X',pos_temp)]))
 
 			ads_temp = mof_temp.copy()[-(1+temp_atoms):]
@@ -198,8 +201,13 @@ def add_triatomic(mof,ads_species,ads_pos,site_idx,d_bond1=1.25,d_bond2=None,
 		else:
 			angle1 = 180.0
 	if angle2 is None:
-		angle2 = angle1
-	if connect == 3:
+		if connect == 1 or connect == 3:
+			angle2 = 180.0
+		else:
+			angle2 = angle1
+	if connect == 2:
+		ads_formula[0], ads_formula[1] = ads_formula[1], ads_formula[0]
+	elif connect == 3:
 		ads_formula[0], ads_formula[2] = ads_formula[2], ads_formula[0]
 
 	di_ads_species = ''.join(ads_formula[0:2])
@@ -210,13 +218,17 @@ def add_triatomic(mof,ads_species,ads_pos,site_idx,d_bond1=1.25,d_bond2=None,
 		r_vec = mof.get_distance(-2,-1,vector=True,mic=True)
 		pos_temp = mof[-1].position+d_bond2*(r_vec/np.linalg.norm(r_vec))
 		mof.extend(Atoms([Atom(X3,pos_temp)]))
+		mof.wrap()
 		mof.set_angle(-3,-2,-1,angle2)
 	elif connect == 2:
-		r_vec = mof.get_distance(-2,site_idx,vector=True,mic=True)
-		pos_temp = ads_pos+d_bond2*(r_vec/np.linalg.norm(r_vec))
-		mof.extend(Atoms([Atom(X3,pos_temp)]))
-		mof.set_angle(site_idx,-3,-1,360-angle2)
-		#set dihedral
+		if angle1 == 180 and angle2 == 180:
+			raise ValueError('It is not possible to have a linear triatomic '+
+				'with connect=2')
+		r_vec = mof.get_distance(site_idx,-2,vector=True,mic=True)
+		r_bond = d_bond1*(r_vec/np.linalg.norm(r_vec))
+		mof.extend(Atoms([Atom(X3,ads_pos+r_bond+1e-6)]))
+		mof.wrap()
+		mof.set_angle(-2,-3,-1,angle2)
 	else:
 		raise ValueError('Connecting atom must have value of <= 3')
 	mof.wrap()
@@ -226,12 +238,12 @@ def add_triatomic(mof,ads_species,ads_pos,site_idx,d_bond1=1.25,d_bond2=None,
 def add_CH4_SS(mof,site_idx,ads_pos):
 	"""
 	Add CH4 to the structure
-
-	Args:
-		mof (ASE Atoms object): starting ASE Atoms object of structure
+ ASE Atoms object of structure
 
 		site_idx (int): ASE index of site based on single-site model
 
+	Args:
+		mof (ASE Atoms object): starting
 		ads_pos (array): 1D numpy array for the best adsorbate position
 			
 	Returns:
@@ -257,12 +269,12 @@ def add_CH4_SS(mof,site_idx,ads_pos):
 
 	#Construct rest of CH4 using Z-matrix format
 	CH4[1].position = ads_pos+r
-	CH4.set_distance(0,2,CH_length,fix=0)
+	CH4.set_distance(0,2,CH_length,fix=0,mic=True)
 	CH4.set_angle(1,0,2,CH_angle)
-	CH4.set_distance(0,3,CH_length,fix=0)
+	CH4.set_distance(0,3,CH_length,fix=0,mic=True)
 	CH4.set_angle(1,0,3,CH_angle)
 	CH4.set_dihedral(2,1,0,3,-CH_dihedral)
-	CH4.set_distance(0,4,CH_length,fix=0)
+	CH4.set_distance(0,4,CH_length,fix=0,mic=True)
 	CH4.set_angle(1,0,4,CH_angle)
 	CH4.set_dihedral(2,1,0,4,CH2_dihedral)
 
