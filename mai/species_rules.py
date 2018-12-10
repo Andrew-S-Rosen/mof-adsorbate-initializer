@@ -3,7 +3,6 @@ from ase.geometry import get_distances
 from ase import Atoms, Atom
 from mai.tools import string_to_formula
 import numpy as np
-from ase.io import write
 
 def construct_mof(ads_pos_optimizer,mof,ads_pos,site_idx):
 	full_ads_species = ads_pos_optimizer.full_ads_species
@@ -153,10 +152,9 @@ def add_diatomic(mof,ads_species,ads_pos,site_idx,d_bond=1.25,angle=None,eta=1,
 			
 			if eta == 1:
 				temp_atoms = 2
-				mof_temp.extend(Atoms([Atom('X',ads_pos+r_bond+1e-6)]))
+				mof_temp.extend(Atoms([Atom('X',ads_pos+r_bond)]))
 				mof_temp.wrap()
 				mof_temp.set_angle(site_idx,-3,-1,360-angle)
-				write('mof.cif',mof_temp)
 			elif eta == 2:
 				temp_atoms = 1
 
@@ -226,7 +224,7 @@ def add_triatomic(mof,ads_species,ads_pos,site_idx,d_bond1=1.25,d_bond2=None,
 				'with connect=2')
 		r_vec = mof.get_distance(site_idx,-2,vector=True,mic=True)
 		r_bond = d_bond1*(r_vec/np.linalg.norm(r_vec))
-		mof.extend(Atoms([Atom(X3,ads_pos+r_bond+1e-6)]))
+		mof.extend(Atoms([Atom(X3,ads_pos+r_bond)]))
 		mof.wrap()
 		mof.set_angle(-2,-3,-1,angle2)
 	else:
@@ -238,12 +236,12 @@ def add_triatomic(mof,ads_species,ads_pos,site_idx,d_bond1=1.25,d_bond2=None,
 def add_CH4_SS(mof,site_idx,ads_pos):
 	"""
 	Add CH4 to the structure
- ASE Atoms object of structure
+
+	Args:
+		mof (ASE Atoms object): starting ASE Atoms object of structure
 
 		site_idx (int): ASE index of site based on single-site model
 
-	Args:
-		mof (ASE Atoms object): starting
 		ads_pos (array): 1D numpy array for the best adsorbate position
 			
 	Returns:
