@@ -9,11 +9,11 @@ NO_dist = 1.19
 
 #add adsorbate
 ads_species = 'N2O' #adsorbate species (eta1-N)
-ads = adsorbate_constructor(ads_species,bond_length,site_idx=site_idx)
-new_mof_atoms, new_mof_name = ads.get_adsorbate_pm(mof_path,d_bond=NN_dist,
-	d_bond2=NO_dist)
+ads = adsorbate_constructor(ads_species,bond_length,site_idx=site_idx,
+	d_bond=NN_dist,d_bond2=NO_dist)
+new_mof_atoms, new_mof_name = ads.get_adsorbate_pm(mof_path)
 
 ads_species = 'ON2' #adsorbate species (eta1-O)
-ads = adsorbate_constructor(ads_species,bond_length,site_idx=site_idx)
-new_mof_atoms, new_mof_name = ads.get_adsorbate_pm(mof_path,angle=90,d_bond=NO_dist,
-	d_bond2=NN_dist)
+ads = adsorbate_constructor(ads_species,bond_length,site_idx=site_idx,
+	d_bond=NO_dist,d_bond2=NN_dist)
+new_mof_atoms, new_mof_name = ads.get_adsorbate_pm(mof_path)

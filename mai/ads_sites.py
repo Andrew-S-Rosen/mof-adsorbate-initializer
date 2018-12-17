@@ -249,22 +249,23 @@ class ads_pos_optimizer():
 			mof_temp[-1].position += 1e-6
 
 			#Set the new angle
-			mof_temp.wrap()	
 			mof_temp.set_angle(-1,site_idx,-2,angle)
-			mof_temp.wrap()
 
 			#Determine number of nearby atoms
 			dist_mat = mof_temp.get_distances(-2,np.arange(0,
 				len(mof_temp)-2).tolist(),mic=True)
 			NNs = sum(dist_mat <= r_cut)
+			min_dist = np.min(dist_mat)
 
 			#Select best option
 			if i == 0:
 				ads_pos = mof_temp[-2].position
 				old_min_NNs = NNs
-			elif sum(dist_mat <= overlap_tol) == 0 and NNs < old_min_NNs:
+				old_min_dist = min_dist
+			elif sum(dist_mat <= overlap_tol) == 0 and (NNs < old_min_NNs or min_dist > old_min_dist):
 				ads_pos = mof_temp[-2].position
 				old_min_NNs = NNs
+				old_min_dist = min_dist
 
 		return ads_pos
 

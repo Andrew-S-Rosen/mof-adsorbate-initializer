@@ -14,6 +14,7 @@ class adsorbate_constructor():
 	This class constructs an ASE atoms object with an adsorbate
 	"""
 	def __init__(self,ads_species,bond_dist,site_idx=None,site_species=None,
+		d_bond=1.25,angle=None,eta=1,d_bond2=None,angle2=None,connect=1,
 		r_cut=2.5,sum_tol=0.5,rmse_tol=0.25,overlap_tol=0.75):
 		"""
 		Initialized variables
@@ -31,7 +32,16 @@ class adsorbate_constructor():
 			the site_species as a string of the atomic element for the adsorption
 			site (autoamtically picks the ASE index for the last atom of type
 			site_species in the Atoms object)
-			
+
+			d_bond (float): X1-X2 bond length (defaults to 1.25)
+
+			angle (float): site-X1-X2 angle (for diatomics, defaults to 180 degrees
+			except for side-on in which it defaults to 90 or end-on O2 in which
+			it defaults to 120; for triatomics, defaults to 180 except for H2O
+			in which it defaults to 104.5)
+
+			eta (int): denticity of end-on (1) or side-on (2) (defaults to 1)
+
 			r_cut (float): cutoff distance for calculating nearby atoms when
 			ranking adsorption sites
 			
@@ -56,13 +66,13 @@ class adsorbate_constructor():
 		self.site_idx = site_idx
 
 		#initialize certain variables as None
-		self.d_bond = None
-		self.d_bond2 = None
-		self.angle = None
-		self.angle2 = None
-		self.eta = None
-		self.connect = None
-
+		self.d_bond = d_bond
+		self.d_bond2 = d_bond2
+		self.angle = angle
+		self.angle2 = angle2
+		self.eta = eta
+		self.connect = connect
+		
 	def get_adsorbate_grid(self,atoms_filepath,grid_path=None,
 		grid_format='ASCII',write_file=True,new_mofs_path=None,error_path=None):
 		"""
@@ -148,8 +158,7 @@ class adsorbate_constructor():
 		new_atoms, new_name = ads_optimizer.get_new_atoms_grid(site_pos,ads_pos)
 		return new_atoms, new_name
 
-	def get_adsorbate_pm(self,atoms_filepath,NN_method='crystal',d_bond=1.25,
-		angle=None,eta=1,d_bond2=None,angle2=None,connect=1,write_file=True,
+	def get_adsorbate_pm(self,atoms_filepath,NN_method='crystal',write_file=True,
 		new_mofs_path=None,error_path=None):
 		"""
 		Use Pymatgen's nearest neighbors algorithms to add an adsorbate
@@ -161,15 +170,6 @@ class adsorbate_constructor():
 			NN_method (string): string representing the desired Pymatgen
 			nearest neighbor algorithm. options include 'crystal',vire','okeefe',
 			and others. See NN_algos.py (defaults to 'crystal')
-
-			d_bond (float): X1-X2 bond length (defaults to 1.25)
-
-			angle (float): site-X1-X2 angle (for diatomics, defaults to 180 degrees
-			except for side-on in which it defaults to 90 or end-on O2 in which
-			it defaults to 120; for triatomics, defaults to 180 except for H2O
-			in which it defaults to 104.5)
-
-			eta (int): denticity of end-on (1) or side-on (2) (defaults to 1)
 
 			write_file (bool): if True, the new ASE atoms object should be
 			written to a CIF file (defaults to True)
@@ -198,13 +198,6 @@ class adsorbate_constructor():
 			new_mofs_path = os.path.join(os.getcwd(),'new_mofs')
 		if error_path is None:
 			error_path = os.path.join(os.getcwd(),'errors')
-
-		self.d_bond = d_bond
-		self.d_bond2 = d_bond2
-		self.angle = angle
-		self.angle2 = angle2
-		self.eta = eta
-		self.connect = connect
 		
 		#Get ASE index of adsorption site
 		site_species = self.site_species

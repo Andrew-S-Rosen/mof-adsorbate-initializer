@@ -120,18 +120,19 @@ def add_diatomic(mof,ads_species,ads_pos,site_idx,d_bond=1.25,angle=None,eta=1,
 		angle -= 180
 
 	#Set X1 position and placeholder X2 position
-	r_vec = mof.get_distance(2,site_idx,vector=True,mic=True)
+	n_start = len(mof)
+	mof.extend(mol[0])
+	r_vec = mof.get_distance(site_idx,-1,vector=True,mic=True)
 	r_bond = d_bond*(r_vec/np.linalg.norm(r_vec))
-	mol[0].position = ads_pos
 	mol[1].position = ads_pos+r_bond
+	mof.extend(mol[1])
+	mof[-1].position += 1e-6
 
 	#Add diatomic to the structure
 	if site_idx is None:
 		raise ValueError('Site index must not be None')
-	mof.extend(mol)
-	mof.wrap()
+
 	mof.set_angle(site_idx,-2,-1,angle)
-	mof.wrap()
 
 	#Make adsorption mode side-on if requested
 	if eta == 2:
@@ -139,7 +140,6 @@ def add_diatomic(mof,ads_species,ads_pos,site_idx,d_bond=1.25,angle=None,eta=1,
 		shift = (line/np.linalg.norm(line))*d_bond/2
 		mof[-2].position += shift
 		mof[-1].position += shift
-		mof.wrap()
 	elif eta > 2:
 		raise ValueError('Wrong value for eta: '+str(eta))
 
@@ -147,38 +147,46 @@ def add_diatomic(mof,ads_species,ads_pos,site_idx,d_bond=1.25,angle=None,eta=1,
 	if angle != 180:
 		dtheta = 10
 		n_angles = int(360/dtheta)
+
+		if eta == 1:
+			temp_atoms = 2
+			mof.extend(Atoms([Atom('X',ads_pos+r_bond)]))
+			mof[-1].position += 1e-6
+			mof.set_angle(site_idx,-3,-1,360-angle)
+		elif eta == 2:
+			temp_atoms = 1
+		r_temp = mof.get_distance(-1,-2,vector=True,mic=True)
+		pos_temp = mof[-1].position+r_temp/2
+		mof.extend(Atoms([Atom('X',pos_temp)]))
+
 		for i in range(n_angles):
 			mof_temp = mof.copy()
-			
-			if eta == 1:
-				temp_atoms = 2
-				mof_temp.extend(Atoms([Atom('X',ads_pos+r_bond)]))
-				mof_temp.wrap()
-				mof_temp.set_angle(site_idx,-3,-1,360-angle)
-			elif eta == 2:
-				temp_atoms = 1
-
-			r_temp = mof_temp.get_distance(-1,-2,vector=True,mic=True)
-			pos_temp = mof_temp[-1].position+r_temp/2
-			mof_temp.extend(Atoms([Atom('X',pos_temp)]))
-
-			ads_temp = mof_temp.copy()[-(1+temp_atoms):]
+			ads_temp = mof.copy()[-3:]
 			ads_temp.rotate(i*dtheta,mof_temp.get_distance(site_idx,-1,
 				vector=True,mic=True),pos_temp)
 			del mof_temp[-temp_atoms:]
-			mof_temp[-1].position = ads_temp[-(1+temp_atoms)].position
 
+			mof_temp[-1].position = ads_temp[0].position
+			if eta == 2:
+				mof_temp[-2].position = ads_temp[1].position
+			
+			#FIX ME FOR ETA == 2!!!!
 			dist_mat = mof_temp.get_distances(-1,np.arange(0,
-				len(mof_temp)-1).tolist(),vector=False,mic=True)
+				n_start-1).tolist(),vector=False,mic=True)
 			NNs = sum(dist_mat <= r_cut)
+			min_dist = np.min(dist_mat)
 
 			if i == 0:
-				ads_pos2 = mof_temp[-1].position
+				best_mof = mof_temp.copy()
 				old_min_NNs = NNs
-			elif sum(dist_mat <= overlap_tol) == 0 and NNs < old_min_NNs:
-				ads_pos2 = mof_temp[-1].position
+				old_min_dist = min_dist
+			elif sum(dist_mat <= overlap_tol) == 0 and (NNs < old_min_NNs or min_dist > old_min_dist):
+				best_mof = mof_temp.copy()
 				old_min_NNs = NNs
-		mof[-1].position = ads_pos2
+				old_min_dist = min_dist
+
+		mof = best_mof
+
 	mof.wrap()
 
 	return mof
@@ -216,7 +224,6 @@ def add_triatomic(mof,ads_species,ads_pos,site_idx,d_bond1=1.25,d_bond2=None,
 		r_vec = mof.get_distance(-2,-1,vector=True,mic=True)
 		pos_temp = mof[-1].position+d_bond2*(r_vec/np.linalg.norm(r_vec))
 		mof.extend(Atoms([Atom(X3,pos_temp)]))
-		mof.wrap()
 		mof.set_angle(-3,-2,-1,angle2)
 	elif connect == 2:
 		if angle1 == 180 and angle2 == 180:
@@ -225,7 +232,6 @@ def add_triatomic(mof,ads_species,ads_pos,site_idx,d_bond1=1.25,d_bond2=None,
 		r_vec = mof.get_distance(site_idx,-2,vector=True,mic=True)
 		r_bond = d_bond1*(r_vec/np.linalg.norm(r_vec))
 		mof.extend(Atoms([Atom(X3,ads_pos+r_bond)]))
-		mof.wrap()
 		mof.set_angle(-2,-3,-1,angle2)
 	else:
 		raise ValueError('Connecting atom must have value of <= 3')
