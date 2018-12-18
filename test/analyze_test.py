@@ -4,7 +4,7 @@ import numpy as np
 
 success_basepath = os.path.join('test','success')
 test_basepath = os.path.join('examples','new_mofs')
-jobs = ['add_O','add_O_OMS_omd','add_O_OMS_zeo','add_CH4_PEG_ASCII']
+jobs = ['add_O','add_O2','add_N2O','add_H2O','add_CH4_PEG','add_O_auto']
 tol = 1E-3
 for job in jobs:
 	success_path = os.path.join(success_basepath,job)

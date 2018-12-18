@@ -402,6 +402,17 @@ class ads_pos_optimizer():
 		return new_mof
 
 	def check_and_write(self,new_mof,new_name):
+		"""
+		Check for overlapping atoms and write CIF file
+
+		Args:
+			new_mof (ASE Atoms object): the new MOF-adsorbate complex
+
+			new_name (string): the name of the new CIF file to write
+		
+		Returns:
+			overlap (boolean): True or False for overlapping atoms		
+		"""
 		overlap_tol = self.overlap_tol
 		write_file = self.write_file
 		error_path = self.error_path
