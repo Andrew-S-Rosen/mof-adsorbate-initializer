@@ -3,7 +3,7 @@ from ase.geometry import get_distances
 from ase import Atoms, Atom
 from mai.tools import string_to_formula
 import numpy as np
-
+from ase.io import write
 def construct_mof(ads_pos_optimizer,mof,ads_pos,site_idx):
 	full_ads_species = ads_pos_optimizer.full_ads_species
 	ads_species = ads_pos_optimizer.ads_species
@@ -36,6 +36,7 @@ def construct_mof(ads_pos_optimizer,mof,ads_pos,site_idx):
 		else:
 			raise ValueError('Too many atoms in adsorbate')
 
+	new_mof.wrap()
 	return new_mof
 
 def add_monoatomic(mof,ads_species,ads_pos):
@@ -59,8 +60,7 @@ def add_monoatomic(mof,ads_species,ads_pos):
 	except:
 		raise ValueError('Unsupported adsorbate: '+ads_species)
 	mof.extend(adsorbate)
-	mof.wrap()
-	
+
 	return mof
 
 def add_diatomic(mof,ads_species,ads_pos,site_idx,d_bond=1.25,angle=None,eta=1,
@@ -170,12 +170,12 @@ def add_diatomic(mof,ads_species,ads_pos,site_idx,d_bond=1.25,angle=None,eta=1,
 			if eta == 2:
 				mof_temp[-2].position = ads_temp[1].position
 			
-			#FIX ME FOR ETA == 2!!!!
 			dist_mat = mof_temp.get_distances(-1,np.arange(0,
 				n_start-1).tolist(),vector=False,mic=True)
 			n_overlap = sum(dist_mat <= overlap_tol)
 			NNs = sum(dist_mat <= r_cut)
 			min_dist = np.min(dist_mat)
+
 			if eta == 2:
 				dist_mat2 = mof_temp.get_distances(-2,np.arange(0,
 					n_start-1).tolist(),vector=False,mic=True)
@@ -200,8 +200,6 @@ def add_diatomic(mof,ads_species,ads_pos,site_idx,d_bond=1.25,angle=None,eta=1,
 				old_min_dist = min_dist
 
 		mof = best_mof
-
-	mof.wrap()
 
 	return mof
 
@@ -244,12 +242,13 @@ def add_triatomic(mof,ads_species,ads_pos,site_idx,d_bond1=1.25,d_bond2=None,
 			raise ValueError('It is not possible to have a linear triatomic '+
 				'with connect=2')
 		r_vec = mof.get_distance(site_idx,-2,vector=True,mic=True)
-		r_bond = d_bond1*(r_vec/np.linalg.norm(r_vec))
+		r_bond = d_bond2*(r_vec/np.linalg.norm(r_vec))
 		mof.extend(Atoms([Atom(X3,ads_pos+r_bond)]))
+		write('test0.cif',mof)
 		mof.set_angle(-2,-3,-1,angle2)
+		write('test.cif',mof)
 	else:
 		raise ValueError('Connecting atom must have value of <= 3')
-	mof.wrap()
 
 	return mof
 
@@ -298,6 +297,5 @@ def add_CH4_SS(mof,site_idx,ads_pos):
 
 	#Add CH4 molecule to the structure
 	mof.extend(CH4)
-	mof.wrap()
 	
 	return mof
