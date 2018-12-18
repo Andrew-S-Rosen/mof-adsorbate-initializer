@@ -105,43 +105,8 @@ class ads_pos_optimizer():
 			mic=True)
 		NN = sum(neighbor_dist <= r_cut)
 		min_dist = np.min(neighbor_dist)
-
-		return NN, min_dist
-
-	def get_best_to_worst_idx(self,ads_poss,site_idx_list):
-		"""
-		Sort the potential adsorption sites by best to worst
-
-		Args:
-			ads_poss (numpy array): 2D numpy array for the proposed
-			adsorption positions
-			
-			site_idx_list (list of ints): ASE indices for adsorption sites
 		
-		Returns:
-			best_to_worst_idx (list of ints): sorted adsorption sites from best
-			to worst
-		"""
-		NN = []
-		min_dist = []
-		i_vec = []
-		best_to_worst_idx = []
-		if len(site_idx_list) != np.shape(ads_poss)[0]:
-			raise ValueError('Incompatible lengths of lists')
-
-		#Cycle through proposed adsorbates sort by best
-		for i, ase_cus_idx in enumerate(site_idx_list):
-			NN_temp, min_dist_temp = self.get_NNs(ads_poss[i,:],ase_cus_idx)
-			NN.append(NN_temp)
-			min_dist.append(min_dist_temp)
-			i_vec.append(i)
-		merged_list = list(zip(i_vec,NN,min_dist))
-		merged_list.sort(key=lambda x: x[2],reverse=True)
-		merged_list.sort(key=lambda x: x[1])
-		for item in merged_list:
-			best_to_worst_idx.append(item[0])
-
-		return best_to_worst_idx
+		return NN, min_dist
 
 	def get_planar_ads_pos(self,center_coord,dist,site_idx):
 		"""
@@ -377,64 +342,7 @@ class ads_pos_optimizer():
 
 		return ads_pos
 
-	def get_new_atoms_auto_oms(self,ads_poss,best_to_worst_idx,cluster):
-		"""
-		Construct new Atoms object with adsorbate based on automatic OMS
-		detection
-
-		Args:
-			ads_poss (numpy array): 2D numpy array for the proposed
-			adsorption positions
-			
-			best_to_worst_idx (list of ints): sorted adsorption sites from best
-			to worst
-			
-			cluster (list of ints): atomic numbers for each atom in coordination
-			environment (useful for debugging) 
-		
-		Returns:
-			new_mof (ASE Atoms object): new ASE Atoms object with adsorbate
-			
-			name (string): name of new structure with adsorbate
-		"""
-		full_ads_species = self.full_ads_species
-		write_file = self.write_file
-		new_mofs_path = self.new_mofs_path
-		error_path = self.error_path
-		atoms_filepath = self.atoms_filepath
-		
-		atoms_filename = os.path.basename(atoms_filepath)
-		name = get_refcode(atoms_filename)
-		basename = name+'_'+full_ads_species
-		success = False
-		mof = read(atoms_filepath)
-
-		#Cycle through all proposed adsorbates and write the best
-		#one that does not overlap with other atoms
-		for idx in best_to_worst_idx:
-			new_mof = construct_mof(self,mof,ads_poss[idx,:],idx)
-			overlap = self.check_and_write(new_mof,force_nowrite=True)
-			if not overlap:
-				new_name = basename+'_OMS'+str(idx)
-				if write_file:
-					if not os.path.exists(new_mofs_path):
-						os.makedirs(new_mofs_path)
-					write(os.path.join(new_mofs_path,new_name+'.cif'),new_mof)
-				success = True
-				break
-
-		if not success:
-			if write_file:
-				if not os.path.exists(error_path):
-					os.makedirs(error_path)
-				write(os.path.join(error_path,basename+'_'+str(cluster)+'.cif'),
-					new_mof)
-			new_mof = None
-			new_name = None
-
-		return new_mof, new_name
-
-	def get_new_atoms_pm(self,ads_pos,site_idx):
+	def get_new_atoms(self,ads_pos,site_idx):
 		"""
 		Get new ASE atoms object with adsorbate from pymatgen analysis
 
@@ -449,14 +357,14 @@ class ads_pos_optimizer():
 		"""
 		atoms_filepath = self.atoms_filepath
 		full_ads_species = self.full_ads_species
-		site_idx = self.site_idx
-		
+
 		atoms_filename = os.path.basename(atoms_filepath)
 		name = get_refcode(atoms_filename)
-		new_name = name+'_'+full_ads_species
+		full_name = name+'_site'+str(site_idx)
+		new_name = full_name+'_'+full_ads_species
 		mof = read(atoms_filepath)
 		new_mof = construct_mof(self,mof,ads_pos,site_idx)
-		overlap = self.check_and_write(new_mof)
+		overlap = self.check_and_write(new_mof,new_name)
 		if overlap:
 			return None, None
 
@@ -480,8 +388,9 @@ class ads_pos_optimizer():
 		site_idx = self.site_idx
 		atoms_filepath = self.atoms_filepath
 		name = get_refcode(os.path.basename(atoms_filepath))
-		new_name = name+'_'+full_ads_species
-
+		full_name = name+'_site'+str(site_idx)
+		new_name = full_name+'_'+full_ads_species
+		
 		#Add molecule to structure
 		mof = read(atoms_filepath)
 		if full_ads_species == 'CH4_grid':
@@ -490,23 +399,19 @@ class ads_pos_optimizer():
 			raise ValueError('Unsupported adsorbate: '+ads_species)
 
 		#Confirm no overlapping atoms and write file
-		overlap = self.check_and_write(new_mof)
+		overlap = self.check_and_write(new_mof,new_name)
 		if overlap:
 			return None, None
 
 		return new_mof, new_name
 
-	def check_and_write(self,new_mof,force_nowrite=False):
+	def check_and_write(self,new_mof,new_name):
 		overlap_tol = self.overlap_tol
 		write_file = self.write_file
 		error_path = self.error_path
-		full_ads_species = self.full_ads_species
 		ads_species = self.ads_species
-		atoms_filepath = self.atoms_filepath
 		new_mofs_path = self.new_mofs_path
 
-		name = get_refcode(os.path.basename(atoms_filepath))
-		new_name = name+'_'+full_ads_species
 		n_new_atoms = len(string_to_formula(ads_species))
 		overlap = False
 		for i in range(n_new_atoms):
@@ -514,15 +419,15 @@ class ads_pos_optimizer():
 				np.arange(0,len(new_mof))[0:len(new_mof)-n_new_atoms],mic=True)
 			if np.sum(dist <= overlap_tol) > 0:
 				overlap = True
-				if write_file and not force_nowrite:
+				if write_file:
 					if not os.path.exists(error_path):
 						os.makedirs(error_path)
-					write(os.path.join(error_path,name+'_'+full_ads_species+'.cif'),new_mof)
+					write(os.path.join(error_path,new_name+'.cif'),new_mof)
 				break
 		if overlap:
 			return True
 		else:
-			if write_file and not force_nowrite:
+			if write_file:
 				if not os.path.exists(new_mofs_path):
 					os.makedirs(new_mofs_path)
 				write(os.path.join(new_mofs_path,new_name+'.cif'),new_mof)

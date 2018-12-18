@@ -127,11 +127,6 @@ def add_diatomic(mof,ads_species,ads_pos,site_idx,d_bond=1.25,angle=None,eta=1,
 	mol[1].position = ads_pos+r_bond
 	mof.extend(mol[1])
 	mof[-1].position += 1e-6
-
-	#Add diatomic to the structure
-	if site_idx is None:
-		raise ValueError('Site index must not be None')
-
 	mof.set_angle(site_idx,-2,-1,angle)
 
 	#Make adsorption mode side-on if requested

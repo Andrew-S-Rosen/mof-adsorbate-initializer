@@ -8,4 +8,4 @@ ads_species = 'O' #adsorbate species
 
 #add adsorbate
 ads = adsorbate_constructor(ads_species,bond_length,site_idx=site_idx)
-new_mof_atoms, new_mof_name = ads.get_adsorbate_pm(mof_path)
+new_mof_atoms, new_mof_name = ads.get_adsorbate(mof_path)
