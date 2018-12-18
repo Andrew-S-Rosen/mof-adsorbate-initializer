@@ -133,7 +133,7 @@ class adsorbate_constructor():
 		site_species = self.site_species
 		max_dist = self.bond_dist
 
-		if write_file == True:
+		if write_file:
 			prep_paths(new_mofs_path,error_path)
 
 		atoms_filename = os.path.basename(atoms_filepath)
@@ -202,7 +202,7 @@ class adsorbate_constructor():
 		#Get ASE index of adsorption site
 		site_species = self.site_species
 		site_idx = self.site_idx
-		if write_file == True:
+		if write_file:
 			prep_paths(new_mofs_path,error_path)
 		atoms = read(atoms_filepath)
 		if site_idx is None:
@@ -272,7 +272,7 @@ class adsorbate_constructor():
 		if error_path is None:
 			error_path = os.path.join(os.getcwd(),'errors')
 
-		if write_file == True:
+		if write_file:
 			prep_paths(new_mofs_path,error_path)
 
 		#Get MOF name and read in as ASE atoms object

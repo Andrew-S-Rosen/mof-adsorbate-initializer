@@ -413,15 +413,15 @@ class ads_pos_optimizer():
 			overlap = self.check_and_write(new_mof,force_nowrite=True)
 			if not overlap:
 				new_name = basename+'_OMS'+str(idx)
-				if write_file == True:
+				if write_file:
 					write(os.path.join(new_mofs_path,new_name+'.cif'),new_mof)
 				success = True
 				break
 			else:
 				del new_mof[-1]
 
-		if success == False:
-			if write_file == True:
+		if not success:
+			if write_file:
 				write(os.path.join(error_path,basename+'_'+str(cluster)+'.cif'),
 					new_mof)
 			new_mof = None
@@ -509,12 +509,12 @@ class ads_pos_optimizer():
 				np.arange(0,len(new_mof))[0:len(new_mof)-n_new_atoms],mic=True)
 			if np.sum(dist <= overlap_tol) > 0:
 				overlap = True
-				if write_file == True and not force_nowrite:
+				if write_file and not force_nowrite:
 					write(os.path.join(error_path,name+'_'+full_ads_species+'.cif'),new_mof)
 				break
-		if overlap == True:
+		if overlap:
 			return True
 		else:
-			if write_file == True and not force_nowrite:
+			if write_file and not force_nowrite:
 				write(os.path.join(new_mofs_path,new_name+'.cif'),new_mof)
 		return False
