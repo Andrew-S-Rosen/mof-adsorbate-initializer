@@ -3,7 +3,7 @@ from ase import Atoms, Atom
 from ase.io import read, write
 from mai.regression import OLS_fit, TLS_fit
 from mai.tools import get_refcode, string_to_formula
-from mai.species_rules import construct_mof
+from mai.species_rules import add_monoatomic, add_diatomic, add_triatomic, add_CH4_SS
 import os
 
 """
@@ -351,9 +351,7 @@ class ads_pos_optimizer():
 			adsorption position
 		
 		Returns:
-			new_mof (ASE Atoms object): new ASE Atoms object with adsorbate
-		
-			name (string): name of new structure with adsorbate
+			new_mof (ASE Atoms object): new ASE Atoms object with adsorbate		
 		"""
 		atoms_filepath = self.atoms_filepath
 		full_ads_species = self.full_ads_species
@@ -363,12 +361,12 @@ class ads_pos_optimizer():
 		full_name = name+'_site'+str(site_idx)
 		new_name = full_name+'_'+full_ads_species
 		mof = read(atoms_filepath)
-		new_mof = construct_mof(self,mof,ads_pos,site_idx)
+		new_mof = self.construct_mof(mof,ads_pos,site_idx)
 		overlap = self.check_and_write(new_mof,new_name)
 		if overlap:
-			return None, None
+			return None
 
-		return new_mof, new_name
+		return new_mof
 
 	def get_new_atoms_grid(self,site_pos,ads_pos):
 		"""
@@ -379,9 +377,7 @@ class ads_pos_optimizer():
 			adsorption position
 		
 		Returns:
-			new_mof (ASE Atoms object): new ASE Atoms object with adsorbate
-		
-			name (string): name of new structure with adsorbate
+			new_mof (ASE Atoms object): new ASE Atoms object with adsorbate		
 		"""
 		full_ads_species = self.full_ads_species
 		ads_species = self.ads_species
@@ -394,16 +390,16 @@ class ads_pos_optimizer():
 		#Add molecule to structure
 		mof = read(atoms_filepath)
 		if full_ads_species == 'CH4_grid':
-			new_mof = construct_mof(self,mof,ads_pos,site_idx)
+			new_mof = self.construct_mof(mof,ads_pos,site_idx)
 		else:
 			raise ValueError('Unsupported adsorbate: '+ads_species)
 
 		#Confirm no overlapping atoms and write file
 		overlap = self.check_and_write(new_mof,new_name)
 		if overlap:
-			return None, None
+			return None
 
-		return new_mof, new_name
+		return new_mof
 
 	def check_and_write(self,new_mof,new_name):
 		overlap_tol = self.overlap_tol
@@ -432,3 +428,53 @@ class ads_pos_optimizer():
 					os.makedirs(new_mofs_path)
 				write(os.path.join(new_mofs_path,new_name+'.cif'),new_mof)
 		return False
+
+
+	def construct_mof(self,mof,ads_pos,site_idx):
+		"""
+		Construct the MOF-adsorbate complex
+
+		Args:
+			ads_pos_optimizer (class): see ads_sites.py for details
+
+			ads_species (string): adsorbate species
+
+			ads_pos (numpy array): 1D numpy array for the proposed
+			adsorption position
+		
+		Returns:
+			mof (ASE Atoms object): ASE Atoms object with adsorbate
+		"""
+		full_ads_species = self.full_ads_species
+		ads_species = self.ads_species
+		r_cut = self.r_cut
+		overlap_tol = self.overlap_tol
+		d_bond = self.d_bond
+		d_bond2 = self.d_bond2
+		angle = self.angle
+		angle2 = self.angle2
+		eta = self.eta
+		connect = self.connect
+
+		n_new_atoms = len(string_to_formula(ads_species))
+		if '_grid' in full_ads_species:
+			if ads_species == 'CH4':
+				new_mof = add_CH4_SS(mof,site_idx,ads_pos)
+			else:
+				raise ValueError('Unsupported species for grid method')
+		else:
+			if n_new_atoms == 1:
+				new_mof = add_monoatomic(mof,ads_species,ads_pos)
+			elif n_new_atoms == 2:
+				new_mof = add_diatomic(mof,ads_species,ads_pos,site_idx,
+					d_bond=d_bond,angle=angle,eta=eta,connect=connect,
+					r_cut=r_cut,overlap_tol=overlap_tol)
+			elif n_new_atoms == 3:
+				new_mof = add_triatomic(mof,ads_species,ads_pos,site_idx,
+					d_bond1=d_bond,d_bond2=d_bond2,angle1=angle,angle2=angle2,
+					connect=connect,r_cut=r_cut,overlap_tol=overlap_tol)	
+			else:
+				raise ValueError('Too many atoms in adsorbate')
+
+		new_mof.wrap()
+		return new_mof

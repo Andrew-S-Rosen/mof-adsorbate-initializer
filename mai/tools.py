@@ -26,6 +26,15 @@ def get_refcode(atoms_filename):
 	return refcode
 
 def string_to_formula(species_string):
+	"""
+	Convert a species string to a chemical formula
+
+	Args:
+		species_string (string): string of atomic/molecular species
+		
+	Return:
+		formula (string): stoichiometric chemical formula
+	"""
 	syms = re.findall('[A-Z][a-z]?',species_string)
 	formula = []
 	for sym in syms:

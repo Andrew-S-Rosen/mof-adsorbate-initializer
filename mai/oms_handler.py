@@ -16,7 +16,7 @@ def get_ase_NN_idx(atoms,coords):
 		ase_NN_idx (list of ints): ASE indices of the coordinating atoms
 	"""
 	ase_NN_idx = []
-	tol = 0.1
+	tol = 0.01
 	for i in range(np.shape(coords)[0]):
 		nn_fail = True
 		for j, element in enumerate(atoms):

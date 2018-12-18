@@ -4,41 +4,6 @@ from ase import Atoms, Atom
 from mai.tools import string_to_formula
 import numpy as np
 
-def construct_mof(ads_pos_optimizer,mof,ads_pos,site_idx):
-	full_ads_species = ads_pos_optimizer.full_ads_species
-	ads_species = ads_pos_optimizer.ads_species
-	r_cut = ads_pos_optimizer.r_cut
-	overlap_tol = ads_pos_optimizer.overlap_tol
-	d_bond = ads_pos_optimizer.d_bond
-	d_bond2 = ads_pos_optimizer.d_bond2
-	angle = ads_pos_optimizer.angle
-	angle2 = ads_pos_optimizer.angle2
-	eta = ads_pos_optimizer.eta
-	connect = ads_pos_optimizer.connect
-
-	n_new_atoms = len(string_to_formula(ads_species))
-	if '_grid' in full_ads_species:
-		if ads_species == 'CH4':
-			new_mof = add_CH4_SS(mof,site_idx,ads_pos)
-		else:
-			raise ValueError('Unsupported species for grid method')
-	else:
-		if n_new_atoms == 1:
-			new_mof = add_monoatomic(mof,ads_species,ads_pos)
-		elif n_new_atoms == 2:
-			new_mof = add_diatomic(mof,ads_species,ads_pos,site_idx,
-				d_bond=d_bond,angle=angle,eta=eta,connect=connect,
-				r_cut=r_cut,overlap_tol=overlap_tol)
-		elif n_new_atoms == 3:
-			new_mof = add_triatomic(mof,ads_species,ads_pos,site_idx,
-				d_bond1=d_bond,d_bond2=d_bond2,angle1=angle,angle2=angle2,
-				connect=connect,r_cut=r_cut,overlap_tol=overlap_tol)	
-		else:
-			raise ValueError('Too many atoms in adsorbate')
-
-	new_mof.wrap()
-	return new_mof
-
 def add_monoatomic(mof,ads_species,ads_pos):
 	"""
 	Add adsorbate to the ASE atoms object
@@ -84,6 +49,8 @@ def add_diatomic(mof,ads_species,ads_pos,site_idx,d_bond=1.25,angle=None,eta=1,
 		to 120)
 
 		eta (int): denticity of end-on (1) or side-on (2) (defaults to 1)
+
+		connect (int): the connecting atom in the species string (defaults to 1)
 
 		r_cut (float): cutoff distance for calculating nearby atoms when
 		ranking adsorption sites (defualts to 2.5)
@@ -204,6 +171,37 @@ def add_triatomic(mof,ads_species,ads_pos,site_idx,d_bond1=1.25,d_bond2=None,
 	angle1=None,angle2=None,connect=1,r_cut=2.5,overlap_tol=0.75):
 	"""
 	Add triatomic to the structure
+
+	Args:
+		mof (ASE Atoms object): starting ASE Atoms object of structure
+
+		ads_species (string): adsorbate species
+
+		ads_pos (array): 1D numpy array for the best adsorbate position
+		
+		site_idx (int): ASE index of site
+
+		d_bond1 (float): X1-X2 bond length (defaults to 1.25)
+
+		d_bond2 (float): X2-X3 bond length for connect == 1 or
+		X1-X3 bond length for connect == 2 (defaults to d_bond1)
+
+		angle1 (float): site-X1-X2 angle (defaults to 180 degrees except
+		for certain pre-set molecules)
+
+		angle2 (float): X3-X1-X2 angle (defaults to 180 degrees for connect == 1
+		and angle1 for connect == 2)
+
+		connect (int): the connecting atom in the species string (defaults to 1)
+
+		r_cut (float): cutoff distance for calculating nearby atoms when
+		ranking adsorption sites (defualts to 2.5)
+
+		overlap_tol (float): distance below which atoms are assumed to be
+		overlapping (defualts to 0.75)
+
+	Returns:
+		mof (ASE Atoms object): ASE Atoms object with adsorbate
 	"""
 	ads_formula = string_to_formula(ads_species)
 	X3 = ads_formula[2]

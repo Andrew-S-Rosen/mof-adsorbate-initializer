@@ -10,4 +10,4 @@ OH_dist = 0.96
 ads_species = 'HOH' #adsorbate species (eta1-O)
 ads = adsorbate_constructor(ads_species,bond_length,site_idx=site_idx,
 	d_bond=OH_dist,d_bond2=OH_dist,angle=120,angle2=104.5,connect=2)
-new_mof_atoms, new_mof_name = ads.get_adsorbate_pm(mof_path)
+new_mof_atoms = ads.get_adsorbate(mof_path)

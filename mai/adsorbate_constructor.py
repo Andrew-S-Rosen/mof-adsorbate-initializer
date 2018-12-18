@@ -14,19 +14,22 @@ class adsorbate_constructor():
 	This class constructs an ASE atoms object with an adsorbate
 	"""
 	def __init__(self,ads_species,bond_dist,site_idx=None,
-		d_bond=1.25,angle=None,eta=1,d_bond2=None,angle2=None,connect=1,
+		eta=1,connect=1,d_bond=1.25,d_bond2=None,angle=None,angle2=None,
 		r_cut=2.5,sum_tol=0.5,rmse_tol=0.25,overlap_tol=0.75):
 		"""
 		Initialized variables
 
 		Args:
-			ads_species (string): string of atomic element for adsorbate
-			(e.g. 'O')
+			ads_species (string): string of element or molecule for adsorbate
 
 			bond_dist (float): distance between adsorbate and surface atom. If
 			used with get_adsorbate_grid, it represents the maximum distance
 
 			site_idx (int): ASE index for the adsorption site
+
+			eta (int): denticity of end-on (1) or side-on (2) (defaults to 1)
+
+			connect (int): the connecting atom in the species string (defaults to 1)
 
 			d_bond (float): X1-X2 bond length (defaults to 1.25)
 
@@ -35,11 +38,15 @@ class adsorbate_constructor():
 			it defaults to 120; for triatomics, defaults to 180 except for H2O
 			in which it defaults to 104.5)
 
-			eta (int): denticity of end-on (1) or side-on (2) (defaults to 1)
+			d_bond2 (float): X2-X3 bond length for connect == 1 or
+			X1-X3 bond length for connect == 2 (defaults to d_bond1)
+
+			angle2 (float): X3-X1-X2 angle (defaults to 180 degrees for connect == 1
+			and angle1 for connect == 2)
 
 			r_cut (float): cutoff distance for calculating nearby atoms when
 			ranking adsorption sites
-			
+
 			sum_tol (float): threshold to determine planarity. when the sum
 			of the Euclidean distance vectors of coordinating atoms is less
 			than sum_tol, planarity is assumed
@@ -68,17 +75,24 @@ class adsorbate_constructor():
 		self.connect = connect
 
 	def get_adsorbate(self,atoms_filepath,omd_path=None,NN_method='crystal',
-		site_species=None,write_file=True,new_mofs_path=None,error_path=None):
+		allowed_sites=None,write_file=True,new_mofs_path=None,error_path=None,
+		NN_indices=None):
 		"""
-		Use Pymatgen's nearest neighbors algorithms to add an adsorbate
+		Add an adsorbate using PymatgenNN or OMD
 
 		Args:
 
 			atoms_filepath (string): filepath to the CIF file
 			
+			omd_path (string): filepath to OMD results folder (defaults to
+			'atoms_filepath/oms_results')
+
 			NN_method (string): string representing the desired Pymatgen
 			nearest neighbor algorithm. options include 'crystal',vire','okeefe',
 			and others. See NN_algos.py (defaults to 'crystal')
+
+			allowed_sites (list of strings): list of allowed site species
+			for use with automatic OMS detection
 
 			write_file (bool): if True, the new ASE atoms object should be
 			written to a CIF file (defaults to True)
@@ -91,6 +105,10 @@ class adsorbate_constructor():
 			problematic (defaults to /errors within the directory
 			containing the starting CIF file)
 
+			NN_indices (list of ints): list of indices for first coordination
+			sphere (these are usually automatically detected via the default
+			of None)
+
 		Returns:
 			new_atoms (Atoms object): ASE Atoms object of MOF with adsorbate
 
@@ -102,12 +120,13 @@ class adsorbate_constructor():
 			raise ValueError('Cannot provide site index and OMD results path')
 		if not os.path.isfile(atoms_filepath):
 			print('WARNING: No MOF found for '+atoms_filepath)
-			return None, None
+			return None
 		if new_mofs_path is None:
 			new_mofs_path = os.path.join(os.getcwd(),'new_mofs')
 		if error_path is None:
 			error_path = os.path.join(os.getcwd(),'errors')
-		
+		if allowed_sites is not None and not isinstance(allowed_sites,list):
+			allowed_sites = [allowed_sites]
 		atoms_filename = os.path.basename(atoms_filepath)
 		name = get_refcode(atoms_filename)
 		atoms = read(atoms_filepath)
@@ -118,15 +137,19 @@ class adsorbate_constructor():
 				omd_path = os.path.join(os.path.dirname(atoms_filepath),'oms_results')
 			omsex_dict = get_omd_data(omd_path,name,atoms)
 			if omsex_dict is None:
-				return None, None
+				return None
 		else:
-			NN_idx = get_NNs_pm(atoms,site_idx,NN_method)
+			if NN_indices is None:
+				NN_idx = get_NNs_pm(atoms,site_idx,NN_method)
+			else:
+				NN_idx = NN_indices
 			omsex_dict = {'cnums':[len(NN_idx)],'oms_coords':[atoms[site_idx].position],
 			'oms_idx':[site_idx],'oms_sym':[atoms[site_idx].symbol],'NN_coords':[atoms[NN_idx].positions],
 			'NN_idx':[NN_idx]}
 
+		new_atoms = []
 		for i, oms_idx in enumerate(omsex_dict['oms_idx']):
-			if omsex_dict['oms_sym'] not in site_species:
+			if allowed_sites is not None and omsex_dict['oms_sym'] not in allowed_sites:
 				continue
 			NN_idx = omsex_dict['NN_idx'][i]
 			mic_coords = np.squeeze(atoms.get_distances(oms_idx,NN_idx,
@@ -137,16 +160,18 @@ class adsorbate_constructor():
 						new_mofs_path=new_mofs_path,error_path=error_path,
 						write_file=write_file)
 			ads_pos = ads_optimizer.get_opt_ads_pos(mic_coords,oms_idx)
-			new_atoms, new_name = ads_optimizer.get_new_atoms(ads_pos,oms_idx)
-			#WRITE THESE OUT TO A LIST
+			new_atoms_i = ads_optimizer.get_new_atoms(ads_pos,oms_idx)
+			new_atoms.extend(new_atoms_i)
+		
+		if len(new_atoms) == 1:
+			new_atoms = new_atoms[0]
 
-		return new_atoms, new_name
+		return new_atoms
 
 	def get_adsorbate_grid(self,atoms_filepath,grid_path=None,
 		grid_format='ASCII',write_file=True,new_mofs_path=None,error_path=None):
 		"""
-		This function adds a molecular adsorbate based on an ASCII-formatted
-		energy grid (such as via RASPA)
+		This function adds a molecular adsorbate based on a potential energy grid
 
 		Args:
 			atoms_filepath (string): filepath to the CIF file
@@ -179,7 +204,7 @@ class adsorbate_constructor():
 		self.ads_species += '_grid'
 		if not os.path.isfile(atoms_filepath):
 			print('WARNING: No MOF found for '+atoms_filepath)
-			return None, None
+			return None
 
 		grid_format = grid_format.lower()
 		if grid_format == 'ascii':
@@ -211,13 +236,13 @@ class adsorbate_constructor():
 		ads_pos = get_best_grid_pos(atoms,max_dist,site_idx,grid_filepath)
 		if ads_pos is 'nogrid':
 			print('WARNING: no grid for '+name)
-			return None, None
+			return None
 		elif ads_pos is 'invalid':
 			print('WARNING: all NaNs within cutoff for '+name)
-			return None, None
+			return None
 		ads_optimizer = ads_pos_optimizer(self,atoms_filepath,
 					new_mofs_path=new_mofs_path,error_path=error_path,
 					write_file=write_file)
-		new_atoms, new_name = ads_optimizer.get_new_atoms_grid(site_pos,ads_pos)
+		new_atoms = ads_optimizer.get_new_atoms_grid(site_pos,ads_pos)
 
-		return new_atoms, new_name
+		return new_atoms
