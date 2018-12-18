@@ -178,7 +178,7 @@ def get_omd_data(oms_data_path,name,atoms):
 		return None
 
 	for i, site in enumerate(oms_results['metal_sites']):
-		if site['problematic']:
+		if site['problematic'] or not site['is_open']:
 			continue
 		cnum = site['number_of_linkers']
 		sphere = read(os.path.join(oms_data_path,name,'first_coordination_sphere'+str(i)+'.cif'))
