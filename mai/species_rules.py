@@ -173,14 +173,28 @@ def add_diatomic(mof,ads_species,ads_pos,site_idx,d_bond=1.25,angle=None,eta=1,
 			#FIX ME FOR ETA == 2!!!!
 			dist_mat = mof_temp.get_distances(-1,np.arange(0,
 				n_start-1).tolist(),vector=False,mic=True)
+			n_overlap = sum(dist_mat <= overlap_tol)
 			NNs = sum(dist_mat <= r_cut)
 			min_dist = np.min(dist_mat)
+			if eta == 2:
+				dist_mat2 = mof_temp.get_distances(-2,np.arange(0,
+					n_start-1).tolist(),vector=False,mic=True)
+				n_overlap2 = sum(dist_mat2 <= overlap_tol)
+				NNs2 = sum(dist_mat2 <= r_cut)
+				min_dist2 = np.min(dist_mat2)				
+				if min_dist2 < min_dist:
+					min_dist = min_dist2
+				if NNs2 > NNs:
+					NNs = NNs2
+				if n_overlap2 > n_overlap:
+					n_overlap = n_overlap2
 
 			if i == 0:
 				best_mof = mof_temp.copy()
 				old_min_NNs = NNs
 				old_min_dist = min_dist
-			elif sum(dist_mat <= overlap_tol) == 0 and (NNs < old_min_NNs or min_dist > old_min_dist):
+			elif n_overlap == 0 and (NNs < old_min_NNs or 
+				(NNs == old_min_NNs and min_dist > old_min_dist)):
 				best_mof = mof_temp.copy()
 				old_min_NNs = NNs
 				old_min_dist = min_dist

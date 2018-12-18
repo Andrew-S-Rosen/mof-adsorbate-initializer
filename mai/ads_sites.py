@@ -262,7 +262,8 @@ class ads_pos_optimizer():
 				ads_pos = mof_temp[-2].position
 				old_min_NNs = NNs
 				old_min_dist = min_dist
-			elif sum(dist_mat <= overlap_tol) == 0 and (NNs < old_min_NNs or min_dist > old_min_dist):
+			elif sum(dist_mat <= overlap_tol) == 0 and (NNs < old_min_NNs or
+				(NNs == old_min_NNs and min_dist > old_min_dist)):
 				ads_pos = mof_temp[-2].position
 				old_min_NNs = NNs
 				old_min_dist = min_dist
