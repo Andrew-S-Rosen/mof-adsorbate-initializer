@@ -1,21 +1,4 @@
-import os
 import re
-
-def prep_paths(new_mofs_path,error_path):
-	"""
-	Make paths as needed
-
-	Args:
-		new_mofs_path (string): path to store the new CIF files if
-		write_file is True (defaults to atoms_filepath/new_mofs)
-
-		error_path (string): path to store any adsorbates flagged as
-		problematic (defaults to atoms_filepath/errors)
-	"""
-	if not os.path.exists(new_mofs_path):
-		os.makedirs(new_mofs_path)
-	if not os.path.exists(error_path):
-		os.makedirs(error_path)
 
 def get_refcode(atoms_filename):
 	"""

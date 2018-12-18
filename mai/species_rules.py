@@ -3,7 +3,7 @@ from ase.geometry import get_distances
 from ase import Atoms, Atom
 from mai.tools import string_to_formula
 import numpy as np
-from ase.io import write
+
 def construct_mof(ads_pos_optimizer,mof,ads_pos,site_idx):
 	full_ads_species = ads_pos_optimizer.full_ads_species
 	ads_species = ads_pos_optimizer.ads_species
@@ -193,11 +193,13 @@ def add_diatomic(mof,ads_species,ads_pos,site_idx,d_bond=1.25,angle=None,eta=1,
 				best_mof = mof_temp.copy()
 				old_min_NNs = NNs
 				old_min_dist = min_dist
-			elif n_overlap == 0 and (NNs < old_min_NNs or 
+				old_overlap = n_overlap
+			elif n_overlap <= old_overlap and (NNs < old_min_NNs or 
 				(NNs == old_min_NNs and min_dist > old_min_dist)):
 				best_mof = mof_temp.copy()
 				old_min_NNs = NNs
 				old_min_dist = min_dist
+				old_overlap = n_overlap
 
 		mof = best_mof
 
@@ -244,9 +246,7 @@ def add_triatomic(mof,ads_species,ads_pos,site_idx,d_bond1=1.25,d_bond2=None,
 		r_vec = mof.get_distance(site_idx,-2,vector=True,mic=True)
 		r_bond = d_bond2*(r_vec/np.linalg.norm(r_vec))
 		mof.extend(Atoms([Atom(X3,ads_pos+r_bond)]))
-		write('test0.cif',mof)
 		mof.set_angle(-2,-3,-1,angle2)
-		write('test.cif',mof)
 	else:
 		raise ValueError('Connecting atom must have value of <= 3')
 

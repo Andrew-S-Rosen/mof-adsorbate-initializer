@@ -255,6 +255,7 @@ class ads_pos_optimizer():
 			dist_mat = mof_temp.get_distances(-2,np.arange(0,
 				len(mof_temp)-2).tolist(),mic=True)
 			NNs = sum(dist_mat <= r_cut)
+			n_overlap = sum(dist_mat <= overlap_tol)
 			min_dist = np.min(dist_mat)
 
 			#Select best option
@@ -262,11 +263,13 @@ class ads_pos_optimizer():
 				ads_pos = mof_temp[-2].position
 				old_min_NNs = NNs
 				old_min_dist = min_dist
-			elif sum(dist_mat <= overlap_tol) == 0 and (NNs < old_min_NNs or
+				old_overlap = n_overlap
+			elif n_overlap <= old_overlap and (NNs < old_min_NNs or
 				(NNs == old_min_NNs and min_dist > old_min_dist)):
 				ads_pos = mof_temp[-2].position
 				old_min_NNs = NNs
 				old_min_dist = min_dist
+				old_overlap = n_overlap
 
 		return ads_pos
 
@@ -414,14 +417,16 @@ class ads_pos_optimizer():
 			if not overlap:
 				new_name = basename+'_OMS'+str(idx)
 				if write_file:
+					if not os.path.exists(new_mofs_path):
+						os.makedirs(new_mofs_path)
 					write(os.path.join(new_mofs_path,new_name+'.cif'),new_mof)
 				success = True
 				break
-			else:
-				del new_mof[-1]
 
 		if not success:
 			if write_file:
+				if not os.path.exists(error_path):
+					os.makedirs(error_path)
 				write(os.path.join(error_path,basename+'_'+str(cluster)+'.cif'),
 					new_mof)
 			new_mof = None
@@ -510,11 +515,15 @@ class ads_pos_optimizer():
 			if np.sum(dist <= overlap_tol) > 0:
 				overlap = True
 				if write_file and not force_nowrite:
+					if not os.path.exists(error_path):
+						os.makedirs(error_path)
 					write(os.path.join(error_path,name+'_'+full_ads_species+'.cif'),new_mof)
 				break
 		if overlap:
 			return True
 		else:
 			if write_file and not force_nowrite:
+				if not os.path.exists(new_mofs_path):
+					os.makedirs(new_mofs_path)
 				write(os.path.join(new_mofs_path,new_name+'.cif'),new_mof)
 		return False

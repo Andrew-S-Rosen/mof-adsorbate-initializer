@@ -2,7 +2,7 @@ import numpy as np
 import os
 from ase.io import read
 from mai.ads_sites import ads_pos_optimizer
-from mai.tools import prep_paths, get_refcode
+from mai.tools import get_refcode
 from mai.oms_handler import get_zeo_data, get_omd_data
 from mai.NN_algos import get_NNs_pm
 from mai.grid_handler import get_best_grid_pos
@@ -133,9 +133,6 @@ class adsorbate_constructor():
 		site_species = self.site_species
 		max_dist = self.bond_dist
 
-		if write_file:
-			prep_paths(new_mofs_path,error_path)
-
 		atoms_filename = os.path.basename(atoms_filepath)
 		name = get_refcode(atoms_filename)
 		atoms = read(atoms_filepath)
@@ -202,8 +199,7 @@ class adsorbate_constructor():
 		#Get ASE index of adsorption site
 		site_species = self.site_species
 		site_idx = self.site_idx
-		if write_file:
-			prep_paths(new_mofs_path,error_path)
+
 		atoms = read(atoms_filepath)
 		if site_idx is None:
 			site_idx = [atom.index for atom in atoms if atom.symbol == 
@@ -271,9 +267,6 @@ class adsorbate_constructor():
 			new_mofs_path = os.path.join(os.getcwd(),'new_mofs')
 		if error_path is None:
 			error_path = os.path.join(os.getcwd(),'errors')
-
-		if write_file:
-			prep_paths(new_mofs_path,error_path)
 
 		#Get MOF name and read in as ASE atoms object
 		atoms_filename = os.path.basename(atoms_filepath)
