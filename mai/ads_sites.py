@@ -376,7 +376,7 @@ class ads_pos_optimizer():
 
 	def get_new_atoms_auto_oms(self,ads_poss,best_to_worst_idx,cluster):
 		"""
-		Construct new Atoms object with adsorbate based on Zeo++ OMS
+		Construct new Atoms object with adsorbate based on automatic OMS
 		detection
 
 		Args:
@@ -394,7 +394,6 @@ class ads_pos_optimizer():
 			
 			name (string): name of new structure with adsorbate
 		"""
-		overlap_tol = self.overlap_tol
 		full_ads_species = self.full_ads_species
 		write_file = self.write_file
 		new_mofs_path = self.new_mofs_path
@@ -411,10 +410,8 @@ class ads_pos_optimizer():
 		#one that does not overlap with other atoms
 		for idx in best_to_worst_idx:
 			new_mof = construct_mof(self,mof,ads_poss[idx,:],idx)
-			dist_mat = new_mof.get_distances(-1,np.arange(0,
-				len(new_mof)-1).tolist(),mic=True)
-			
-			if sum(dist_mat <= overlap_tol) == 0:
+			overlap = self.check_and_write(new_mof,force_nowrite=True)
+			if not overlap:
 				new_name = basename+'_OMS'+str(idx)
 				if write_file == True:
 					write(os.path.join(new_mofs_path,new_name+'.cif'),new_mof)
@@ -494,7 +491,7 @@ class ads_pos_optimizer():
 
 		return new_mof, new_name
 
-	def check_and_write(self,new_mof):
+	def check_and_write(self,new_mof,force_nowrite=False):
 		overlap_tol = self.overlap_tol
 		write_file = self.write_file
 		error_path = self.error_path
@@ -512,12 +509,12 @@ class ads_pos_optimizer():
 				np.arange(0,len(new_mof))[0:len(new_mof)-n_new_atoms],mic=True)
 			if np.sum(dist <= overlap_tol) > 0:
 				overlap = True
-				if write_file == True:
+				if write_file == True and not force_nowrite:
 					write(os.path.join(error_path,name+'_'+full_ads_species+'.cif'),new_mof)
 				break
 		if overlap == True:
 			return True
 		else:
-			if write_file == True:
+			if write_file == True and not force_nowrite:
 				write(os.path.join(new_mofs_path,new_name+'.cif'),new_mof)
 		return False
