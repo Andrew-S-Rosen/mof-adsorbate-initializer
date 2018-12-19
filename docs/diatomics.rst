@@ -13,7 +13,7 @@ We'll start with the code that can do the job. Then we'll walk through what it a
 
 Before we dive in, if you haven't already checked out the tutorial for monatomic species, please do that first so you can be brought up to speed on the general workflow of MAI. Once you've done that, it'll be easy to see how diatomics are a simple extension of monatomics!
 
-Like with the monatomic example, we need to initialize an :clas:`mai.adsorbate_constructor` object and then provide it the MOF of interest. In the case of diatomics, we have a few new keywords to introduce. In addition to the arguments previously described in the last tutorial, we also now need to be able to tell MAI what kind of denticity we would like (i.e. end-on or side-on adsorption) and what we want the X1-X2 bond length and M-X1-X2 bond angle to be (if X1-X2 is our diatomic of interest and M is our metal adsorption site). The arguments used here are described below:
+Like with the monatomic example, we need to initialize an :class:`mai.adsorbate_constructor` object and then provide it the MOF of interest. In the case of diatomics, we have a few new keywords to introduce. In addition to the arguments previously described in the last tutorial, we also now need to be able to tell MAI what kind of denticity we would like (i.e. end-on or side-on adsorption) and what we want the X1-X2 bond length and M-X1-X2 bond angle to be (if X1-X2 is our diatomic of interest and M is our metal adsorption site). The arguments used here are described below:
 
 1. The :mod:`ads_species` argument is a string of the molecule that you want to add to the structure. In this example, we wanted to an O2 molecule, so we set this argument to 'O2'. Note that heteroatomic species are supported, and MAI will default to having the first atom bound to the metal site. So, setting :mod:`ads_species` to 'CO' or 'OC' would lead to M-C-O and M-O-C, respectively.
 2. The :mod:`bond_dist` argument is the desired distance between the adsorption site (i.e. the Ni species) and the connecting atom of the adsorbate (in Å). Here, we set :mod:`bond_dist` to 1.5 Å.
@@ -22,7 +22,7 @@ Like with the monatomic example, we need to initialize an :clas:`mai.adsorbate_c
 5. The :mod:`d_bond` keyword argument is the desired distance between X1 and X2 in the diatomic (in Å). If not specified, it will default to the value for :mod:`bond_dist`. Here, we decided to set :mod:`d_bond` to 1.2 Å, which is a reasonable O-O bond distance.
 6. The :mod:`angle` keyword argument is the desired M-X1-X2 bond angle (in degrees). By default, it assumes :mod:`angle=180` if :mod:`eta=1` or :mod:`angle=90` if :mod:`eta=2`. For this example, we use :mod:`angle=120` and :mod:`angle=90`, respectively, which is representative of common O2 binding modes.
 
-That takes care of initializing :clas:`mai.adsorbate_constructor` object. Now we can use this object to call a function ot make initialize the adsorbate with the file path to the MOF's CIF file.
+That takes care of initializing :class:`mai.adsorbate_constructor` object. Now we can use this object to call a function ot make initialize the adsorbate with the file path to the MOF's CIF file.
 
 Now let's see what happens as a result of running this code! The initialized structure is shown below:
 |Ni2Cl2-BBTA-O2|

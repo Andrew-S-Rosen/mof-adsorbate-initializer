@@ -10,6 +10,9 @@ The MOF Adsorbate Initializer (MAI) is a set of Python tools to initialize the p
 
 |TOC| 
 
+--------
+Contents
+--------
 .. toctree::
    
    install
