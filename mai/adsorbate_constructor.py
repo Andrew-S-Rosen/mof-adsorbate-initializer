@@ -111,8 +111,6 @@ class adsorbate_constructor():
 
 		Returns:
 			new_atoms (Atoms object): ASE Atoms object of MOF with adsorbate
-
-			new_name (string): name of MOF with adsorbate
 		"""
 		#Check for file and prepare paths
 		site_idx = self.site_idx
@@ -196,8 +194,6 @@ class adsorbate_constructor():
 
 		Returns:
 			new_atoms (Atoms object): ASE Atoms object of MOF with adsorbate
-			
-			new_name (string): name of MOF with adsorbate
 		"""
 		#Check for file and prepare paths
 		

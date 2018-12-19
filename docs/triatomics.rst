@@ -1,11 +1,11 @@
 Triatomics
 ===========
 
-In this example, we'll work through how to add three-atom adsorbate to an open metal site (OMS) in a MOF. The CIF file for the MOF we'll use for this example can be found here: :download:`_static/Sc-MIL-88B.cif`. This MOF is known as Sc-MIL-88B and has the structure shown below:
-|Sc-MIL-88B|
+In this example, we'll work through how to add three-atom adsorbates to an open metal site in a MOF. The CIF file for the MOF we'll use for this example can be found here: :download:`Ni2Cl2-BBTA.cif`. This MOF is known as Ni2Cl2-BBTA and has the structure shown below:
+|Ni2Cl2-BBTA|
 The metal (Sc) sites here are shown in purple. This MOF has a trimetallic node, with two coordinatively unsaturated metal sites per node. For this example, we will consider the initialization of a N2O molecule to a single coordinatively unsaturated Sc site.
 
-.. |Sc-MIL-88B| image:: _static/Sc-MIL-88B.png
+.. |Ni2Cl2-BBTA| image:: _static/Ni2Cl2-BBTA.png
    :align: middle
 
 We'll start with the code that can do the job. Then we'll walk through what it all means. 
@@ -26,10 +26,10 @@ Like with the previous examples, we need to initialize an :class:`mai.adsorbate_
 That takes care of initializing :class:`mai.adsorbate_constructor` object. Now we can use this object to call a function ot make initialize the adsorbate with the file path to the MOF's CIF file.
 
 Now let's see what happens as a result of running this code! The initialized structure is shown below:
-|Sc-MIL-88B-N2O|
+|Ni2Cl2-BBTA-N2O|
 Exactly what we'd expect yet again! You can see that in the first example, O2 is bound end-on, whereas the latter it is bound side-on, as specified in the example script. The bond angles and distances are the same as those specified in the input file. As mentioned in the previous tutorial, MAI attempts to minimize sterics. When it comes to diatomics, the adsorbate is spun around the M-X1 axis so that it minimizes interactions with framework atoms.
 
 That concludes our tutorial with diatomic adsorbates. Join me as we move onto more complicated systems! Up next is triatomics!
 
-.. |Sc-MIL-88B-N2O| image:: _static/Sc-MIL-88B-N2O.png
+.. |Ni2Cl2-BBTA-N2O| image:: _static/Ni2Cl2-BBTA-N2O.png
    :align: middle
