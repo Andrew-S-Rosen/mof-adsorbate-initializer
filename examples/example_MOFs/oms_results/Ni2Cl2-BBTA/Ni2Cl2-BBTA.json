@@ -1,0 +1,76 @@
+{
+   "cif_okay": true,
+   "problematic": false,
+   "has_oms": true,
+   "metal_sites": [
+      {
+         "metal": "Ni",
+         "type": "Ni_5L_over_open_plane",
+         "is_open": true,
+         "unique": true,
+         "problematic": false,
+         "number_of_linkers": 5,
+         "t_factor": 0.10805998753050451
+      },
+      {
+         "metal": "Ni",
+         "type": "Ni_5L_over_open_plane",
+         "is_open": true,
+         "unique": false,
+         "problematic": false,
+         "number_of_linkers": 5,
+         "t_factor": 0.108055535503001
+      },
+      {
+         "metal": "Ni",
+         "type": "Ni_5L_over_open_plane",
+         "is_open": true,
+         "unique": false,
+         "problematic": false,
+         "number_of_linkers": 5,
+         "t_factor": 0.10834831769849274
+      },
+      {
+         "metal": "Ni",
+         "type": "Ni_5L_over_open_plane",
+         "is_open": true,
+         "unique": false,
+         "problematic": false,
+         "number_of_linkers": 5,
+         "t_factor": 0.10836651043406723
+      },
+      {
+         "metal": "Ni",
+         "type": "Ni_5L_over_open_plane",
+         "is_open": true,
+         "unique": false,
+         "problematic": false,
+         "number_of_linkers": 5,
+         "t_factor": 0.10834800738542848
+      },
+      {
+         "metal": "Ni",
+         "type": "Ni_5L_over_open_plane",
+         "is_open": true,
+         "unique": false,
+         "problematic": false,
+         "number_of_linkers": 5,
+         "t_factor": 0.10835361518767049
+      }
+   ],
+   "oms_density": 0.0007160706842606359,
+   "checksum": "a822f0bb0f70f8be4f8b468da0026a38db717b2328584e193295400a11047c7e",
+   "metal_species": [
+      "Ni"
+   ],
+   "non_metal_species": [
+      "C",
+      "H",
+      "Cl",
+      "N"
+   ],
+   "name": "Ni2Cl2-BBTA",
+   "uc_volume": 1396.5101797632303,
+   "density": 1.235721267862516,
+   "date_created": "2018-12-18T19:02:58.131206"
+}

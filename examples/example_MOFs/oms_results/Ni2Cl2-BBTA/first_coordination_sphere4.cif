@@ -1,0 +1,32 @@
+# generated using pymatgen
+data_NiN3Cl2
+_symmetry_space_group_name_H-M   'P 1'
+_cell_length_a   8.03712000
+_cell_length_b   14.41680000
+_cell_length_c   14.41670000
+_cell_angle_alpha   116.64100000
+_cell_angle_beta   100.70900000
+_cell_angle_gamma   100.71000000
+_symmetry_Int_Tables_number   1
+_chemical_formula_structural   NiN3Cl2
+_chemical_formula_sum   'Ni1 N3 Cl2'
+_cell_volume   1396.51017976
+_cell_formula_units_Z   1
+loop_
+ _symmetry_equiv_pos_site_id
+ _symmetry_equiv_pos_as_xyz
+  1  'x, y, z'
+loop_
+ _atom_site_type_symbol
+ _atom_site_label
+ _atom_site_symmetry_multiplicity
+ _atom_site_fract_x
+ _atom_site_fract_y
+ _atom_site_fract_z
+ _atom_site_occupancy
+  Ni  Ni1  1  0.210640  0.421280  0.210630  1
+  N  N2  1  0.033960  0.433120  0.297000  1
+  N  N3  1  0.399170  0.433130  0.136120  1
+  N  N4  1  0.130980  0.261950  0.130950  1
+  Cl  Cl5  1  0.424080  0.424100  0.348120  1
+  Cl  Cl6  1  0.000000  0.424060  0.075940  1

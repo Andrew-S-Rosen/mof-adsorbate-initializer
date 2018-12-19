@@ -1,0 +1,569 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>mai package &mdash; MOF-Adsorbate-Initializer v1.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> MOF-Adsorbate-Initializer
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <!-- Local TOC -->
+              <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">mai package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-mai.ads_sites">mai.ads_sites module</a></li>
+<li><a class="reference internal" href="#module-mai.adsorbate_constructor">mai.adsorbate_constructor module</a></li>
+<li><a class="reference internal" href="#mai-energy-grid-handler-module">mai.energy_grid_handler module</a></li>
+<li><a class="reference internal" href="#mai-gases-module">mai.gases module</a></li>
+<li><a class="reference internal" href="#mai-geom-module">mai.geom module</a></li>
+<li><a class="reference internal" href="#mai-janitor-module">mai.janitor module</a></li>
+<li><a class="reference internal" href="#module-mai.oms_handler">mai.oms_handler module</a></li>
+<li><a class="reference internal" href="#module-mai.regression">mai.regression module</a></li>
+<li><a class="reference internal" href="#module-mai">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">MOF-Adsorbate-Initializer</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>mai package</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/source/mai.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="mai-package">
+<h1>mai package<a class="headerlink" href="#mai-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-mai.ads_sites">
+<span id="mai-ads-sites-module"></span><h2>mai.ads_sites module<a class="headerlink" href="#module-mai.ads_sites" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="mai.ads_sites.ads_pos_optimizer">
+<em class="property">class </em><code class="descclassname">mai.ads_sites.</code><code class="descname">ads_pos_optimizer</code><span class="sig-paren">(</span><em>adsorbate_constructor</em>, <em>atoms_filepath</em>, <em>write_file=True</em>, <em>new_mofs_path=None</em>, <em>error_path=None</em><span class="sig-paren">)</span><a class="headerlink" href="#mai.ads_sites.ads_pos_optimizer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>This identifies ideal adsorption sites</p>
+<dl class="method">
+<dt id="mai.ads_sites.ads_pos_optimizer.check_and_write">
+<code class="descname">check_and_write</code><span class="sig-paren">(</span><em>new_mof</em>, <em>new_name</em><span class="sig-paren">)</span><a class="headerlink" href="#mai.ads_sites.ads_pos_optimizer.check_and_write" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check for overlapping atoms and write CIF file</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><p class="first">new_mof (ASE Atoms object): the new MOF-adsorbate complex</p>
+<p class="last">new_name (string): the name of the new CIF file to write</p>
+</dd>
+<dt>Returns:</dt>
+<dd>overlap (boolean): True or False for overlapping atoms</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="mai.ads_sites.ads_pos_optimizer.construct_mof">
+<code class="descname">construct_mof</code><span class="sig-paren">(</span><em>mof</em>, <em>ads_pos</em>, <em>site_idx</em><span class="sig-paren">)</span><a class="headerlink" href="#mai.ads_sites.ads_pos_optimizer.construct_mof" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct the MOF-adsorbate complex</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><p class="first">ads_pos_optimizer (class): see ads_sites.py for details</p>
+<p>ads_species (string): adsorbate species</p>
+<p class="last">ads_pos (numpy array): 1D numpy array for the proposed
+adsorption position</p>
+</dd>
+<dt>Returns:</dt>
+<dd>mof (ASE Atoms object): ASE Atoms object with adsorbate</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="mai.ads_sites.ads_pos_optimizer.get_NNs">
+<code class="descname">get_NNs</code><span class="sig-paren">(</span><em>ads_pos</em>, <em>site_idx</em><span class="sig-paren">)</span><a class="headerlink" href="#mai.ads_sites.ads_pos_optimizer.get_NNs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the number of atoms nearby the proposed adsorption site within r_cut</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><p class="first">ads_pos (numpy array): 1D numpy array for the proposed
+adsorption position</p>
+<p class="last">site_idx (int): ASE index for adsorption site</p>
+</dd>
+<dt>Returns:</dt>
+<dd><p class="first">NN (int): number of neighbors within r_cut</p>
+<p class="last">min_dist (float): distance from adsorbate to nearest atom</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="mai.ads_sites.ads_pos_optimizer.get_bi_ads_pos">
+<code class="descname">get_bi_ads_pos</code><span class="sig-paren">(</span><em>normal_vec</em>, <em>center_coord</em>, <em>site_idx</em><span class="sig-paren">)</span><a class="headerlink" href="#mai.ads_sites.ads_pos_optimizer.get_bi_ads_pos" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get adsorption site for a 2-coordinate site</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><p class="first">normal_vec (numpy array): 1D numpy array for the
+normal vector to the line</p>
+<p>center_coord (numpy array): 1D numpy array for adsorption site</p>
+<p class="last">site_idx (int): ASE index of adsorption site</p>
+</dd>
+<dt>Returns:</dt>
+<dd>ads_pos (numpy array): 1D numpy array for the proposed
+adsorption position</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="mai.ads_sites.ads_pos_optimizer.get_dist_planar">
+<code class="descname">get_dist_planar</code><span class="sig-paren">(</span><em>normal_vec</em><span class="sig-paren">)</span><a class="headerlink" href="#mai.ads_sites.ads_pos_optimizer.get_dist_planar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get distance vector for planar adsorption site</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>normal_vec (numpy array): 1D numpy array for normal vector</dd>
+<dt>Returns:</dt>
+<dd>dist (float): distance vector scaled to bond_dist</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="mai.ads_sites.ads_pos_optimizer.get_new_atoms">
+<code class="descname">get_new_atoms</code><span class="sig-paren">(</span><em>ads_pos</em>, <em>site_idx</em><span class="sig-paren">)</span><a class="headerlink" href="#mai.ads_sites.ads_pos_optimizer.get_new_atoms" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get new ASE atoms object with adsorbate from pymatgen analysis</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>ads_pos (numpy array): 1D numpy array for the proposed
+adsorption position</dd>
+<dt>Returns:</dt>
+<dd>new_mof (ASE Atoms object): new ASE Atoms object with adsorbate</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="mai.ads_sites.ads_pos_optimizer.get_new_atoms_grid">
+<code class="descname">get_new_atoms_grid</code><span class="sig-paren">(</span><em>site_pos</em>, <em>ads_pos</em><span class="sig-paren">)</span><a class="headerlink" href="#mai.ads_sites.ads_pos_optimizer.get_new_atoms_grid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get new ASE atoms object with adsorbate from energy grid</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>ads_pos (numpy array): 1D numpy array for the proposed
+adsorption position</dd>
+<dt>Returns:</dt>
+<dd>new_mof (ASE Atoms object): new ASE Atoms object with adsorbate</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="mai.ads_sites.ads_pos_optimizer.get_nonplanar_ads_pos">
+<code class="descname">get_nonplanar_ads_pos</code><span class="sig-paren">(</span><em>scaled_sum_dist</em>, <em>center_coord</em><span class="sig-paren">)</span><a class="headerlink" href="#mai.ads_sites.ads_pos_optimizer.get_nonplanar_ads_pos" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get adsorption site for non-planar structure</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><p class="first">scaled_sum_dist (numpy array): 2D numpy array for the
+scaled Euclidean distance vectors between each coordinating
+atom and the central atom (i.e. the adsorption site)</p>
+<p class="last">center_coord (numpy array): 1D numpy array for adsorption site</p>
+</dd>
+<dt>Returns:</dt>
+<dd>ads_pos (numpy array): 1D numpy array for the proposed
+adsorption position</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="mai.ads_sites.ads_pos_optimizer.get_opt_ads_pos">
+<code class="descname">get_opt_ads_pos</code><span class="sig-paren">(</span><em>mic_coords</em>, <em>site_idx</em><span class="sig-paren">)</span><a class="headerlink" href="#mai.ads_sites.ads_pos_optimizer.get_opt_ads_pos" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the optimal adsorption site</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><p class="first">mic_coords (numpy array): 2D numpy array for the
+coordinates of each coordinating atom using the central
+atom (i.e. adsorption site) as the origin</p>
+<p class="last">site_idx (int): ASE index of adsorption site</p>
+</dd>
+<dt>Returns:</dt>
+<dd>ads_pos (numpy array): 1D numpy array for the proposed
+adsorption position</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="mai.ads_sites.ads_pos_optimizer.get_planar_ads_pos">
+<code class="descname">get_planar_ads_pos</code><span class="sig-paren">(</span><em>center_coord</em>, <em>dist</em>, <em>site_idx</em><span class="sig-paren">)</span><a class="headerlink" href="#mai.ads_sites.ads_pos_optimizer.get_planar_ads_pos" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get adsorption site for planar structure</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><p class="first">center_coord (numpy array): 1D numpy array for adsorption site
+(i.e. the central atom)</p>
+<p class="last">site_idx (int): ASE index for adsorption site</p>
+</dd>
+<dt>Returns:</dt>
+<dd>ads_pos (numpy array): 1D numpy array for the proposed
+adsorption position</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="mai.ads_sites.ads_pos_optimizer.get_tri_ads_pos">
+<code class="descname">get_tri_ads_pos</code><span class="sig-paren">(</span><em>normal_vec</em>, <em>scaled_sum_dist</em>, <em>center_coord</em>, <em>site_idx</em><span class="sig-paren">)</span><a class="headerlink" href="#mai.ads_sites.ads_pos_optimizer.get_tri_ads_pos" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get adsorption site for a 3-coordinate site</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><p class="first">normal_vec (numpy array): 1D numpy array for the
+normal vector to the line</p>
+<p>scaled_sum_dist (numpy array): 2D numpy array for the
+scaled Euclidean distance vectors between each coordinating
+atom and the central atom (i.e. the adsorption site)</p>
+<p>center_coord (numpy array): 1D numpy array for adsorption site</p>
+<p class="last">site_idx (int): ASE index of adsorption site</p>
+</dd>
+<dt>Returns:</dt>
+<dd>ads_pos (numpy array): 1D numpy array for the proposed
+adsorption position</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-mai.adsorbate_constructor">
+<span id="mai-adsorbate-constructor-module"></span><h2>mai.adsorbate_constructor module<a class="headerlink" href="#module-mai.adsorbate_constructor" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="mai.adsorbate_constructor.adsorbate_constructor">
+<em class="property">class </em><code class="descclassname">mai.adsorbate_constructor.</code><code class="descname">adsorbate_constructor</code><span class="sig-paren">(</span><em>ads_species</em>, <em>bond_dist</em>, <em>site_idx=None</em>, <em>eta=1</em>, <em>connect=1</em>, <em>d_bond=1.25</em>, <em>d_bond2=None</em>, <em>angle=None</em>, <em>angle2=None</em>, <em>r_cut=2.5</em>, <em>sum_tol=0.5</em>, <em>rmse_tol=0.25</em>, <em>overlap_tol=0.75</em><span class="sig-paren">)</span><a class="headerlink" href="#mai.adsorbate_constructor.adsorbate_constructor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>This class constructs an ASE atoms object with an adsorbate</p>
+<dl class="method">
+<dt id="mai.adsorbate_constructor.adsorbate_constructor.get_adsorbate">
+<code class="descname">get_adsorbate</code><span class="sig-paren">(</span><em>atoms_filepath</em>, <em>omd_path=None</em>, <em>NN_method='crystal'</em>, <em>allowed_sites=None</em>, <em>write_file=True</em>, <em>new_mofs_path=None</em>, <em>error_path=None</em>, <em>NN_indices=None</em><span class="sig-paren">)</span><a class="headerlink" href="#mai.adsorbate_constructor.adsorbate_constructor.get_adsorbate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add an adsorbate using PymatgenNN or OMD</p>
+<p>Args:</p>
+<blockquote>
+<div><p>atoms_filepath (string): filepath to the CIF file</p>
+<p>omd_path (string): filepath to OMD results folder (defaults to
+‘atoms_filepath/oms_results’)</p>
+<p>NN_method (string): string representing the desired Pymatgen
+nearest neighbor algorithm. options include ‘crystal’,vire’,’okeefe’,
+and others. See NN_algos.py (defaults to ‘crystal’)</p>
+<p>allowed_sites (list of strings): list of allowed site species
+for use with automatic OMS detection</p>
+<p>write_file (bool): if True, the new ASE atoms object should be
+written to a CIF file (defaults to True)</p>
+<p>new_mofs_path (string): path to store the new CIF files if
+write_file is True (defaults to /new_mofs within the directory
+containing the starting CIF file)</p>
+<p>error_path (string): path to store any adsorbates flagged as
+problematic (defaults to /errors within the directory
+containing the starting CIF file)</p>
+<p>NN_indices (list of ints): list of indices for first coordination
+sphere (these are usually automatically detected via the default
+of None)</p>
+</div></blockquote>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd><p class="first">new_atoms (Atoms object): ASE Atoms object of MOF with adsorbate</p>
+<p class="last">new_name (string): name of MOF with adsorbate</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="mai.adsorbate_constructor.adsorbate_constructor.get_adsorbate_grid">
+<code class="descname">get_adsorbate_grid</code><span class="sig-paren">(</span><em>atoms_filepath</em>, <em>grid_path=None</em>, <em>grid_format='ASCII'</em>, <em>write_file=True</em>, <em>new_mofs_path=None</em>, <em>error_path=None</em><span class="sig-paren">)</span><a class="headerlink" href="#mai.adsorbate_constructor.adsorbate_constructor.get_adsorbate_grid" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function adds a molecular adsorbate based on a potential energy grid</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><p class="first">atoms_filepath (string): filepath to the CIF file</p>
+<p>grid_path (string): path to the directory containing the PEG
+(defaults to /energy_grids within the directory containing
+the starting CIF file)</p>
+<p>grid_format (string): accepts either ‘ASCII’ or ‘cube’ and
+is the file format for the PEG (defaults to ASCII)</p>
+<p>write_file (bool): if True, the new ASE atoms object should be
+written to a CIF file (defaults to True)</p>
+<p>new_mofs_path (string): path to store the new CIF files if
+write_file is True (defaults to /new_mofs within the directory
+containing the starting CIF file)</p>
+<p class="last">error_path (string): path to store any adsorbates flagged as
+problematic (defaults to /errors within the directory
+containing the starting CIF file)</p>
+</dd>
+<dt>Returns:</dt>
+<dd><p class="first">new_atoms (Atoms object): ASE Atoms object of MOF with adsorbate</p>
+<p class="last">new_name (string): name of MOF with adsorbate</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="mai-energy-grid-handler-module">
+<h2>mai.energy_grid_handler module<a class="headerlink" href="#mai-energy-grid-handler-module" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="mai-gases-module">
+<h2>mai.gases module<a class="headerlink" href="#mai-gases-module" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="mai-geom-module">
+<h2>mai.geom module<a class="headerlink" href="#mai-geom-module" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="mai-janitor-module">
+<h2>mai.janitor module<a class="headerlink" href="#mai-janitor-module" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-mai.oms_handler">
+<span id="mai-oms-handler-module"></span><h2>mai.oms_handler module<a class="headerlink" href="#module-mai.oms_handler" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="mai.oms_handler.get_ase_NN_idx">
+<code class="descclassname">mai.oms_handler.</code><code class="descname">get_ase_NN_idx</code><span class="sig-paren">(</span><em>atoms</em>, <em>coords</em><span class="sig-paren">)</span><a class="headerlink" href="#mai.oms_handler.get_ase_NN_idx" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the ASE indices for the coordinating atoms</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><p class="first">atoms (Atoms object): ASE Atoms object for the MOF</p>
+<p class="last">coords (numpy array): coordinates of the coordinating atoms</p>
+</dd>
+<dt>Returns:</dt>
+<dd>ase_NN_idx (list of ints): ASE indices of the coordinating atoms</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="mai.oms_handler.get_ase_oms_idx">
+<code class="descclassname">mai.oms_handler.</code><code class="descname">get_ase_oms_idx</code><span class="sig-paren">(</span><em>atoms</em>, <em>coords</em><span class="sig-paren">)</span><a class="headerlink" href="#mai.oms_handler.get_ase_oms_idx" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the ASE index of the OMS</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><p class="first">atoms (Atoms object): ASE Atoms object for the MOF</p>
+<p class="last">coords (numpy array): coordinates of the OMS</p>
+</dd>
+<dt>Returns:</dt>
+<dd>ase_oms_idx (int): ASE index of OMS</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="mai.oms_handler.get_omd_data">
+<code class="descclassname">mai.oms_handler.</code><code class="descname">get_omd_data</code><span class="sig-paren">(</span><em>oms_data_path</em>, <em>name</em>, <em>atoms</em><span class="sig-paren">)</span><a class="headerlink" href="#mai.oms_handler.get_omd_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get info about the open metal site from OpenMetalDetector
+results files</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><p class="first">oms_data_path (string): path to the OpenMetalDetector results</p>
+<p>name (string): name of the MOF</p>
+<p class="last">atoms (ASE Atoms object): Atoms object for the MOF</p>
+</dd>
+<dt>Returns:</dt>
+<dd>omsex_dict (dict): dictionary of data from the OpenMetalDetector results</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-mai.regression">
+<span id="mai-regression-module"></span><h2>mai.regression module<a class="headerlink" href="#module-mai.regression" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="mai.regression.OLS_fit">
+<code class="descclassname">mai.regression.</code><code class="descname">OLS_fit</code><span class="sig-paren">(</span><em>xyz</em><span class="sig-paren">)</span><a class="headerlink" href="#mai.regression.OLS_fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make ordinary least squares fit to z=a+bx+cy and return the normal vector</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>xyz (numpy array): 2D numpy array of XYZ values (N rows, 3 cols)</dd>
+<dt>Returns:</dt>
+<dd>normal_vec (numpy array): 1D numpy array for the normal vector</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="mai.regression.TLS_fit">
+<code class="descclassname">mai.regression.</code><code class="descname">TLS_fit</code><span class="sig-paren">(</span><em>xyz</em><span class="sig-paren">)</span><a class="headerlink" href="#mai.regression.TLS_fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make total least squares fit to ax+by+cz+d=0 and return the normal vector</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>xyz (numpy array): 2D numpy array of XYZ values (N rows, 3 cols)</dd>
+<dt>Returns:</dt>
+<dd><p class="first">rmse (float): root mean square error of fit</p>
+<p class="last">normal_vec (numpy array): 1D numpy array for the normal vector</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-mai">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-mai" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Andrew S. Rosen
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'../',
+              VERSION:'v1.0',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+    
+
+  
+
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

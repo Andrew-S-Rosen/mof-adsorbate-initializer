@@ -9,7 +9,8 @@ bond_length = 1.75 #desired distance between OMS and ads_species
 
 #Run the Open Metal Detector
 mof_coll = MofCollection.from_folder(collection_folder=mofs_path,analysis_folder=mofs_path)
-mof_coll.analyse_mofs()
+if __name__ == '__main__':
+	mof_coll.analyse_mofs()
 
 #add adsorbate for every CIF in mofs_path
 for f in os.listdir(mofs_path):

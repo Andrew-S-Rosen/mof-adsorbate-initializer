@@ -20,18 +20,34 @@ mai.adsorbate\_constructor module
     :undoc-members:
     :show-inheritance:
 
-mai.grid\_handler module
+mai.energy\_grid\_handler module
 --------------------------------
 
-.. automodule:: mai.grid_handler
+.. automodule:: mai.energy_grid_handler
     :members:
     :undoc-members:
     :show-inheritance:
 
-mai.NN\_algos module
---------------------------------
+mai.gases module
+----------------
 
-.. automodule:: mai.NN_algos
+.. automodule:: mai.gases
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+mai.geom module
+---------------
+
+.. automodule:: mai.geom
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+mai.janitor module
+------------------
+
+.. automodule:: mai.janitor
     :members:
     :undoc-members:
     :show-inheritance:
@@ -52,21 +68,6 @@ mai.regression module
     :undoc-members:
     :show-inheritance:
 
-mai.species\_rules module
------------------------
-
-.. automodule:: mai.species_rules
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-mai.tools module
----------------------
-
-.. automodule:: mai.tools
-    :members:
-    :undoc-members:
-    :show-inheritance:
 
 Module contents
 ---------------

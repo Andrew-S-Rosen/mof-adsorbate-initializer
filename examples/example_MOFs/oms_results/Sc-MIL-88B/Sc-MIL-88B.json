@@ -1,0 +1,75 @@
+{
+   "cif_okay": true,
+   "problematic": false,
+   "has_oms": true,
+   "metal_sites": [
+      {
+         "metal": "Sc",
+         "type": "Sc_5L_over_open_plane",
+         "is_open": true,
+         "unique": true,
+         "problematic": false,
+         "number_of_linkers": 5,
+         "t_factor": 0.001025920883987889
+      },
+      {
+         "metal": "Sc",
+         "type": "Closed",
+         "is_open": false,
+         "unique": true,
+         "problematic": false,
+         "number_of_linkers": 6,
+         "t_factor": 0.9211303091023807
+      },
+      {
+         "metal": "Sc",
+         "type": "Sc_5L_over_open_plane",
+         "is_open": true,
+         "unique": false,
+         "problematic": false,
+         "number_of_linkers": 5,
+         "t_factor": 0.0001852022083506692
+      },
+      {
+         "metal": "Sc",
+         "type": "Sc_5L_over_open_plane",
+         "is_open": true,
+         "unique": false,
+         "problematic": false,
+         "number_of_linkers": 5,
+         "t_factor": 0.007024824383618503
+      },
+      {
+         "metal": "Sc",
+         "type": "Sc_5L_over_open_plane",
+         "is_open": true,
+         "unique": false,
+         "problematic": false,
+         "number_of_linkers": 5,
+         "t_factor": 0.004213356496987804
+      },
+      {
+         "metal": "Sc",
+         "type": "Closed",
+         "is_open": false,
+         "unique": false,
+         "problematic": false,
+         "number_of_linkers": 6,
+         "t_factor": 0.923158858424976
+      }
+   ],
+   "oms_density": 0.0006352461954257759,
+   "checksum": "a747c0fe533b589e6d95be27b055d86ff4a0253e0a313b63e786dbbbb04af3f0",
+   "metal_species": [
+      "Sc"
+   ],
+   "non_metal_species": [
+      "C",
+      "H",
+      "O"
+   ],
+   "name": "Sc-MIL-88B",
+   "uc_volume": 3148.385640719175,
+   "density": 0.6964331188800807,
+   "date_created": "2018-12-18T19:03:03.455964"
+}
