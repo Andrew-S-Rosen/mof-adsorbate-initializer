@@ -17,5 +17,5 @@ The MOF Adsorbate Initializer (MAI) is a set of Python tools to initialize the p
    citing
 
 
-.. |TOC| image:: static/toc.png
+.. |TOC| image:: _static/toc.png
    :align: middle

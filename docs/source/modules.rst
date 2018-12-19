@@ -1,4 +1,4 @@
-mof-adsorbate-initializer
+MOF Adsorbate Initializer
 =========================
 
 .. toctree::
