@@ -30,7 +30,7 @@ Exactly what we'd expect yet again! You can see that in the first example, O2 is
 .. |Ni2Cl2-BBTA-O2| image:: _static/Ni2Cl2-BBTA-O2.png
    :align: middle
 
------------
+------------
 Heteroatomic
 ------------
 MAI also supports heteratomic adsorbates. In this example, we'll consider the adsorption of a single CO molecule with the same Ni2Cl2-BBTA MOF. The only thing that changes for heteroatomic adsorbates is that you need to tell MAI which atom is the "connecting atom" (i.e. the atom of the adsorbate bound to the metal adsorption site) if bound in an end-on fashion. By default, MAI will assume that the first atom in :mod:`ads_species` is the connecting atom. Therefore, setting :mod:`ads_species='CO'` or :mod:`ads_species='OC'` would yield M-C-O or M-O-C binding modes, respectively. There is also a :mod:`connect` keyword argument in :class:`mai.adsorbate_constructor`, which is an integer representing the atom in :mod:`ads_species` that should be the connecting atom. For :mod:`ads_species='Co'`, using :mod:`connect=1` or :mod:`connect=2` would once again refer to M-C-O or M-O-C binding modes, respectively.
