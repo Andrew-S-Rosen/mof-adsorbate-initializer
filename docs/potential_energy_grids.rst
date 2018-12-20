@@ -4,15 +4,7 @@ Some adsorbates do not lend themselves well to the geometric approaches laid out
 
 |grid|
 
-MAI supports two different formats for PEGs. The first is the cube_ file format for grids, such as those generated from `PorousMaterials.jl <https://github.com/SimonEnsemble/PorousMaterials.jl>`_. Details of how to generate such PEGs can be found `here` <https://simonensemble.github.io/PorousMaterials.jl/latest/#>`_. The second accepted format is a space-delimited file with four columns of (x,y,z,E) entries, where E is the potential energy and (x,y,z) are the coordinates. Each new line represents a new (x,y,z,E) vector. This is the file-format produced from RASPA_-generated PEGs. Such a file might look like the following
-
-``0 0 0 -100``
-
-``0 0 0.1 -110``
-
-``0 0 0.2 -120``
-
-``...``
+MAI supports two different formats for PEGs. The first is the cube_ file format for grids, such as those generated from `PorousMaterials.jl <https://github.com/SimonEnsemble/PorousMaterials.jl>`_. Details of how to generate such PEGs can be found `here <https://simonensemble.github.io/PorousMaterials.jl/latest/#>`_. The second accepted format is a space-delimited file with four columns of (x,y,z,E) entries, where E is the potential energy and (x,y,z) are the coordinates. Each new line represents a new (x,y,z,E) vector. This is the file-format produced from RASPA_-generated PEGs.
 
 Currently, only single-site CH4 adsorbates are supported with PEGs, although in principle it would be trivial to consider other adsorbates as well. When use PEGs to initialize the position of CH4 adsorbates, the C atom of the CH4 molecule will be placed in the low-energy site, and the four remaining H atoms will be arranged to form the tetrahedral structure of CH4, with one of the H atoms pointed directly toward the adsorption site.
 
