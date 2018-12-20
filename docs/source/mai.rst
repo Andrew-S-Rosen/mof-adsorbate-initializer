@@ -67,11 +67,3 @@ mai.tools module
     :members:
     :undoc-members:
     :show-inheritance:
-
-Module contents
----------------
-
-.. automodule:: mai
-    :members:
-    :undoc-members:
-    :show-inheritance:

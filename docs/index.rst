@@ -18,7 +18,7 @@ Contents
    install
    tutorials
    citing
-
+   source/mai
 
 .. |TOC| image:: _static/toc.png
    :align: middle
