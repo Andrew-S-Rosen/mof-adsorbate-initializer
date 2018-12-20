@@ -1,11 +1,11 @@
 Triatomics
 ===========
 
-In this example, we'll work through how to add three-atom adsorbates to open metal sites in MOFs. The CIF file for the MOF we'll use for this example can be found :download:`here <_static/Ni2Cl2-BTDD.cif>`. This MOF is known Ni2Cl2(BTDD) and has the structure shown below:
+In this example, we'll work through how to add three-atom adsorbates to open metal sites in MOFs. The CIF for the MOF we'll use for this example can be found :download:`here <_static/Ni2Cl2-BTDD.cif>`. This MOF is known Ni2Cl2(BTDD) and has the structure shown below:
 
 |Ni2Cl2-BTDD|
 
-The metal (Ni) sites here are shown in silver. This MOF has a honeycomb-like structure with square pyramidal Ni cations. Isn't it beautiful?
+The metal (Ni) sites here are shown in silver. This MOF has a honeycomb-like structure with square pyramidal Ni cations that run down the crystallographic c-axis. Isn't it beautiful?
 
 .. |Ni2Cl2-BTDD| image:: _static/Ni2Cl2-BTDD.png
    :align: middle
@@ -23,7 +23,7 @@ Like with the previous examples, we need to initialize an :class:`~mai.adsorbate
 2. Now, we have the option to add the ``d_bond2`` keyword argument, which specifies the X1-X2 distance. It defaults to ``d_bond2=d_bond1`` if not specified.
 3. We can also add the ``angle2`` keyword argument, which specifies the X1-X2-X3 bond angle. It defaults to ``angle2=180`` if not specified. We'll leave this one at the default for this example.
 
-That takes care of initializing the :class:`~mai.adsorbate_constructor.adsorbate_constructor` object. With this, we provide the object with the path to the MOF, and it will initialize the adsorbate. Now let's see what happens as a result of running this code! The initialized structure is shown below:
+That takes care of initializing the :class:`~mai.adsorbate_constructor.adsorbate_constructor` object. With this, we provide the object with the path to the MOF, and it will initialize the adsorbate. Now let's see what happens as a result of running this code! The initialized structures are shown below:
 
 |Ni2Cl2-BTDD-N2O|
 
@@ -35,11 +35,11 @@ Exactly what we'd expect once more! You can see that in the first example, N2O i
 ---------------------
 Noncontiguous Adsorbate
 ---------------------
-The last bit of trickery comes into play when dealing with what I'll call "noncontiguous" adsorbates. These are adsorbates like water, where it is triatomic, but it is not bound in a sequential fashion. As with water, you will have a central atom of the adsorbate bound to the metal. Therefore, ``connect`` must be set to ``connect=2``, and the name of the species must be specified accordingly with the connecting atom listed as the second atom in the ``ads_species`` name (e.g. ``ads_species=HOH`` for water bound in an η1-O mode if ``connect=2``). Example code is shown below. The main thing to keep in mind is that now the connecting atom of the adsorbate is X2 instead of X1.
+The last bit of trickery comes into play when dealing with what I'll call "noncontiguous" adsorbates. These are adsorbates like water, where it is triatomic, but it is not bound in a sequential fashion. As with water, you will have a central atom of the adsorbate bound to the metal. Therefore, ``connect`` must be set to ``connect=2``, and the name of the species must be specified with the connecting atom listed as the second atom in the ``ads_species`` name (e.g. ``ads_species=HOH`` for water bound in an η1-O mode if ``connect=2``). An example code is shown below. The main thing to keep in mind is that now the connecting atom of the adsorbate is X2 instead of X1.
 
 .. literalinclude:: _static/triatomic_central.py
 
 .. |Ni2Cl2-BTDD-CO| image:: _static/Ni2Cl2-BTDD-H2O.png
    :align: middle
 
-That concludes our tutorial for triatomic adsorbates. Now onto how to automate the specification of ``site_idx``.
+That concludes our tutorial for triatomic adsorbates.

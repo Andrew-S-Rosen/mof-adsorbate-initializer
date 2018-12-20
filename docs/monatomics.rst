@@ -1,7 +1,7 @@
 Monatomics
 ===========
 
-In this example, we'll work through how to add a single atom adsorbate to open metal site in MOFs. The CIF file for the MOF we'll use in this example can be found :download:`here <_static/Cu-BTC.cif>`. This MOF is known as Cu-BTC and has the structure shown below:
+In this example, we'll work through how to add a single atom adsorbate to open metal site in MOFs. The CIF for the MOF we'll use in this example can be found :download:`here <_static/Cu-BTC.cif>`. This MOF is known as Cu-BTC and has the structure shown below:
 
 |Cu-BTC|
 

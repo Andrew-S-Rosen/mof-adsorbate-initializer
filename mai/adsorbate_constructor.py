@@ -159,8 +159,8 @@ class adsorbate_constructor():
 						write_file=write_file)
 			ads_pos = ads_optimizer.get_opt_ads_pos(mic_coords,oms_idx)
 			new_atoms_i = ads_optimizer.get_new_atoms(ads_pos,oms_idx)
-			new_atoms.extend(new_atoms_i)
-		
+			new_atoms.append(new_atoms_i)
+
 		if len(new_atoms) == 1:
 			new_atoms = new_atoms[0]
 
