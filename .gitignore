@@ -4,3 +4,5 @@ src/
 examples/new_mofs/
 
 examples/errors/
+
+__pycache__

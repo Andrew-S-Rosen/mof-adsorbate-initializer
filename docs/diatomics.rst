@@ -1,7 +1,7 @@
 Diatomics
 ===========
 
-In this example, we'll work through how to add two-atom adsorbates to an open metal site in a MOF. The CIF file for the MOF we'll use for this example can be found here: :download:`Ni2Cl2-BBTA.cif`. This MOF is known Ni2Cl2-BBTA and has the structure shown below:
+In this example, we'll work through how to add two-atom adsorbates to an open metal site in a MOF. The CIF file for the MOF we'll use for this example can be found :download:`here <_static/Ni2Cl2-BBTA.cif`. This MOF is known Ni2Cl2(BBTA) and has the structure shown below:
 |Ni2Cl2-BBTA|
 The metal (Ni) sites here are shown in silver. This MOF has a honeycomb-like structure with an infinite chain of metals running down the crystallographic c-axis, each one in a square pyramidal geometry. Neat!
 
@@ -12,7 +12,7 @@ The metal (Ni) sites here are shown in silver. This MOF has a honeycomb-like str
 Homoatomic
 -----------
 For this example, we will consider the initialization of an O2 molecule to a single coordinatively unsaturated Ni site. O2 can bind in an end-on or side-on mode depending on the structure. We'll consider both for this example. The code to handle this is shown below. 
-.. literalinclude:: diatomic_homo.py
+.. literalinclude:: _static/diatomic_homo.py
 
 Like with the monatomic example, we need to initialize an :class:`mai.adsorbate_constructor` object and then provide it the MOF of interest. In the case of diatomics, we have a few new keywords to introduce. In addition to the arguments described in the monatomic tutorial, we now need to be able to tell MAI what kind of denticity we would like (i.e. end-on or side-on adsorption) and what we want the X1-X2 bond length and M-X1-X2 bond angle to be (if X1-X2 is our diatomic of interest and M is our metal adsorption site). The arguments used here are described below:
 
@@ -34,7 +34,7 @@ Exactly what we'd expect yet again! You can see that in the first example, O2 is
 Heteroatomic
 ------------
 MAI also supports heteratomic adsorbates. In this example, we'll consider the adsorption of a single CO molecule with the same Ni2Cl2-BBTA MOF. The only thing that changes for heteroatomic adsorbates is that you need to tell MAI which atom is the "connecting atom" (i.e. the atom of the adsorbate bound to the metal adsorption site) if bound in an end-on fashion. By default, MAI will assume that the first atom in ``ads_species`` is the connecting atom. Therefore, setting ``ads_species='CO'`` or ``ads_species='OC'`` would yield M-C-O or M-O-C binding modes, respectively. There is also a ``connect`` keyword argument in :class:`mai.adsorbate_constructor`, which is an integer representing the atom in ``ads_species`` that should be the connecting atom. For ``ads_species='Co'``, using ``connect=1`` or ``connect=2`` would once again refer to M-C-O or M-O-C binding modes, respectively.
-.. literalinclude:: diatomic_hetero.py 
+.. literalinclude:: _static/diatomic_hetero.py 
 
 .. |Ni2Cl2-BBTA-CO| image:: _static/Ni2Cl2-BBTA-CO.png
    :align: middle

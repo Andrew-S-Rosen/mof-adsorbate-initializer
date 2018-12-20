@@ -9,9 +9,7 @@ The metal (Sc) sites here are shown in purple. This MOF has a trimetallic node, 
    :align: middle
 
 We'll start with the code that can do the job. Then we'll walk through what it all means. 
-.. literalinclude:: triatomic.py
-
-Before we dive in, if you haven't already checked out the tutorial for monatomic and diatomic species, please do that first so you can be brought up to speed.
+.. literalinclude:: _static/triatomic.py
 
 Like with the previous examples, we need to initialize an :class:`mai.adsorbate_constructor` object and then provide it the MOF of interest. In the case of triatomics, we have a few new keywords to introduce. In addition to the arguments previously described in the previous tutorials, we also now need to be able to tell MAI which connecting atom we would like. This was simple for diatomics, but for triatomics we can 
  we want the X2-X3 bond length to be and which connecting what we want the X1-X2-X3 bond angle to be kind of denticity we would like (i.e. end-on or side-on adsorption) and what we want the X1-X2 bond length and M-X1-X2 bond angle to be (if X1-X2 is our diatomic of interest and M is our metal adsorption site). The arguments used here are described below:

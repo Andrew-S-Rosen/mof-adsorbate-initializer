@@ -1,8 +1,5 @@
-mai package
-===========
-
-Submodules
-----------
+Code documentation
+==================
 
 mai.ads\_sites module
 ---------------------
