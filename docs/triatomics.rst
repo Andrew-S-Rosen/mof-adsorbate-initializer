@@ -1,33 +1,45 @@
 Triatomics
 ===========
 
-In this example, we'll work through how to add three-atom adsorbates to an open metal site in a MOF. The CIF file for the MOF we'll use for this example can be found here: :download:`Ni2Cl2-BBTA.cif`. This MOF is known as Ni2Cl2-BBTA and has the structure shown below:
-|Ni2Cl2-BBTA|
-The metal (Sc) sites here are shown in purple. This MOF has a trimetallic node, with two coordinatively unsaturated metal sites per node. For this example, we will consider the initialization of a N2O molecule to a single coordinatively unsaturated Sc site.
+In this example, we'll work through how to add three-atom adsorbates to open metal sites in MOFs. The CIF file for the MOF we'll use for this example can be found :download:`here <_static/Ni2Cl2-BTDD.cif>`. This MOF is known Ni2Cl2(BTDD) and has the structure shown below:
 
-.. |Ni2Cl2-BBTA| image:: _static/Ni2Cl2-BBTA.png
+|Ni2Cl2-BTDD|
+
+The metal (Ni) sites here are shown in silver. This MOF has a honeycomb-like structure with square pyramidal Ni cations. Isn't it beautiful?
+
+.. |Ni2Cl2-BTDD| image:: _static/Ni2Cl2-BTDD.png
    :align: middle
 
-We'll start with the code that can do the job. Then we'll walk through what it all means. 
-.. literalinclude:: _static/triatomic.py
+--------------------
+Contiguous Adsorbate
+--------------------
+For this example, we will consider the initialization of a "contiguous" triatomic adsorbate. What I mean by this is that if we treat the adsorbate as an arbitrary molecule X1-X2-X3, then the adsorption process is described by M-X1-X2-X3. In this example, we'll consider the adsorption of N2O to a Ni site, in both an η1-N and η1-O binding mode. The code to handle this is shown below. 
 
-Like with the previous examples, we need to initialize an :class:`mai.adsorbate_constructor` object and then provide it the MOF of interest. In the case of triatomics, we have a few new keywords to introduce. In addition to the arguments previously described in the previous tutorials, we also now need to be able to tell MAI which connecting atom we would like. This was simple for diatomics, but for triatomics we can 
- we want the X2-X3 bond length to be and which connecting what we want the X1-X2-X3 bond angle to be kind of denticity we would like (i.e. end-on or side-on adsorption) and what we want the X1-X2 bond length and M-X1-X2 bond angle to be (if X1-X2 is our diatomic of interest and M is our metal adsorption site). The arguments used here are described below:
+.. literalinclude:: _static/triatomic_linear.py
 
-1. The ``ads_species`` argument is a string of the molecule that you want to add to the structure. In this example, we wanted to an O2 molecule, so we set this argument to 'O2'. Note that heteroatomic species are supported, and MAI will default to having the first atom bound to the metal site. So, setting ``ads_species`` to 'CO' or 'OC' would lead to M-C-O and M-O-C, respectively.
-2. The ``bond_dist`` argument is the desired distance between the adsorption site (i.e. the Ni species) and the connecting atom of the adsorbate (in Å). Here, we set ``bond_dist`` to 1.5 Å.
-3. The ``site_idx`` keyword argument is an integer representing the ASE ``Atoms`` index of the adsorption site (i.e. the Ni species).
-4. The ``eta`` keyword argument is an integer representing the denticity (must be 1 or 2 and defaults to 1 if not specified). In other words, ``eta=1`` would be an end-on adsorption mode, whereas ``eta=2`` would be a side-on adsorption mode. For this example, we decided to explore both options.
-5. The ``d_bond`` keyword argument is the desired distance between X1 and X2 in the diatomic (in Å). If not specified, it will default to the value for ``bond_dist``. Here, we decided to set ``d_bond`` to 1.2 Å, which is a reasonable O-O bond distance.
-6. The ``angle`` keyword argument is the desired M-X1-X2 bond angle (in degrees). By default, it assumes ``angle=180`` if ``eta=1`` or ``angle=90`` if ``eta=2``. For this example, we use ``angle=120`` and ``angle=90``, respectively, which is representative of common O2 binding modes.
+Like with the previous examples, we need to initialize an :class:`~mai.adsorbate_constructor.adsorbate_constructor` object and then provide it the MOF of interest. In the case of triatomics, we have a few new keywords to introduce. In addition to the arguments described in the previous examples, we can now provide MAI additional geometric parameters if desired. Namely, the new features are now that we can include the X2-X3 bond length and the X1-X2-X3 bond angle. The arguments used here are described below:
 
-That takes care of initializing :class:`mai.adsorbate_constructor` object. Now we can use this object to call a function ot make initialize the adsorbate with the file path to the MOF's CIF file.
+1. The ``ads_species``, ``bond_dist``, ``site_idx``, ``d_bond``, and ``angle`` are the same as before.
+2. Now, we have the option to add the ``d_bond2`` keyword argument, which specifies the X1-X2 distance. It defaults to ``d_bond2=d_bond1`` if not specified.
+3. We can also add the ``angle2`` keyword argument, which specifies the X1-X2-X3 bond angle. It defaults to ``angle2=180`` if not specified. We'll leave this one at the default for this example.
 
-Now let's see what happens as a result of running this code! The initialized structure is shown below:
-|Ni2Cl2-BBTA-N2O|
-Exactly what we'd expect yet again! You can see that in the first example, O2 is bound end-on, whereas the latter it is bound side-on, as specified in the example script. The bond angles and distances are the same as those specified in the input file. As mentioned in the previous tutorial, MAI attempts to minimize sterics. When it comes to diatomics, the adsorbate is spun around the M-X1 axis so that it minimizes interactions with framework atoms.
+That takes care of initializing the :class:`~mai.adsorbate_constructor.adsorbate_constructor` object. With this, we provide the object with the path to the MOF, and it will initialize the adsorbate. Now let's see what happens as a result of running this code! The initialized structure is shown below:
 
-That concludes our tutorial with diatomic adsorbates. Join me as we move onto more complicated systems! Up next is triatomics!
+|Ni2Cl2-BTDD-N2O|
 
-.. |Ni2Cl2-BBTA-N2O| image:: _static/Ni2Cl2-BBTA-N2O.png
+Exactly what we'd expect once more! You can see that in the first example, N2O is bound in an η1-N mode, whereas the second is bound in an η1-O mode, as specified. Feel free to play around with the bond distance and bond angle arguments to get a feel for how MAI works.
+
+.. |Ni2Cl2-BTDD-N2O| image:: _static/Ni2Cl2-BTDD-N2O.png
    :align: middle
+
+---------------------
+Noncontiguous Adsorbate
+---------------------
+The last bit of trickery comes into play when dealing with what I'll call "noncontiguous" adsorbates. These are adsorbates like water, where it is triatomic, but it is not bound in a sequential fashion. As with water, you will have a central atom of the adsorbate bound to the metal. Therefore, ``connect`` must be set to ``connect=2``, and the name of the species must be specified accordingly with the connecting atom listed as the second atom in the ``ads_species`` name (e.g. ``ads_species=HOH`` for water bound in an η1-O mode if ``connect=2``). Example code is shown below. The main thing to keep in mind is that now the connecting atom of the adsorbate is X2 instead of X1.
+
+.. literalinclude:: _static/triatomic_central.py
+
+.. |Ni2Cl2-BTDD-CO| image:: _static/Ni2Cl2-BTDD-H2O.png
+   :align: middle
+
+That concludes our tutorial for triatomic adsorbates. Now onto how to automate the specification of ``site_idx``.

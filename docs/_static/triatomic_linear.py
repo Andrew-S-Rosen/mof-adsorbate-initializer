@@ -1,6 +1,6 @@
 from mai.adsorbate_constructor import adsorbate_constructor
 
-mof_path = 'Sc-MIL-88B' #path to CIF of MOF
+mof_path = 'Ni2Cl2-BTDD.cif' #path to CIF of MOF
 site_idx = 0 #index of adsorption site
 bond_dist = 2.0 #desired distance between site_index and ads_species
 NN_dist = 1.13 #N-N distance in N2O
