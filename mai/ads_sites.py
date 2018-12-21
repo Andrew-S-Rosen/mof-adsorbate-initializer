@@ -1,8 +1,8 @@
 import numpy as np
 from ase import Atoms, Atom
-from ase.io import read, write
+from ase.io import write
 from mai.regression import OLS_fit, TLS_fit
-from mai.tools import get_refcode, string_to_formula
+from mai.tools import string_to_formula
 from mai.species_rules import add_monoatomic, add_diatomic, add_triatomic, add_CH4_SS
 import os
 
@@ -13,7 +13,7 @@ class ads_pos_optimizer():
 	"""
 	This identifies ideal adsorption sites
 	"""
-	def __init__(self,adsorbate_constructor,atoms_filepath,write_file=True,
+	def __init__(self,adsorbate_constructor,write_file=True,
 		new_mofs_path=None,error_path=None):
 		"""
 		Initialized variables
@@ -21,38 +21,36 @@ class ads_pos_optimizer():
 		Args:
 			adsorbate_constructor (class): adsorbate_constructor class
 			containing many relevant defaults
-
-			atoms_filepath (string): path to the structure file
 			
 			write_file (bool): if True, the new ASE atoms object should be
 			written to a CIF file (defaults to True)
 			
 			new_mofs_path (string): path to store the new CIF files if
-			write_file is True (defaults to atoms_filepath/new_mofs)
+			write_file is True (defaults to /new_mofs)
 			
 			error_path (string): path to store any adsorbates flagged as
-			problematic (defaults to atoms_filepath/errors)
+			problematic (defaults to /errors)
 		"""
-		self.full_ads_species = adsorbate_constructor.ads_species
-		self.ads_species = adsorbate_constructor.ads_species.split('_')[0]
-		self.bond_dist = adsorbate_constructor.bond_dist
+		self.full_ads_species = adsorbate_constructor.ads
+		self.ads = adsorbate_constructor.ads.split('_')[0]
+		self.d_MX1 = adsorbate_constructor.d_MX1
 		self.overlap_tol = adsorbate_constructor.overlap_tol
 		self.r_cut = adsorbate_constructor.r_cut
 		self.sum_tol = adsorbate_constructor.sum_tol
 		self.rmse_tol = adsorbate_constructor.rmse_tol
 		self.site_idx = adsorbate_constructor.site_idx
-		self.d_bond = adsorbate_constructor.d_bond
-		self.d_bond2 = adsorbate_constructor.d_bond2
-		self.angle = adsorbate_constructor.angle
-		self.angle2 = adsorbate_constructor.angle2
+		self.d_X1X2 = adsorbate_constructor.d_X1X2
+		self.d_X2X3 = adsorbate_constructor.d_X2X3
+		self.ang_MX1X2 = adsorbate_constructor.ang_MX1X2
+		self.ang_triads = adsorbate_constructor.ang_triads
 		self.eta = adsorbate_constructor.eta
 		self.connect = adsorbate_constructor.connect
-		self.atoms_filepath = atoms_filepath
+		self.start_atoms = adsorbate_constructor.start_atoms
+		self.name = adsorbate_constructor.name
 		self.write_file = write_file
 		
 		if new_mofs_path is None:
-			new_mofs_path = os.path.join(os.path.dirname(atoms_filepath),
-				'new_mofs')
+			new_mofs_path = os.path.join(os.getcwd(),'new_mofs')
 		self.new_mofs_path = new_mofs_path
 		if error_path is None:
 			error_path = os.path.join(new_mofs_path,'errors')
@@ -66,12 +64,12 @@ class ads_pos_optimizer():
 			normal_vec (numpy array): 1D numpy array for normal vector
 		
 		Returns:
-			dist (float): distance vector scaled to bond_dist
+			dist (float): distance vector scaled to d_MX1
 		"""
 		#Scale normal vector to desired bond length
-		bond_dist = self.bond_dist
+		d_MX1 = self.d_MX1
 		unit_normal = normal_vec/np.linalg.norm(normal_vec)
-		dist = unit_normal*bond_dist
+		dist = unit_normal*d_MX1
 
 		return dist
 
@@ -91,10 +89,9 @@ class ads_pos_optimizer():
 			min_dist (float): distance from adsorbate to nearest atom
 		"""
 		r_cut = self.r_cut
-		atoms_filepath = self.atoms_filepath
 
 		#Add proposed adsorbate
-		mof_temp = read(atoms_filepath)
+		mof_temp = self.start_atoms.copy()
 		adsorbate = Atoms([Atom('X',ads_pos)])
 		mof_temp.extend(adsorbate)
 
@@ -165,8 +162,8 @@ class ads_pos_optimizer():
 		"""
 
 		#Sum up Euclidean vectors and scale to bond distance
-		bond_dist = self.bond_dist
-		dist = bond_dist*scaled_sum_dist/np.linalg.norm(scaled_sum_dist)
+		d_MX1 = self.d_MX1
+		dist = d_MX1*scaled_sum_dist/np.linalg.norm(scaled_sum_dist)
 		ads_pos = center_coord - dist
 
 		return ads_pos
@@ -189,7 +186,6 @@ class ads_pos_optimizer():
 		"""
 		r_cut = self.r_cut
 		overlap_tol = self.overlap_tol
-		atoms_filepath = self.atoms_filepath
 		dist = self.get_dist_planar(normal_vec)
 
 		#Prepare 2 temporary adsorbates
@@ -198,7 +194,7 @@ class ads_pos_optimizer():
 		ads_pos_temp_unrotated2 = center_coord - dist
 		ads_temp1 = Atoms([Atom('X',ads_pos_temp_unrotated1)])
 		ads_temp2 = Atoms([Atom('X',ads_pos_temp_unrotated2)])
-		mof_temp_orig = read(atoms_filepath)
+		mof_temp_orig = self.start_atoms.copy()
 
 		#Rotate one of the adsorbates about the axis
 		#defined by the two coordinating atoms
@@ -297,7 +293,6 @@ class ads_pos_optimizer():
 		"""
 		sum_tol = self.sum_tol
 		rmse_tol = self.rmse_tol
-		atoms_filepath = self.atoms_filepath
 		scale_factor = 2.0
 
 		#Get coordinates of center atom and coordination number
@@ -305,7 +300,8 @@ class ads_pos_optimizer():
 			cnum = 1
 		else:
 			cnum = np.shape(mic_coords)[0]
-		center_coord = read(atoms_filepath)[site_idx].position
+		start_atoms = self.start_atoms.copy()
+		center_coord = start_atoms[site_idx].position
 
 		#Calculate relevant quantities based on coordination number
 		if cnum == 1:
@@ -353,14 +349,11 @@ class ads_pos_optimizer():
 		Returns:
 			new_mof (ASE Atoms object): new ASE Atoms object with adsorbate		
 		"""
-		atoms_filepath = self.atoms_filepath
 		full_ads_species = self.full_ads_species
-
-		atoms_filename = os.path.basename(atoms_filepath)
-		name = get_refcode(atoms_filename)
+		name = self.name
 		full_name = name+'_site'+str(site_idx)
 		new_name = full_name+'_'+full_ads_species
-		mof = read(atoms_filepath)
+		mof = self.start_atoms.copy()
 		new_mof = self.construct_mof(mof,ads_pos,site_idx)
 		overlap = self.check_and_write(new_mof,new_name)
 		if overlap:
@@ -380,19 +373,18 @@ class ads_pos_optimizer():
 			new_mof (ASE Atoms object): new ASE Atoms object with adsorbate		
 		"""
 		full_ads_species = self.full_ads_species
-		ads_species = self.ads_species
+		ads = self.ads
 		site_idx = self.site_idx
-		atoms_filepath = self.atoms_filepath
-		name = get_refcode(os.path.basename(atoms_filepath))
+		name = self.name
 		full_name = name+'_site'+str(site_idx)
 		new_name = full_name+'_'+full_ads_species
 		
 		#Add molecule to structure
-		mof = read(atoms_filepath)
+		mof = self.start_atoms.copy()
 		if full_ads_species == 'CH4_grid':
 			new_mof = self.construct_mof(mof,ads_pos,site_idx)
 		else:
-			raise ValueError('Unsupported adsorbate: '+ads_species)
+			raise ValueError('Unsupported adsorbate: '+ads)
 
 		#Confirm no overlapping atoms and write file
 		overlap = self.check_and_write(new_mof,new_name)
@@ -416,10 +408,10 @@ class ads_pos_optimizer():
 		overlap_tol = self.overlap_tol
 		write_file = self.write_file
 		error_path = self.error_path
-		ads_species = self.ads_species
+		ads = self.ads
 		new_mofs_path = self.new_mofs_path
 
-		n_new_atoms = len(string_to_formula(ads_species))
+		n_new_atoms = len(string_to_formula(ads))
 		overlap = False
 		for i in range(n_new_atoms):
 			dist = new_mof.get_distances(-(i+1),
@@ -448,7 +440,7 @@ class ads_pos_optimizer():
 		Args:
 			ads_pos_optimizer (class): see ads_sites.py for details
 
-			ads_species (string): adsorbate species
+			ads (string): adsorbate species
 
 			ads_pos (numpy array): 1D numpy array for the proposed
 			adsorption position
@@ -457,32 +449,32 @@ class ads_pos_optimizer():
 			mof (ASE Atoms object): ASE Atoms object with adsorbate
 		"""
 		full_ads_species = self.full_ads_species
-		ads_species = self.ads_species
+		ads = self.ads
 		r_cut = self.r_cut
 		overlap_tol = self.overlap_tol
-		d_bond = self.d_bond
-		d_bond2 = self.d_bond2
-		angle = self.angle
-		angle2 = self.angle2
+		d_X1X2 = self.d_X1X2
+		d_X2X3 = self.d_X2X3
+		ang_MX1X2 = self.ang_MX1X2
+		ang_triads = self.ang_triads
 		eta = self.eta
 		connect = self.connect
 
-		n_new_atoms = len(string_to_formula(ads_species))
+		n_new_atoms = len(string_to_formula(ads))
 		if '_grid' in full_ads_species:
-			if ads_species == 'CH4':
+			if ads == 'CH4':
 				new_mof = add_CH4_SS(mof,site_idx,ads_pos)
 			else:
 				raise ValueError('Unsupported species for grid method')
 		else:
 			if n_new_atoms == 1:
-				new_mof = add_monoatomic(mof,ads_species,ads_pos)
+				new_mof = add_monoatomic(mof,ads,ads_pos)
 			elif n_new_atoms == 2:
-				new_mof = add_diatomic(mof,ads_species,ads_pos,site_idx,
-					d_bond=d_bond,angle=angle,eta=eta,connect=connect,
+				new_mof = add_diatomic(mof,ads,ads_pos,site_idx,
+					d_X1X2=d_X1X2,ang_MX1X2=ang_MX1X2,eta=eta,connect=connect,
 					r_cut=r_cut,overlap_tol=overlap_tol)
 			elif n_new_atoms == 3:
-				new_mof = add_triatomic(mof,ads_species,ads_pos,site_idx,
-					d_bond1=d_bond,d_bond2=d_bond2,angle1=angle,angle2=angle2,
+				new_mof = add_triatomic(mof,ads,ads_pos,site_idx,
+					d_X1X2=d_X1X2,d_X2X3=d_X2X3,ang_MX1X2=ang_MX1X2,ang_triads=ang_triads,
 					connect=connect,r_cut=r_cut,overlap_tol=overlap_tol)	
 			else:
 				raise ValueError('Too many atoms in adsorbate')

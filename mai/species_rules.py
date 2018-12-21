@@ -28,7 +28,7 @@ def add_monoatomic(mof,ads_species,ads_pos):
 
 	return mof
 
-def add_diatomic(mof,ads_species,ads_pos,site_idx,d_bond=1.25,angle=None,eta=1,
+def add_diatomic(mof,ads_species,ads_pos,site_idx,d_X1X2=1.25,ang_MX1X2=None,eta=1,
 	connect=1,r_cut=2.5,overlap_tol=0.75):
 	"""
 	Add diatomic to the structure
@@ -42,9 +42,9 @@ def add_diatomic(mof,ads_species,ads_pos,site_idx,d_bond=1.25,angle=None,eta=1,
 		
 		site_idx (int): ASE index of site
 
-		d_bond (float): X1-X2 bond length (defaults to 1.25)
+		d_X1X2 (float): X1-X2 bond length (defaults to 1.25)
 
-		angle (float): site-X1-X2 angle (defaults to 180 degrees except for
+		ang_MX1X2 (float): site-X1-X2 angle (defaults to 180 degrees except for
 		side-on in which it defaults to 90 or end-on O2 in which it defaults
 		to 120)
 
@@ -75,38 +75,38 @@ def add_diatomic(mof,ads_species,ads_pos,site_idx,d_bond=1.25,angle=None,eta=1,
 	except:
 		raise ValueError('Invalid chemical species: '+ads_species)
 
-	#Set default bond angle
-	if angle is None:
+	#Set default bond ang_MX1X2
+	if ang_MX1X2 is None:
 		if eta == 1 and ads_species in ['O2','OO']:
-			angle = 120.0
+			ang_MX1X2 = 120.0
 		elif eta == 2:
-			angle = 90.0
+			ang_MX1X2 = 90.0
 		else:
-			angle = 180.0
-	while angle > 180:
-		angle -= 180
+			ang_MX1X2 = 180.0
+	while ang_MX1X2 > 180:
+		ang_MX1X2 -= 180
 
 	#Set X1 position and placeholder X2 position
 	n_start = len(mof)
 	mof.extend(mol[0])
 	r_vec = mof.get_distance(site_idx,-1,vector=True,mic=True)
-	r_bond = d_bond*(r_vec/np.linalg.norm(r_vec))
+	r_bond = d_X1X2*(r_vec/np.linalg.norm(r_vec))
 	mol[1].position = ads_pos+r_bond
 	mof.extend(mol[1])
 	mof[-1].position += 1e-6
-	mof.set_angle(site_idx,-2,-1,angle)
+	mof.set_angle(site_idx,-2,-1,ang_MX1X2)
 
 	#Make adsorption mode side-on if requested
 	if eta == 2:
 		line = mof.get_distance(-1,-2,vector=True,mic=True)
-		shift = (line/np.linalg.norm(line))*d_bond/2
+		shift = (line/np.linalg.norm(line))*d_X1X2/2
 		mof[-2].position += shift
 		mof[-1].position += shift
 	elif eta > 2:
 		raise ValueError('Wrong value for eta: '+str(eta))
 
 	#If not linear, sweep possible angles for X2 to minimize sterics
-	if angle != 180:
+	if ang_MX1X2 != 180:
 		dtheta = 10
 		n_angles = int(360/dtheta)
 
@@ -114,7 +114,7 @@ def add_diatomic(mof,ads_species,ads_pos,site_idx,d_bond=1.25,angle=None,eta=1,
 			temp_atoms = 2
 			mof.extend(Atoms([Atom('X',ads_pos+r_bond)]))
 			mof[-1].position += 1e-6
-			mof.set_angle(site_idx,-3,-1,360-angle)
+			mof.set_angle(site_idx,-3,-1,360-ang_MX1X2)
 		elif eta == 2:
 			temp_atoms = 1
 		r_temp = mof.get_distance(-1,-2,vector=True,mic=True)
@@ -167,8 +167,8 @@ def add_diatomic(mof,ads_species,ads_pos,site_idx,d_bond=1.25,angle=None,eta=1,
 
 	return mof
 
-def add_triatomic(mof,ads_species,ads_pos,site_idx,d_bond1=1.25,d_bond2=None,
-	angle1=None,angle2=None,connect=1,r_cut=2.5,overlap_tol=0.75):
+def add_triatomic(mof,ads_species,ads_pos,site_idx,d_X1X2=1.25,d_X2X3=None,
+	ang_MX1X2=None,ang_triads=None,connect=1,r_cut=2.5,overlap_tol=0.75):
 	"""
 	Add triatomic to the structure
 
@@ -181,16 +181,16 @@ def add_triatomic(mof,ads_species,ads_pos,site_idx,d_bond1=1.25,d_bond2=None,
 		
 		site_idx (int): ASE index of site
 
-		d_bond1 (float): X1-X2 bond length (defaults to 1.25)
+		d_X1X2 (float): X1-X2 bond length (defaults to 1.25)
 
-		d_bond2 (float): X2-X3 bond length for connect == 1 or
-		X1-X3 bond length for connect == 2 (defaults to d_bond1)
+		d_X2X3 (float): X2-X3 bond length for connect == 1 or
+		X1-X3 bond length for connect == 2 (defaults to d_X1X2)
 
-		angle1 (float): site-X1-X2 angle (defaults to 180 degrees except
+		ang_MX1X2 (float): site-X1-X2 angle (defaults to 180 degrees except
 		for certain pre-set molecules)
 
-		angle2 (float): X3-X1-X2 angle (defaults to 180 degrees for connect == 1
-		and angle1 for connect == 2)
+		ang_triads (float): X3-X1-X2 angle (defaults to 180 degrees for connect == 1
+		and ang_MX1X2 for connect == 2)
 
 		connect (int): the connecting atom in the species string (defaults to 1)
 
@@ -206,40 +206,40 @@ def add_triatomic(mof,ads_species,ads_pos,site_idx,d_bond1=1.25,d_bond2=None,
 	ads_formula = string_to_formula(ads_species)
 	X3 = ads_formula[2]
 
-	if d_bond2 is None:
-		d_bond2 = d_bond1 
-	if angle1 is None:
+	if d_X2X3 is None:
+		d_X2X3 = d_X1X2 
+	if ang_MX1X2 is None:
 		if ads_species in ['H2O','HOO','OHH']:
-			angle1 = 104.5
+			ang_MX1X2 = 104.5
 		else:
-			angle1 = 180.0
-	if angle2 is None:
+			ang_MX1X2 = 180.0
+	if ang_triads is None:
 		if connect == 1 or connect == 3:
-			angle2 = 180.0
+			ang_triads = 180.0
 		else:
-			angle2 = angle1
+			ang_triads = ang_MX1X2
 	if connect == 2:
 		ads_formula[0], ads_formula[1] = ads_formula[1], ads_formula[0]
 	elif connect == 3:
 		ads_formula[0], ads_formula[2] = ads_formula[2], ads_formula[0]
 
 	di_ads_species = ''.join(ads_formula[0:2])
-	mof = add_diatomic(mof,di_ads_species,ads_pos,site_idx,d_bond=d_bond1,
-		angle=angle1,r_cut=r_cut,overlap_tol=overlap_tol)
+	mof = add_diatomic(mof,di_ads_species,ads_pos,site_idx,d_X1X2=d_X1X2,
+		ang_MX1X2=ang_MX1X2,r_cut=r_cut,overlap_tol=overlap_tol)
 
 	if connect == 1 or connect == 3:
 		r_vec = mof.get_distance(-2,-1,vector=True,mic=True)
-		pos_temp = mof[-1].position+d_bond2*(r_vec/np.linalg.norm(r_vec))
+		pos_temp = mof[-1].position+d_X2X3*(r_vec/np.linalg.norm(r_vec))
 		mof.extend(Atoms([Atom(X3,pos_temp)]))
-		mof.set_angle(-3,-2,-1,angle2)
+		mof.set_angle(-3,-2,-1,ang_triads)
 	elif connect == 2:
-		if angle1 == 180 and angle2 == 180:
+		if ang_MX1X2 == 180 and ang_triads == 180:
 			raise ValueError('It is not possible to have a linear triatomic '+
 				'with connect=2')
 		r_vec = mof.get_distance(site_idx,-2,vector=True,mic=True)
-		r_bond = d_bond2*(r_vec/np.linalg.norm(r_vec))
+		r_bond = d_X2X3*(r_vec/np.linalg.norm(r_vec))
 		mof.extend(Atoms([Atom(X3,ads_pos+r_bond)]))
-		mof.set_angle(-2,-3,-1,angle2)
+		mof.set_angle(-2,-3,-1,ang_triads)
 	else:
 		raise ValueError('Connecting atom must have value of <= 3')
 

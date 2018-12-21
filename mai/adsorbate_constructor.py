@@ -1,6 +1,7 @@
-import numpy as np
 import os
+import numpy as np
 from ase.io import read
+from ase.atoms import Atoms
 from mai.ads_sites import ads_pos_optimizer
 from mai.tools import get_refcode
 from mai.oms_handler import get_omd_data
@@ -13,36 +14,36 @@ class adsorbate_constructor():
 	"""
 	This class constructs an ASE atoms object with an adsorbate
 	"""
-	def __init__(self,ads_species,bond_dist,site_idx=None,
-		eta=1,connect=1,d_bond=1.25,d_bond2=None,angle=None,angle2=None,
+	def __init__(self,ads='X',d_MX1=2.0,eta=1,connect=1,
+		d_X1X2=1.25,d_X2X3=None,ang_MX1X2=None,ang_triads=None,
 		r_cut=2.5,sum_tol=0.5,rmse_tol=0.25,overlap_tol=0.75):
 		"""
 		Initialized variables
 
 		Args:
-			ads_species (string): string of element or molecule for adsorbate
+			ads (string): string of element or molecule for adsorbate
+			(defaults to 'X')
 
-			bond_dist (float): distance between adsorbate and surface atom. If
+			d_MX1 (float): distance between adsorbate and surface atom. If
 			used with get_adsorbate_grid, it represents the maximum distance
-
-			site_idx (int): ASE index for the adsorption site
+			(defaults to 2.0)
 
 			eta (int): denticity of end-on (1) or side-on (2) (defaults to 1)
 
 			connect (int): the connecting atom in the species string (defaults to 1)
 
-			d_bond (float): X1-X2 bond length (defaults to 1.25)
+			d_X1X2 (float): X1-X2 bond length (defaults to 1.25)
 
-			angle (float): site-X1-X2 angle (for diatomics, defaults to 180 degrees
+			ang_MX1X2 (float): site-X1-X2 angle (for diatomics, defaults to 180 degrees
 			except for side-on in which it defaults to 90 or end-on O2 in which
 			it defaults to 120; for triatomics, defaults to 180 except for H2O
 			in which it defaults to 104.5)
 
-			d_bond2 (float): X2-X3 bond length for connect == 1 or
+			d_X2X3 (float): X2-X3 bond length for connect == 1 or
 			X1-X3 bond length for connect == 2 (defaults to d_bond1)
 
-			angle2 (float): X3-X1-X2 angle (defaults to 180 degrees for connect == 1
-			and angle1 for connect == 2)
+			ang_triads (float): X3-X1-X2 angle (defaults to 180 degrees for connect == 1
+			and 90 degrees for connect == 2)
 
 			r_cut (float): cutoff distance for calculating nearby atoms when
 			ranking adsorption sites
@@ -58,34 +59,36 @@ class adsorbate_constructor():
 			overlap_tol (float): distance below which atoms are assumed to be
 			overlapping
 		"""
-		self.ads_species = ads_species
-		self.bond_dist = bond_dist
+		self.ads = ads
+		self.d_MX1 = d_MX1
 		self.r_cut = r_cut
 		self.sum_tol = sum_tol
 		self.rmse_tol = rmse_tol
 		self.overlap_tol = overlap_tol
-		self.site_idx = site_idx
 
 		#initialize certain variables as None
-		self.d_bond = d_bond
-		self.d_bond2 = d_bond2
-		self.angle = angle
-		self.angle2 = angle2
+		self.d_X1X2 = d_X1X2
+		self.d_X2X3 = d_X2X3
+		self.ang_MX1X2 = ang_MX1X2
+		self.ang_triads = ang_triads
 		self.eta = eta
 		self.connect = connect
 
-	def get_adsorbate(self,atoms_filepath,omd_path=None,NN_method='crystal',
-		allowed_sites=None,write_file=True,new_mofs_path=None,error_path=None,
-		NN_indices=None):
+	def get_adsorbate(self,atoms_path=None,site_idx=None,omd_path=None,
+		NN_method='crystal',allowed_sites=None,write_file=True,
+		new_mofs_path=None,error_path=None,NN_indices=None,atoms=None,
+		new_atoms_name=None):
 		"""
 		Add an adsorbate using PymatgenNN or OMD
 
 		Args:
 
-			atoms_filepath (string): filepath to the CIF file
+			atoms_path (string): filepath to the CIF file
 			
+			site_idx (int): ASE index for the adsorption site
+
 			omd_path (string): filepath to OMD results folder (defaults to
-			'atoms_filepath/oms_results')
+			'/oms_results')
 
 			NN_method (string): string representing the desired Pymatgen
 			nearest neighbor algorithm. options include 'crystal',vire','okeefe',
@@ -109,30 +112,53 @@ class adsorbate_constructor():
 			sphere (these are usually automatically detected via the default
 			of None)
 
+			atoms (ASE Atoms object): the ASE Atoms object of the MOF to add
+			the adsorbate to (only include if atoms_path is not specified)
+
+			new_atoms_name (string): the name of the MOF used for file I/O
+			purposes (defaults to the basename of atoms_path if 
+			provided)
+
 		Returns:
 			new_atoms (Atoms object): ASE Atoms object of MOF with adsorbate
 		"""
 		#Check for file and prepare paths
-		site_idx = self.site_idx
 		if site_idx is not None and omd_path is not None:
 			raise ValueError('Cannot provide site index and OMD results path')
-		if not os.path.isfile(atoms_filepath):
-			print('WARNING: No MOF found for '+atoms_filepath)
+
+		if atoms_path is not None and not os.path.isfile(atoms_path):
+			print('WARNING: No MOF found for '+atoms_path)
 			return None
+		if atoms is not None and not isinstance(atoms,Atoms):
+			raise ValueError('atoms argument must be an ASE Atoms object')
+		if atoms_path is not None:
+			new_atoms_name = os.path.basename(atoms_path)
+			name = get_refcode(new_atoms_name)
+			atoms = read(atoms_path)
+		elif atoms is None:
+			raise ValueError('Must specify either atoms or atoms_path args')
+
 		if new_mofs_path is None:
 			new_mofs_path = os.path.join(os.getcwd(),'new_mofs')
 		if error_path is None:
 			error_path = os.path.join(os.getcwd(),'errors')
 		if allowed_sites is not None and not isinstance(allowed_sites,list):
 			allowed_sites = [allowed_sites]
-		atoms_filename = os.path.basename(atoms_filepath)
-		name = get_refcode(atoms_filename)
-		atoms = read(atoms_filepath)
+
+		if atoms is not None and new_atoms_name is None:
+			name = atoms.get_chemical_formula()
+		self.start_atoms = atoms.copy()
+
+		if site_idx < 0:
+			site_idx = len(atoms)+site_idx
+
+		self.name = name
+		self.site_idx = site_idx
 
 		#Get ASE indices of coordinating atoms and vectors from adsorption site
 		if site_idx is None:
 			if omd_path is None:
-				omd_path = os.path.join(os.path.dirname(atoms_filepath),'oms_results')
+				omd_path = os.path.join(os.getcwd(),'oms_results')
 			omsex_dict = get_omd_data(omd_path,name,atoms)
 			if omsex_dict is None:
 				return None
@@ -154,9 +180,8 @@ class adsorbate_constructor():
 				mic=True,vector=True))
 
 			#Get the optimal adsorption site
-			ads_optimizer = ads_pos_optimizer(self,atoms_filepath,
-						new_mofs_path=new_mofs_path,error_path=error_path,
-						write_file=write_file)
+			ads_optimizer = ads_pos_optimizer(self,new_mofs_path=new_mofs_path,
+				error_path=error_path,write_file=write_file)
 			ads_pos = ads_optimizer.get_opt_ads_pos(mic_coords,oms_idx)
 			new_atoms_i = ads_optimizer.get_new_atoms(ads_pos,oms_idx)
 			new_atoms.append(new_atoms_i)
@@ -166,42 +191,66 @@ class adsorbate_constructor():
 
 		return new_atoms
 
-	def get_adsorbate_grid(self,atoms_filepath,grid_path=None,
-		grid_format='ASCII',write_file=True,new_mofs_path=None,error_path=None):
+	def get_adsorbate_grid(self,atoms_path=None,site_idx=None,grid_path=None,
+		grid_format='ASCII',write_file=True,new_mofs_path=None,error_path=None,
+		atoms=None,new_atoms_name=None):
 		"""
 		This function adds a molecular adsorbate based on a potential energy grid
 
 		Args:
-			atoms_filepath (string): filepath to the CIF file
-			
+			atoms_path (string): filepath to the CIF file
+
+			site_idx (int): ASE index for the adsorption site
+
 			grid_path (string): path to the directory containing the PEG
-			(defaults to /energy_grids within the directory containing
-			the starting CIF file)
+			(defaults to /energy_grids)
 
 			grid_format (string): accepts either 'ASCII' or 'cube' and
-			is the file format for the PEG (defaults to ASCII)
+			is the file format for the PEG (defaults to 'ASCII')
 
 			write_file (bool): if True, the new ASE atoms object should be
 			written to a CIF file (defaults to True)
 			
 			new_mofs_path (string): path to store the new CIF files if
-			write_file is True (defaults to /new_mofs within the directory
-			containing the starting CIF file)
+			write_file is True (defaults to /new_mofs)
 			
 			error_path (string): path to store any adsorbates flagged as
-			problematic (defaults to /errors within the directory
-			containing the starting CIF file)
+			problematic (defaults to /errors)
+
+			atoms (ASE Atoms object): the ASE Atoms object of the MOF to add
+			the adsorbate to (only include if atoms_path is not specified)
+
+			new_atoms_name (string): the name of the MOF used for file I/O
+			purposes (defaults to the basename of atoms_path if 
+			provided)
 
 		Returns:
 			new_atoms (Atoms object): ASE Atoms object of MOF with adsorbate
 		"""
 		#Check for file and prepare paths
-		
-		self.ads_species += '_grid'
-		if not os.path.isfile(atoms_filepath):
-			print('WARNING: No MOF found for '+atoms_filepath)
-			return None
 
+		self.ads += '_grid'
+		if atoms_path is not None and not os.path.isfile(atoms_path):
+			print('WARNING: No MOF found for '+atoms_path)
+			return None
+		if atoms is not None and not isinstance(atoms,Atoms):
+			raise ValueError('atoms argument must be an ASE Atoms object')
+		if atoms_path is not None:
+			new_atoms_name = os.path.basename(atoms_path)
+			name = get_refcode(new_atoms_name)
+			atoms = read(atoms_path)
+		elif atoms is None:
+			raise ValueError('Must specify either atoms or atoms_path args')
+		if site_idx is None:
+			raise ValueError('Must specify site index')
+		if atoms is not None and new_atoms_name is None:
+			name = atoms.get_chemical_formula()
+		self.start_atoms = atoms.copy()
+		if site_idx < 0:
+			site_idx = len(atoms)+site_idx
+		self.site_idx = site_idx
+		self.name = name
+		
 		grid_format = grid_format.lower()
 		if grid_format == 'ascii':
 			grid_ext = '.grid'
@@ -210,22 +259,15 @@ class adsorbate_constructor():
 		else:
 			raise ValueError('Unsupported grid_format '+grid_format)
 
-		if self.site_idx is None:
-			raise ValueError('site_idx must be specified')
-
 		if grid_path is None:
-			grid_path = os.path.join(os.path.dirname(atoms_filepath),'energy_grids')
+			grid_path = os.path.join(os.getcwd(),'energy_grids')
 		if new_mofs_path is None:
 			new_mofs_path = os.path.join(os.getcwd(),'new_mofs')
 		if error_path is None:
 			error_path = os.path.join(os.getcwd(),'errors')
 
-		max_dist = self.bond_dist
-		site_idx = self.site_idx
+		max_dist = self.d_MX1
 
-		atoms_filename = os.path.basename(atoms_filepath)
-		name = get_refcode(atoms_filename)
-		atoms = read(atoms_filepath)
 		grid_filepath = os.path.join(grid_path,name+grid_ext)
 		
 		site_pos = atoms[site_idx].position
@@ -236,9 +278,8 @@ class adsorbate_constructor():
 		elif ads_pos is 'invalid':
 			print('WARNING: all NaNs within cutoff for '+name)
 			return None
-		ads_optimizer = ads_pos_optimizer(self,atoms_filepath,
-					new_mofs_path=new_mofs_path,error_path=error_path,
-					write_file=write_file)
+		ads_optimizer = ads_pos_optimizer(self,new_mofs_path=new_mofs_path,
+			error_path=error_path,write_file=write_file)
 		new_atoms = ads_optimizer.get_new_atoms_grid(site_pos,ads_pos)
 
 		return new_atoms

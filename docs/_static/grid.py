@@ -1,14 +1,11 @@
-import os
 from mai.adsorbate_constructor import adsorbate_constructor
 from ase.io import read
 
-grid_path = os.path.join('example_MOFs','energy_grids_ASCII')
-mof_path = 'AHOKIR01-O.cif' #path to CIF of MOF
-adsorbate = 'CH4' #adsorbate species
-site = 'O' #adsorption site
-max_dist = 3.0 #maximum distance between O and C
+grid_path = 'energy_grids' #path to energy grids
+mof_path = 'mymof.cif' #path to CIF of MOF
+site_idx = -1 #adsorption site
 
 mof = read(mof_path)
-site_idx = [atom.index for atom in mof if atom.symbol == site][-1]
-ads = adsorbate_constructor(adsorbate,max_dist,site_idx=site_idx)
-mof_adsorbate = ads.get_adsorbate_grid(mof_path,grid_path=grid_path,grid_format='ASCII')
+ads = adsorbate_constructor(ads='CH4',d_MX1=3.0,site_idx=site_idx)
+mof_adsorbate = ads.get_adsorbate_grid(atoms_path=mof_path,
+	grid_path=grid_path,grid_format='ASCII')
