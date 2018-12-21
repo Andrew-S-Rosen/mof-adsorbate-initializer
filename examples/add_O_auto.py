@@ -3,7 +3,8 @@ from omsdetector import MofCollection
 from mai.adsorbate_constructor import adsorbate_constructor
 
 mofs_path = 'example_MOFs' #path to folder of CIFs
-oms_data_path = os.getcwd() #path to store the OMS results
+oms_analysis_folder = os.getcwd() #path to store the OMS results
+oms_data_path = os.path.join(oms_analysis_folder,'oms_results') #path to oms_results folder
 
 #Run the Open Metal Detector
 mof_coll = MofCollection.from_folder(collection_folder=mofs_path,
