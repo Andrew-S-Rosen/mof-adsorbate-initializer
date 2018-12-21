@@ -11,4 +11,3 @@ python add_all_H2O.py &&
 python add_CH4_PEG.py &&
 python add_O_auto.py &&
 cd ../
-python test/analyze_test.py
