@@ -19,9 +19,9 @@ For this example, we will consider the initialization of a "contiguous" triatomi
 
 Like with the previous examples, we need to initialize an :class:`~mai.adsorbate_constructor.adsorbate_constructor` object and then provide it the MOF of interest. In the case of triatomics, we have a few new keywords to introduce. In addition to the arguments described in the previous examples, we can now provide MAI additional geometric parameters if desired. Namely, the new features are now that we can include the X2-X3 bond length and the X1-X2-X3 bond angle. The arguments used here are described below:
 
-1. The ``ads_species``, ``bond_dist``, ``site_idx``, ``d_bond``, and ``angle`` are the same as before.
-2. Now, we have the option to add the ``d_bond2`` keyword argument, which specifies the X1-X2 distance. It defaults to ``d_bond2=d_bond1`` if not specified.
-3. We can also add the ``angle2`` keyword argument, which specifies the X1-X2-X3 bond angle. It defaults to ``angle2=180`` if not specified. We'll leave this one at the default for this example.
+1. The ``ads``, ``d_MX1X2``, , ``d_X1X2``, and ``ang_MX1X2`` are the same as before.
+2. Now, we have the option to add the ``d_X2X3`` keyword argument, which specifies the X2-X3 distance. It defaults to ``d_X2X3=d_X1X2`` if not specified.
+3. We can also add the ``ang_triads`` keyword argument, which specifies the X2-X1-X3 bond angle. It defaults to ``ang_triads=180`` if not specified. We'll leave this one at the default for this example since N2O is generally linear when adsorbed to metals.
 
 That takes care of initializing the :class:`~mai.adsorbate_constructor.adsorbate_constructor` object. With this, we provide the object with the path to the MOF, and it will initialize the adsorbate. Now let's see what happens as a result of running this code! The initialized structures are shown below:
 
@@ -35,7 +35,9 @@ Exactly what we'd expect once more! You can see that in the first example, N2O i
 ---------------------
 Noncontiguous Adsorbate
 ---------------------
-The last bit of trickery comes into play when dealing with what I'll call "noncontiguous" adsorbates. These are adsorbates like water, where it is triatomic, but it is not bound in a sequential fashion. As with water, you will have a central atom of the adsorbate bound to the metal. Therefore, ``connect`` must be set to ``connect=2``, and the name of the species must be specified with the connecting atom listed as the second atom in the ``ads_species`` name (e.g. ``ads_species=HOH`` for water bound in an η1-O mode if ``connect=2``). An example code is shown below. The main thing to keep in mind is that now the connecting atom of the adsorbate is X2 instead of X1.
+The last bit of trickery comes into play when dealing with what I'll call "noncontiguous" adsorbates. These are adsorbates like water, where it is triatomic, but it is not bound in a sequential fashion. As with water, you will have a central atom of the adsorbate bound to the metal (instead of an M-O-H-H adsorption mode). To tell MAI about this desired adsorption mode, :class:`~mai.adsorbate_constructor.adsorbate_constructor` has a keyword argument named ``connect``, which is the atom number in ``ads`` that should be bound to the adsorption site. For the case of ``ads='HOH'``, we should set ``connect=2`` to have the second atom (i.e. the O atom) bound to the adsorption site. Note that for this reason we cannot use ``ads='H2O'`` here.
+
+An example code is shown below. The main thing to keep in mind is that now the connecting atom of the adsorbate is X2 instead of X1.
 
 .. literalinclude:: _static/triatomic_central.py
 

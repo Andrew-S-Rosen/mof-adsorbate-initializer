@@ -1,15 +1,15 @@
 Advanced Skills
 ================
-The previous tutorials should get you up and running so you can automate the construction of adsorbate geometries in a wide range of MOFs. However, for more advanced users, there are some additional features that may be of use. Let's walk through some more complex examples.
+The previous tutorials should get you up and running so you can automate the construction of adsorbate geometries for a wide range of MOFs. However, for more advanced users, there are some additional features that may be of use. Let's walk through some more complex examples.
 
 --------------------------
 Adding Multiple Adsorbates
 --------------------------
-Instead of adding a single adsorbate, we may want to add an adsorbate to every metal site in a given MOF. We will consider Ni2Cl2(BBTA) again from the triatomic tutorial, except this time we will add an H2O molecule to every Ni site. This can be done using the code below.
+Instead of adding a single adsorbate, you may want to add an adsorbate to every metal site in a given MOF. We will consider Ni2Cl2(BTDD) again from the triatomic tutorial, except this time we will add an H2O molecule to every Ni site. This can be done using the code below.
 
 .. literalinclude:: _static/multiple.py
 
-There are a few changes we've made to the usual workflow. The first is that we needed to identify all of the possible adsorption site indices, which we have defined as ``Ni_idx``. This can be done using ASE's built-in tools for working with ASE ``Atoms`` ojbects. We will then iterate over each site and add an H2O molecule. Since MAI adds adsorbates sequentially, we don't want to write out all the intermediate structures, so we also set ``write_file=False`` in :func:`~mai.adsorbate_constructor.adsorbate_constructor.get_adsorbate`. The last new aspect to introduce is that, instead of passing a CIF file via ``atoms_filepath`` in :func:`~mai.adsorbate_constructor.adsorbate_constructor.get_adsorbate`, we can directly pass in an ASE ``Atoms`` object via the ``atoms`` keyword argument.
+There are a few changes we've made to the usual workflow. The first is that we needed to identify all of the possible adsorption site indices, which we have defined as ``Ni_idx``. This can be done using ASE's built-in tools for working with ASE ``Atoms`` ojbects. We will then iterate over each site and add an H2O molecule. Since MAI adds adsorbates sequentially, we don't want to write out all the intermediate structures, so we also set ``write_file=False`` in :func:`~mai.adsorbate_constructor.adsorbate_constructor.get_adsorbate`. The last new aspect to introduce is that, instead of passing a CIF file via ``atoms_path`` in :func:`~mai.adsorbate_constructor.adsorbate_constructor.get_adsorbate`, we can directly pass in an ASE ``Atoms`` object via the ``atoms`` keyword argument.
 
 --------------------
 Bonding Algorithms

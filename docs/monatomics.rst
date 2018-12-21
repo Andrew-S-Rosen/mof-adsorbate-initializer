@@ -14,13 +14,15 @@ We'll start with the code that can do the job. Then we'll walk through what it a
 
 .. literalinclude:: _static/monatomic.py
 
-Okay, let's dive right in! MAI requires the calling of a module known as the :class:`~mai.adsorbate_constructor.adsorbate_constructor` object, which tells MAI what kind of adsorbate you'd like to make. For simple monatomic species, there are only a few arguments you need to worry about. 
+Okay, let's dive right in! MAI requires the calling of an object known as the :class:`~mai.adsorbate_constructor.adsorbate_constructor`, which tells MAI what kind of adsorbate you'd like to make. For simple monatomic species, there are only a few arguments you need to worry about. 
 
-1. The ``ads_species`` argument is a string of the element that you want to add to the structure. In this example, we wanted to an oxygen atom, so we set ``ads_species='O'``.
-2. The ``bond_dist`` argument is the desired distance between the adsorption site (i.e. the Cu species) and the adsorbate (in Å). Here, we set ``bond_dist=1.75``.
-3. The ``site_idx`` keyword argument is an integer representing the ASE ``Atoms`` index of the adsorption site (i.e. the Cu species). Later in this guide we'll show how this parameter can be determined automatically, but for now we have manually set it to the 0-th ``Atoms`` index via ``site_idx=0``, which corresponds to one of the Cu atoms. To find out the ASE indices for a given structure, you can inspect_ or visualize_ the ``Atoms`` object associated with the CIF file. Generally, it is the same indexing order as you'd find in your favorite CIF viewer (e.g. VESTA_).
+1. The ``ads`` keyword argument is a string of the element that you want to add to the structure.
+2. The ``d_MX1`` keyword argument is the desired distance between the adsorption site (i.e. the Cu species) and the adsorbate (in Å).
 
-That takes care of initializing the :class:`~mai.adsorbate_constructor.adsorbate_constructor` object. Now we can use this object to call a function to initialize the adsorbate. This is done via :func:`~mai.adsorbate_constructor.adsorbate_constructor.get_adsorbate`. Generally, the only information you'll need to provide is the file path to the CIF of the MOF. In this case, we set it to ``Cu-BTC.cif`` in our current working directory. The output of calling :func:`~mai.adsorbate_constructor.adsorbate_constructor.get_adsorbate` is a new ASE ``Atoms`` object with the adsorbate initialized.
+That takes care of initializing the :class:`~mai.adsorbate_constructor.adsorbate_constructor` object. Now we can use this object to call a function to initialize the adsorbate. This is done via :func:`~mai.adsorbate_constructor.adsorbate_constructor.get_adsorbate`. The output of calling :func:`~mai.adsorbate_constructor.adsorbate_constructor.get_adsorbate` is a new ASE ``Atoms`` object with the adsorbate initialized. The commonly used keywords for monatomic speies are as follows:
+
+1. The ``atoms_path`` keyword argument is the filepath to the starting CIF file of the MOF.
+2. The ``site_idx`` keyword argument is an integer representing the ASE ``Atoms`` index of the adsorption site (i.e. the Cu species). Later in this guide we'll show how this parameter can be determined automatically, but for now we have manually set it to the 0-th ``Atoms`` index via ``site_idx=0``, which corresponds to one of the Cu atoms. To find out the ASE indices for a given structure, you can inspect_ or visualize_ the ``Atoms`` object associated with the CIF file. Generally, it is the same indexing order as you'd find in your favorite CIF viewer (e.g. VESTA_).
 
 Now let's see what happens as a result of running this code! The initialized structure is shown below:
 
