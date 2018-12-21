@@ -10,8 +10,5 @@ A.S. Rosen, J.M. Notestein, R.Q. Snurr. "Identifying Promising Metal-Organic Fra
 ## What is MAI?
 High-throughput computational catalysis typically involves the calculation of many different adsorption energies. MAI is a tool meant to automate the process of constructing reasonable initial guesses for adsorbates in MOFs for the purposes of DFT screening workflows. For implementing a high-throughput DFT workflow, refer to our [PyMOFScreen](https://github.com/arosen93/mof_screen) code.
 
-## Documentation
-WORK IN PROGRESS: Please check out the [ReadTheDocs](https://mai.readthedocs.io/en/latest/) for documentation on how to use MAI.
-
-## Example Images
-`Todo`
+## Documentation and Details
+Please check out the [ReadTheDocs](https://mai.readthedocs.io/en/latest/) page for documentation on how to use MAI.
