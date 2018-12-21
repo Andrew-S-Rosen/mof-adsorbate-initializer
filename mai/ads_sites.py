@@ -90,7 +90,7 @@ class ads_pos_optimizer():
 		"""
 		r_cut = self.r_cut
 
-		#Add proposed adsorbate
+		#Add proposed adsorbate to a copy of the MOF
 		mof_temp = self.start_atoms.copy()
 		adsorbate = Atoms([Atom('X',ads_pos)])
 		mof_temp.extend(adsorbate)
@@ -413,6 +413,8 @@ class ads_pos_optimizer():
 
 		n_new_atoms = len(string_to_formula(ads))
 		overlap = False
+
+		#Loop over each new atom and confirm no overlap
 		for i in range(n_new_atoms):
 			dist = new_mof.get_distances(-(i+1),
 				np.arange(0,len(new_mof))[0:len(new_mof)-n_new_atoms],mic=True)
@@ -460,6 +462,8 @@ class ads_pos_optimizer():
 		connect = self.connect
 
 		n_new_atoms = len(string_to_formula(ads))
+
+		#Construct MOF based on type of adsorbate
 		if '_grid' in full_ads_species:
 			if ads == 'CH4':
 				new_mof = add_CH4_SS(mof,site_idx,ads_pos)

@@ -45,8 +45,7 @@ def add_diatomic(mof,ads_species,ads_pos,site_idx,d_X1X2=1.25,ang_MX1X2=None,eta
 		d_X1X2 (float): X1-X2 bond length (defaults to 1.25)
 
 		ang_MX1X2 (float): site-X1-X2 angle (defaults to 180 degrees except for
-		side-on in which it defaults to 90 or end-on O2 in which it defaults
-		to 120)
+		side-on in which it defaults to 90)
 
 		eta (int): denticity of end-on (1) or side-on (2) (defaults to 1)
 
@@ -77,12 +76,10 @@ def add_diatomic(mof,ads_species,ads_pos,site_idx,d_X1X2=1.25,ang_MX1X2=None,eta
 
 	#Set default bond ang_MX1X2
 	if ang_MX1X2 is None:
-		if eta == 1 and ads_species in ['O2','OO']:
-			ang_MX1X2 = 120.0
+		if eta == 1:
+			ang_MX1X2 = 180.0
 		elif eta == 2:
 			ang_MX1X2 = 90.0
-		else:
-			ang_MX1X2 = 180.0
 	while ang_MX1X2 > 180:
 		ang_MX1X2 -= 180
 
@@ -186,8 +183,7 @@ def add_triatomic(mof,ads_species,ads_pos,site_idx,d_X1X2=1.25,d_X2X3=None,
 		d_X2X3 (float): X2-X3 bond length for connect == 1 or
 		X1-X3 bond length for connect == 2 (defaults to d_X1X2)
 
-		ang_MX1X2 (float): site-X1-X2 angle (defaults to 180 degrees except
-		for certain pre-set molecules)
+		ang_MX1X2 (float): site-X1-X2 angle (defaults to 180 degrees)
 
 		ang_triads (float): X3-X1-X2 angle (defaults to 180 degrees for connect == 1
 		and ang_MX1X2 for connect == 2)
@@ -209,10 +205,7 @@ def add_triatomic(mof,ads_species,ads_pos,site_idx,d_X1X2=1.25,d_X2X3=None,
 	if d_X2X3 is None:
 		d_X2X3 = d_X1X2 
 	if ang_MX1X2 is None:
-		if ads_species in ['H2O','HOO','OHH']:
-			ang_MX1X2 = 104.5
-		else:
-			ang_MX1X2 = 180.0
+		ang_MX1X2 = 180.0
 	if ang_triads is None:
 		if connect == 1 or connect == 3:
 			ang_triads = 180.0

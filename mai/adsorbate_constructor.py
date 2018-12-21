@@ -34,13 +34,13 @@ class adsorbate_constructor():
 
 			d_X1X2 (float): X1-X2 bond length (defaults to 1.25)
 
+			d_X2X3 (float): X2-X3 bond length for connect == 1 or
+			X1-X3 bond length for connect == 2 (defaults to d_bond1)
+
 			ang_MX1X2 (float): site-X1-X2 angle (for diatomics, defaults to 180 degrees
 			except for side-on in which it defaults to 90 or end-on O2 in which
 			it defaults to 120; for triatomics, defaults to 180 except for H2O
 			in which it defaults to 104.5)
-
-			d_X2X3 (float): X2-X3 bond length for connect == 1 or
-			X1-X3 bond length for connect == 2 (defaults to d_bond1)
 
 			ang_triads (float): X3-X1-X2 angle (defaults to 180 degrees for connect == 1
 			and 90 degrees for connect == 2)
@@ -59,14 +59,20 @@ class adsorbate_constructor():
 			overlap_tol (float): distance below which atoms are assumed to be
 			overlapping
 		"""
+		if not isinstance(ads,str):
+			raise ValueError('ads must be a string')
+		if eta not in [1,2]:
+			raise ValueError('eta must be 1 or 2')
+		if connect not in [1,2,3]:
+			raise ValueError('connect must be 1, 2, or 3')
+		if overlap_tol >= d_MX1:
+			raise ValueError('The tolerance for overlapping atoms is greater than d_MX1')
 		self.ads = ads
 		self.d_MX1 = d_MX1
 		self.r_cut = r_cut
 		self.sum_tol = sum_tol
 		self.rmse_tol = rmse_tol
 		self.overlap_tol = overlap_tol
-
-		#initialize certain variables as None
 		self.d_X1X2 = d_X1X2
 		self.d_X2X3 = d_X2X3
 		self.ang_MX1X2 = ang_MX1X2
@@ -122,10 +128,10 @@ class adsorbate_constructor():
 		Returns:
 			new_atoms (Atoms object): ASE Atoms object of MOF with adsorbate
 		"""
-		#Check for file and prepare paths
+
+		#Error handling of variables and setting of defaults
 		if site_idx is not None and omd_path is not None:
 			raise ValueError('Cannot provide site index and OMD results path')
-
 		if atoms_path is not None and not os.path.isfile(atoms_path):
 			print('WARNING: No MOF found for '+atoms_path)
 			return None
@@ -137,21 +143,18 @@ class adsorbate_constructor():
 			atoms = read(atoms_path)
 		elif atoms is None:
 			raise ValueError('Must specify either atoms or atoms_path args')
-
 		if new_mofs_path is None:
 			new_mofs_path = os.path.join(os.getcwd(),'new_mofs')
 		if error_path is None:
 			error_path = os.path.join(os.getcwd(),'errors')
 		if allowed_sites is not None and not isinstance(allowed_sites,list):
 			allowed_sites = [allowed_sites]
-
 		if atoms is not None and new_atoms_name is None:
 			name = atoms.get_chemical_formula()
-		self.start_atoms = atoms.copy()
-
 		if site_idx is not None and site_idx < 0:
 			site_idx = len(atoms)+site_idx
 
+		self.start_atoms = atoms.copy()
 		self.name = name
 		self.site_idx = site_idx
 
@@ -227,9 +230,8 @@ class adsorbate_constructor():
 		Returns:
 			new_atoms (Atoms object): ASE Atoms object of MOF with adsorbate
 		"""
-		#Check for file and prepare paths
 
-		self.ads += '_grid'
+		#Error handling of variables and setting of defaults
 		if atoms_path is not None and not os.path.isfile(atoms_path):
 			print('WARNING: No MOF found for '+atoms_path)
 			return None
@@ -245,12 +247,9 @@ class adsorbate_constructor():
 			raise ValueError('Must specify site index')
 		if atoms is not None and new_atoms_name is None:
 			name = atoms.get_chemical_formula()
-		self.start_atoms = atoms.copy()
 		if site_idx < 0:
 			site_idx = len(atoms)+site_idx
-		self.site_idx = site_idx
-		self.name = name
-		
+
 		grid_format = grid_format.lower()
 		if grid_format == 'ascii':
 			grid_ext = '.grid'
@@ -266,6 +265,10 @@ class adsorbate_constructor():
 		if error_path is None:
 			error_path = os.path.join(os.getcwd(),'errors')
 
+		self.start_atoms = atoms.copy()
+		self.site_idx = site_idx
+		self.ads += '_grid'
+		self.name = name
 		max_dist = self.d_MX1
 
 		grid_filepath = os.path.join(grid_path,name+grid_ext)
