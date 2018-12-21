@@ -149,7 +149,7 @@ class adsorbate_constructor():
 			name = atoms.get_chemical_formula()
 		self.start_atoms = atoms.copy()
 
-		if site_idx < 0:
+		if site_idx is not None and site_idx < 0:
 			site_idx = len(atoms)+site_idx
 
 		self.name = name
