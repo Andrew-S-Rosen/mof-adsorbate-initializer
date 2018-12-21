@@ -10,14 +10,13 @@ Currently, only single-site CH4 adsorbates are supported with PEGs, although in 
 
 Unlike with the monatomics, diatomics, and triatomics tutorials, when dealing with PEGs, one must use the :func:`~mai.adsorbate_constructor.adsorbate_constructor.get_adsorbate_grid` function instead of :func:`~mai.adsorbate_constructor.adsorbate_constructor.get_adsorbate`. The :func:`~mai.adsorbate_constructor.adsorbate_constructor.get_adsorbate_grid` function is quite simple. An example code is shown below to initialize an adsorbate based on an :download:`example PEG <../examples/example_MOFs/energy_grids_ASCII/AHOKIR01-O.grid>` and :download:`example MOF <../examples/example_MOFs/energy_grids_ASCII/AHOKIR01-O.cif>`.
 
-.. literalinclude:: _static/grid.py
+.. literalinclude:: ../examples/add_CH4_PEG.py
 
 The arguments for are described below:
 
 1. The ``atoms_path`` and ``site_idx`` are the same as for :func:`~mai.adsorbate_constructor.adsorbate_constructor.get_adsorbate`.
 2. The ``grid_path`` keyword argument is the path to the PEG file.
-3. The ``grid_format`` keyword argument can be either ``grid_format='cube'`` or ``grid_format='ASCII'`` for a cube or 
-The main  only requires three main arguments. The first two arguments, ``atoms_path`` and ``site_idx``, are the same as when using :func:`~mai.adsorbate_constructor.adsorbate_constructor.get_adsorbate_grid`. The third argument,  first is the filepath to the MOF CIF, and the second is the ``grid_format`` keyword argument, which must be either ``ASCII``. By default, if unspecified MAI will assume you are providing an ASCII-formatted grid.
+3. The ``grid_format`` keyword argument can be either ``grid_format='cube'`` or ``grid_format='ASCII'``.
 
 The result of running the previous example code is the following structure.
 

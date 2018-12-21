@@ -11,9 +11,10 @@ mof_coll = MofCollection.from_folder(collection_folder=mofs_path,
 mof_coll.analyse_mofs()
 
 #add adsorbate for every CIF in mofs_path
-for f in os.listdir(mofs_path):
-	if '.cif' not in f:
+for file in os.listdir(mofs_path):
+	if '.cif' not in file:
 		continue
-	mof_path = os.path.join(mofs_path,f)
+	mof_path = os.path.join(mofs_path,file)
 	ads = adsorbate_constructor(ads='O',d_MX1=1.75)
-	new_mof_atoms = ads.get_adsorbate(atoms_path=mof_path)
+	new_mof_atoms = ads.get_adsorbate(atoms_path=mof_path,
+		omd_path=oms_data_path)

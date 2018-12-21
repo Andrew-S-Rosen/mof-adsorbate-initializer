@@ -1,7 +1,7 @@
 Diatomics
 ===========
 
-In this example, we'll work through how to add two-atom adsorbates to open metal sites in MOFs. The CIF for the MOF we'll use for this example can be found :download:`here <_static/Ni-BTP.cif>`. This MOF is known Ni3(BTP)2, or Ni-BTP for short, and has the structure shown below:
+In this example, we'll work through how to add two-atom adsorbates to open metal sites in MOFs. The CIF for the MOF we'll use for this example can be found :download:`here <../examples/example_MOFs/Ni-BTP.cif>`. This MOF is known Ni3(BTP)2, or Ni-BTP for short, and has the structure shown below:
 
 |Ni-BTP|
 
@@ -15,7 +15,7 @@ Homoatomic
 -----------
 For this example, we will consider the initialization of an O2 molecule to a single coordinatively unsaturated Ni site. O2 can bind in an end-on (η1-O) or side-on (η2-O) mode depending on the structure. We'll consider both for this example. The code to handle this is shown below. 
 
-.. literalinclude:: _static/diatomic_homo.py
+.. literalinclude:: ../examples/add_O2.py
 
 Like with the monatomic example, we need to initialize an :class:`~mai.adsorbate_constructor.adsorbate_constructor` object and then provide it the MOF of interest. In the case of diatomics, we have a few new keywords to introduce. In addition to the arguments described in the monatomic tutorial, we now need to be able to tell MAI what kind of denticity we would like (i.e. end-on or side-on adsorption) and what we want the X1-X2 bond length and M-X1-X2 bond angle to be (if X1-X2 is our diatomic of interest and M is our metal adsorption site). The arguments used here are described below:
 
@@ -39,7 +39,7 @@ Heteroatomic
 ------------
 MAI also supports heteratomic adsorbates. In this example, we'll consider the adsorption of a single CO molecule with the same MOF. The only thing that changes for heteroatomic adsorbates is that you need to tell MAI which atom is the "connecting atom" (i.e. the atom of the adsorbate bound to the metal adsorption site) if bound in an end-on fashion. By default, MAI will assume that the first atom in ``ads_species`` is the connecting atom. Therefore, setting ``ads_species='CO'`` or ``ads_species='OC'`` would yield M-C-O or M-O-C binding modes, respectively.
 
-.. literalinclude:: _static/diatomic_hetero.py 
+.. literalinclude:: ../examples/add_CO.py 
 
 .. |Ni-BTP-CO| image:: _static/Ni-BTP-CO.png
    :align: middle

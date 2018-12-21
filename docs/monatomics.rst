@@ -1,7 +1,7 @@
 Monatomics
 ===========
 
-In this example, we'll work through how to add a single atom adsorbate to open metal site in MOFs. The CIF for the MOF we'll use in this example can be found :download:`here <_static/Cu-BTC.cif>`. This MOF is known as Cu-BTC and has the structure shown below:
+In this example, we'll work through how to add a single atom adsorbate to open metal site in MOFs. The CIF for the MOF we'll use in this example can be found :download:`here <../examples/example_MOFs/Cu-BTC.cif>`. This MOF is known as Cu-BTC and has the structure shown below:
 
 |Cu-BTC|
 
@@ -12,7 +12,7 @@ The metal (Cu) sites here are shown in orange. There are multiple Cu sites per u
 
 We'll start with the code that can do the job. Then we'll walk through what it all means.
 
-.. literalinclude:: _static/monatomic.py
+.. literalinclude:: ../examples/add_O.py
 
 Okay, let's dive right in! MAI requires the calling of an object known as the :class:`~mai.adsorbate_constructor.adsorbate_constructor`, which tells MAI what kind of adsorbate you'd like to make. For simple monatomic species, there are only a few arguments you need to worry about. 
 

@@ -1,7 +1,7 @@
 Triatomics
 ===========
 
-In this example, we'll work through how to add three-atom adsorbates to open metal sites in MOFs. The CIF for the MOF we'll use for this example can be found :download:`here <_static/Ni2Cl2-BTDD.cif>`. This MOF is known Ni2Cl2(BTDD) and has the structure shown below:
+In this example, we'll work through how to add three-atom adsorbates to open metal sites in MOFs. The CIF for the MOF we'll use for this example can be found :download:`here <../examples/example_MOFs/Ni2Cl2-BTDD.cif>`. This MOF is known Ni2Cl2(BTDD) and has the structure shown below:
 
 |Ni2Cl2-BTDD|
 
@@ -15,7 +15,7 @@ Contiguous Adsorbate
 --------------------
 For this example, we will consider the initialization of a "contiguous" triatomic adsorbate. What I mean by this is that if we treat the adsorbate as an arbitrary molecule X1-X2-X3, then the adsorption process is described by M-X1-X2-X3. In this example, we'll consider the adsorption of N2O to a Ni site, in both an η1-N and η1-O binding mode. The code to handle this is shown below. 
 
-.. literalinclude:: _static/triatomic_linear.py
+.. literalinclude:: ../examples/add_N2O.py
 
 Like with the previous examples, we need to initialize an :class:`~mai.adsorbate_constructor.adsorbate_constructor` object and then provide it the MOF of interest. In the case of triatomics, we have a few new keywords to introduce. In addition to the arguments described in the previous examples, we can now provide MAI additional geometric parameters if desired. Namely, the new features are now that we can include the X2-X3 bond length and the X1-X2-X3 bond angle. The arguments used here are described below:
 
@@ -39,7 +39,7 @@ The last bit of trickery comes into play when dealing with what I'll call "nonco
 
 An example code is shown below. The main thing to keep in mind is that now the connecting atom of the adsorbate is X2 instead of X1.
 
-.. literalinclude:: _static/triatomic_central.py
+.. literalinclude:: ../examples/add_H2O.py
 
 .. |Ni2Cl2-BTDD-CO| image:: _static/Ni2Cl2-BTDD-H2O.png
    :align: middle

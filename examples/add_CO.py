@@ -1,6 +1,7 @@
+import os
 from mai.adsorbate_constructor import adsorbate_constructor
 
-mof_path = 'Ni-BTP.cif' #path to CIF of MOF
+mof_path = os.path.join('example_MOFs','Ni-BTP.cif') #path to CIF of MOF
 
 #add CO adsorbate in η1-C mode
 ads = adsorbate_constructor(ads='CO',d_MX1=1.5,d_X1X2=1.13)
