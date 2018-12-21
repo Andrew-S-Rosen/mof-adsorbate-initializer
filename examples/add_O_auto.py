@@ -8,7 +8,7 @@ oms_data_path = os.path.join(oms_analysis_folder,'oms_results') #path to oms_res
 
 #Run the Open Metal Detector
 mof_coll = MofCollection.from_folder(collection_folder=mofs_path,
-	analysis_folder=oms_data_path)
+	analysis_folder=oms_analysis_folder)
 mof_coll.analyse_mofs()
 
 #add adsorbate for every CIF in mofs_path
