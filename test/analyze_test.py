@@ -13,10 +13,6 @@ for job in jobs:
 			mof_real = read(os.path.join(success_path,file))
 			diff = np.abs(mof_real.get_positions()-mof_test.get_positions())
 			if np.sum(diff >= tol) != 0:
-				print('MOF (real):')
-				print(mof_real.get_positions())
-				print('MOF (test):')
-				print(mof_test.get_positions())
 				print('Difference:')
 				print(diff)
 				raise ValueError('Error with: '+file)
