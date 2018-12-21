@@ -4,8 +4,10 @@
 cd examples
 python add_O.py &&
 python add_O2.py &&
-python add_N2O.py
+python add_CO &&
+python add_N2O.py &&
 python add_H2O.py &&
+python add_all_H2O &&
 python add_CH4_PEG.py &&
 python add_O_auto.py &&
 cd ../
