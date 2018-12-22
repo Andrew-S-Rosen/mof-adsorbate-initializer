@@ -34,6 +34,10 @@ MAI also supports heteratomic adsorbates. In this example, we'll consider the ad
 
 .. literalinclude:: ../examples/add_CO.py 
 
+The result of running this code is shown below:
+
+|Ni-BTP-CO|
+
 .. |Ni-BTP-CO| image:: _static/nibtp2.png
    :align: middle
 
