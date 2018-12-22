@@ -5,10 +5,7 @@ In this example, we'll work through how to add three-atom adsorbates to open met
 
 |Ni2Cl2-BTDD|
 
-The metal (Ni) sites here are shown in silver. This MOF has a honeycomb-like structure with square pyramidal Ni cations that run down the crystallographic c-axis. Isn't it beautiful?
-
-.. |Ni2Cl2-BTDD| image:: _static/Ni2Cl2-BTDD.png
-   :align: middle
+The metal (Ni) sites here are shown in silver. This MOF has a honeycomb-like structure with square pyramidal Ni cations that run down the crystallographic c-axis.
 
 --------------------
 Contiguous Adsorbate
@@ -29,7 +26,7 @@ That takes care of initializing the :class:`~mai.adsorbate_constructor.adsorbate
 
 Exactly what we'd expect once more! You can see that in the first example, N2O is bound in an η1-N mode, whereas the second is bound in an η1-O mode, as specified. Feel free to play around with the bond distance and bond angle arguments to get a feel for how MAI works.
 
-.. |Ni2Cl2-BTDD-N2O| image:: _static/Ni2Cl2-BTDD-N2O.png
+.. |Ni2Cl2-BTDD-N2O| image:: _static/n2o.png
    :align: middle
 
 ---------------------
@@ -41,7 +38,7 @@ An example code is shown below. The main thing to keep in mind is that now the c
 
 .. literalinclude:: ../examples/add_H2O.py
 
-.. |Ni2Cl2-BTDD-CO| image:: _static/Ni2Cl2-BTDD-H2O.png
+.. |Ni2Cl2-BTDD-CO| image:: _static/h2o.png
    :align: middle
 
 That concludes our tutorial for triatomic adsorbates.

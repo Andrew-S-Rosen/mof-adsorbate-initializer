@@ -5,10 +5,7 @@ In this example, we'll work through how to add two-atom adsorbates to open metal
 
 |Ni-BTP|
 
-The metal (Ni) sites are shown in silver. This MOF has a sodalite-like structure with square planar Ni cations. Neat!
-
-.. |Ni-BTP| image:: _static/Ni-BTP.png
-   :align: middle
+The metal (Ni) sites are shown in silver. This MOF has a sodalite-like structure with square planar Ni cations.
 
 -----------
 Homoatomic
@@ -31,7 +28,7 @@ That takes care of initializing the :class:`~mai.adsorbate_constructor.adsorbate
 
 Exactly what we'd expect yet again! You can see that in the first example, O2 is bound end-on, whereas in the second it is bound side-on, as specified in the example script. The bond angles and distances are the same as those specified in the input file.
 
-.. |Ni-BTP-O2| image:: _static/Ni-BTP-O2.png
+.. |Ni-BTP-O2| image:: _static/nibtp.png
    :align: middle
 
 ------------
@@ -41,7 +38,7 @@ MAI also supports heteratomic adsorbates. In this example, we'll consider the ad
 
 .. literalinclude:: ../examples/add_CO.py 
 
-.. |Ni-BTP-CO| image:: _static/Ni-BTP-CO.png
+.. |Ni-BTP-CO| image:: _static/nibtp2.png
    :align: middle
 
 That concludes our tutorial for diatomic adsorbates. Now onto triatomics!

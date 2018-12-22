@@ -7,7 +7,7 @@ In this example, we'll work through how to add a single atom adsorbate to open m
 
 The metal (Cu) sites here are shown in orange. There are multiple Cu sites per unit cell, and each Cu site is in a paddlewheel-like structure. For this example, we will consider the initialization of an O atom adsorbate to a single coordinatively unsaturated Cu site. 
 
-.. |Cu-BTC| image:: _static/Cu-BTC.png
+.. |Cu-BTC| image:: _static/cubtc1.png
    :align: middle
 
 We'll start with the code that can do the job. Then we'll walk through what it all means.
@@ -32,7 +32,7 @@ Exactly what we'd expect! Generally, MAI aims to satisfy two major conditions. T
 
 That concludes our tutorial with monatomic adsorbates. Join me as we move onto more complicated systems! Up next is diatomics!
 
-.. |Cu-BTC-O| image:: _static/Cu-BTC-O.png
+.. |Cu-BTC-O| image:: _static/cubtc2.png
    :align: middle
 .. _inspect: https://wiki.fysik.dtu.dk/ase/ase/atoms.html
 .. _visualize: https://wiki.fysik.dtu.dk/ase/ase/visualize/visualize.html
