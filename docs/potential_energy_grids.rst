@@ -27,3 +27,4 @@ The result of running the previous example code is the following structure.
 
 .. |grid| image:: _static/CH4.png
    :align: middle
+   :scale: 50 %
