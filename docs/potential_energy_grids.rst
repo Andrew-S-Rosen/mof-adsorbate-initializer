@@ -12,7 +12,7 @@ Unlike with the monatomics, diatomics, and triatomics tutorials, when dealing wi
 
 .. literalinclude:: ../examples/add_CH4_PEG.py
 
-The arguments for are described below:
+The new arguments used in this code are described below:
 
 1. The ``atoms_path`` and ``site_idx`` are the same as for :func:`~mai.adsorbate_constructor.adsorbate_constructor.get_adsorbate`.
 2. The ``grid_path`` keyword argument is the path to the PEG file.
