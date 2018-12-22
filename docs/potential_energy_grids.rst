@@ -25,7 +25,7 @@ The result of running the previous example code is the following structure.
 .. _RASPA: https://www.tandfonline.com/doi/full/10.1080/08927022.2015.1010082
 .. _cube: http://paulbourke.net/dataformats/cube/
 
-.. |PEG| image:: _static/grid.png
+.. |PEG| image:: _static/grid.jpg
    :align: middle
    :scale: 25 %
 

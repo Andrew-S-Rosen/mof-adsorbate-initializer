@@ -20,5 +20,5 @@ Contents
    citing
    source/mai
 
-.. |TOC| image:: ../toc.png
+.. |TOC| image:: ../toc.jpg
    :align: middle
