@@ -1,11 +1,7 @@
 Triatomics
 ===========
 
-In this example, we'll work through how to add three-atom adsorbates to open metal sites in MOFs. The CIF for the MOF we'll use for this example can be found :download:`here <../examples/example_MOFs/Ni2Cl2-BTDD.cif>`. This MOF is known Ni2Cl2(BTDD) and has the structure shown below:
-
-|Ni2Cl2-BTDD|
-
-The metal (Ni) sites here are shown in silver. This MOF has a honeycomb-like structure with square pyramidal Ni cations that run down the crystallographic c-axis.
+In this example, we'll work through how to add three-atom adsorbates to open metal sites in MOFs. The CIF for the MOF we'll use for this example can be found :download:`here <../examples/example_MOFs/Ni2Cl2-BTDD.cif>`. This MOF is known Ni2Cl2(BTDD) and has a honeycomb-like structure with square pyramidal Ni cations that run down the crystallographic c-axis.
 
 --------------------
 Contiguous Adsorbate
@@ -38,7 +34,11 @@ An example code is shown below. The main thing to keep in mind is that now the c
 
 .. literalinclude:: ../examples/add_H2O.py
 
-.. |Ni2Cl2-BTDD-CO| image:: _static/h2o.png
+This results in the following initialized structure:
+
+|Ni2Cl2-BTDD-H2O|
+
+.. |Ni2Cl2-BTDD-H2O| image:: _static/h2o.png
    :align: middle
 
 That concludes our tutorial for triatomic adsorbates.

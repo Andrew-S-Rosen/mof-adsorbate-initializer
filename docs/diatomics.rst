@@ -1,11 +1,7 @@
 Diatomics
 ===========
 
-In this example, we'll work through how to add two-atom adsorbates to open metal sites in MOFs. The CIF for the MOF we'll use for this example can be found :download:`here <../examples/example_MOFs/Ni-BTP.cif>`. This MOF is known Ni3(BTP)2, or Ni-BTP for short, and has the structure shown below:
-
-|Ni-BTP|
-
-The metal (Ni) sites are shown in silver. This MOF has a sodalite-like structure with square planar Ni cations.
+In this example, we'll work through how to add two-atom adsorbates to open metal sites in MOFs. The CIF for the MOF we'll use for this example can be found :download:`here <../examples/example_MOFs/Ni-BTP.cif>`. This MOF is known Ni3(BTP)2, or Ni-BTP for short, and has a sodalite-like structure with square planar Ni cations.
 
 -----------
 Homoatomic
