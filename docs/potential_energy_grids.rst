@@ -2,7 +2,7 @@ Potential Energy Grids
 ======================
 Some adsorbates do not lend themselves well to the geometric approaches laid out thus far. This is particularly the case for adsorbates that are physisorbed relatively far away from an adsorption site, as opposed to chemisorbed nearby. In these cases, an alternative way of initializing the adsorbate can be considered by mapping out a potential energy grid (PEG) of each MOF and putting the adsorbate in a low-energy site within some cutoff radius of the proposed adsorption site. A visualized example of such a PEG is shown below for a methane adsorbate near a proposed Ni-O active site.
 
-|grid|
+|PEG|
 
 MAI supports two different formats for PEGs. The first is the cube_ file format, such as that generated from `PorousMaterials.jl <https://github.com/SimonEnsemble/PorousMaterials.jl>`_. Details of how to generate such PEGs can be found `here <https://simonensemble.github.io/PorousMaterials.jl/latest/#>`_. The second accepted format is a space-delimited file with four columns of (x,y,z,E) entries, where E is the potential energy and (x,y,z) are the coordinates. Each new line represents a new (x,y,z,E) vector. We'll refer to this file as an ASCII grid.
 
@@ -25,6 +25,10 @@ The result of running the previous example code is the following structure.
 .. _RASPA: https://www.tandfonline.com/doi/full/10.1080/08927022.2015.1010082
 .. _cube: http://paulbourke.net/dataformats/cube/
 
+.. |PEG| image:: _static/grid.png
+   :align: middle
+   :scale: 25 %
+
 .. |grid| image:: _static/CH4.png
    :align: middle
-   :scale: 50 %
+   :scale: 25 %

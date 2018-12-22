@@ -27,3 +27,4 @@ In addition to the ``site_idx`` keyword in the :func:`~mai.adsorbate_constructor
 
 .. |all_H2O| image:: _static/all_H2O.png
    :align: middle
+   :scale: 50 %

@@ -9,6 +9,7 @@ The metal (Cu) sites here are shown in orange. There are multiple Cu sites per u
 
 .. |Cu-BTC| image:: _static/cubtc1.png
    :align: middle
+   :scale: 25 %
 
 We'll start with the code that can do the job. Then we'll walk through what it all means.
 
@@ -34,6 +35,7 @@ That concludes our tutorial with monatomic adsorbates. Join me as we move onto m
 
 .. |Cu-BTC-O| image:: _static/cubtc2.png
    :align: middle
+   :scale: 25 %
 .. _inspect: https://wiki.fysik.dtu.dk/ase/ase/atoms.html
 .. _visualize: https://wiki.fysik.dtu.dk/ase/ase/visualize/visualize.html
 .. _VESTA: https://jp-minerals.org/vesta/en/

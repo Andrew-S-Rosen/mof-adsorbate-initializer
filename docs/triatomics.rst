@@ -40,5 +40,6 @@ This results in the following initialized structure:
 
 .. |Ni2Cl2-BTDD-H2O| image:: _static/h2o.png
    :align: middle
+   :scale: 25 %
 
 That concludes our tutorial for triatomic adsorbates.
