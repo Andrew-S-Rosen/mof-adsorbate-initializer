@@ -14,7 +14,7 @@ class ads_pos_optimizer():
 	This identifies ideal adsorption sites
 	"""
 	def __init__(self,adsorbate_constructor,write_file=True,
-		new_mofs_path=None,error_path=None):
+		new_mofs_path=None,error_path=None,log_stats=True):
 		"""
 		Initialized variables
 
@@ -30,6 +30,8 @@ class ads_pos_optimizer():
 			
 			error_path (string): path to store any adsorbates flagged as
 			problematic (defaults to /errors)
+
+			log_stats (bool): print stats about process
 		"""
 		self.full_ads_species = adsorbate_constructor.ads
 		self.ads = adsorbate_constructor.ads.split('_')[0]
@@ -48,13 +50,14 @@ class ads_pos_optimizer():
 		self.start_atoms = adsorbate_constructor.start_atoms
 		self.name = adsorbate_constructor.name
 		self.write_file = write_file
-		
 		if new_mofs_path is None:
 			new_mofs_path = os.path.join(os.getcwd(),'new_mofs')
 		self.new_mofs_path = new_mofs_path
 		if error_path is None:
 			error_path = os.path.join(new_mofs_path,'errors')
 		self.error_path = error_path
+		self.log_stats = log_stats
+		self.io_stats = {'MOF':self.name,'ads':self.ads,'eta':str(self.eta)}
 
 	def get_dist_planar(self,normal_vec):
 		"""
@@ -87,8 +90,11 @@ class ads_pos_optimizer():
 			NN (int): number of neighbors within r_cut
 			
 			min_dist (float): distance from adsorbate to nearest atom
+
+			n_overlap (int): number of overlapping atoms
 		"""
 		r_cut = self.r_cut
+		overlap_tol = self.overlap_tol
 
 		#Add proposed adsorbate to a copy of the MOF
 		mof_temp = self.start_atoms.copy()
@@ -102,8 +108,9 @@ class ads_pos_optimizer():
 			mic=True)
 		NN = sum(neighbor_dist <= r_cut)
 		min_dist = np.min(neighbor_dist)
-		
-		return NN, min_dist
+		n_overlap = sum(neighbor_dist <= overlap_tol)
+
+		return NN, min_dist, n_overlap
 
 	def get_planar_ads_pos(self,center_coord,dist,site_idx):
 		"""
@@ -121,6 +128,8 @@ class ads_pos_optimizer():
 		"""
 		NN = []
 		min_dist = []
+		ads_temps = []
+		n_overlaps = []
 
 		#Get +/- normal vector
 		for i in range(2):
@@ -128,17 +137,24 @@ class ads_pos_optimizer():
 				ads_pos_temp = center_coord + dist
 			elif i == 1:
 				ads_pos_temp = center_coord - dist
-			NN_temp, min_dist_temp = self.get_NNs(ads_pos_temp,site_idx)
+			NN_temp, min_dist_temp, n_overlap = self.get_NNs(ads_pos_temp,site_idx)
 			NN.append(NN_temp)
 			min_dist.append(min_dist_temp)
+			ads_temps.append(ads_pos_temp)
+			n_overlaps.append(n_overlap)
 
 		#Select best direction for normal vector
-		if NN[0] == NN[1]:
-			if min_dist[0] >= min_dist[1]:
+		if n_overlaps[0] == n_overlaps[1]:
+			if NN[0] == NN[1]:
+				if min_dist[0] >= min_dist[1]:
+					ads_pos = center_coord + dist
+				else:
+					ads_pos = center_coord - dist
+			elif NN[0] <= NN[1]:
 				ads_pos = center_coord + dist
 			else:
 				ads_pos = center_coord - dist
-		elif NN[0] <= NN[1]:
+		elif n_overlaps[0] < n_overlaps[1]:
 			ads_pos = center_coord + dist
 		else:
 			ads_pos = center_coord - dist
@@ -256,14 +272,14 @@ class ads_pos_optimizer():
 		"""
 		dist = self.get_dist_planar(normal_vec)
 		ads_pos_planar = self.get_planar_ads_pos(center_coord,dist,site_idx)
-		NN_planar, min_dist_planar = self.get_NNs(ads_pos_planar,site_idx)
+		NN_planar, min_dist_planar, n_overlap = self.get_NNs(ads_pos_planar,site_idx)
 		ads_pos_nonplanar = self.get_nonplanar_ads_pos(scaled_sum_dist,center_coord)
-		NN_nonplanar, min_dist_nonplanar = self.get_NNs(ads_pos_nonplanar,
+		NN_nonplanar, min_dist_nonplanar, n_overlap = self.get_NNs(ads_pos_nonplanar,
 			site_idx)
 
 		#3-coordinate can be something like trigonal planar or T-shaped.
 		#Use planar algorithm (normal vector) for trigonal planar structures
-		#andd sum of Euclidean vectors for the other shapes
+		#and sum of Euclidean vectors for the other shapes
 		if NN_planar == NN_nonplanar:
 			if min_dist_planar >= min_dist_nonplanar:
 				ads_pos = ads_pos_planar
@@ -302,6 +318,7 @@ class ads_pos_optimizer():
 			cnum = np.shape(mic_coords)[0]
 		start_atoms = self.start_atoms.copy()
 		center_coord = start_atoms[site_idx].position
+		self.io_stats['cnum'] = str(cnum)
 
 		#Calculate relevant quantities based on coordination number
 		if cnum == 1:
@@ -331,9 +348,14 @@ class ads_pos_optimizer():
 			ads_pos = self.get_tri_ads_pos(normal_vec,scaled_sum_dist,center_coord,
 				site_idx)
 		elif norm_scaled <= sum_tol or rmse <= rmse_tol:
+			if norm_scaled <= sum_tol and rmse <= rmse_tol:
+				self.io_stats['planar'] = 'Planar'
+			else:
+				self.io_stats['planar'] = 'Planar-ish'
 			dist = self.get_dist_planar(normal_vec)
 			ads_pos = self.get_planar_ads_pos(center_coord,dist,site_idx)
 		else:
+			self.io_stats['planar'] = 'Nonplanar'
 			ads_pos = self.get_nonplanar_ads_pos(scaled_sum_dist,center_coord)
 
 		return ads_pos
@@ -349,6 +371,7 @@ class ads_pos_optimizer():
 		Returns:
 			new_mof (ASE Atoms object): new ASE Atoms object with adsorbate		
 		"""
+		log_stats = self.log_stats
 		full_ads_species = self.full_ads_species
 		name = self.name
 		full_name = name+'_site'+str(site_idx)
@@ -357,7 +380,29 @@ class ads_pos_optimizer():
 		new_mof = self.construct_mof(mof,ads_pos,site_idx)
 		overlap = self.check_and_write(new_mof,new_name)
 		if overlap:
-			return None
+			new_mof = None
+
+		if not overlap:
+			self.io_stats['result'] = 'Success :)'
+		else:
+			self.io_stats['result'] = 'Failure :('
+
+		if log_stats:
+			if self.io_stats['n_new_atoms'] == '1':
+				print_eta = ''
+				print_connect = ''
+			else:
+				print_eta = ', eta = '+str(self.eta)
+				if self.connect != 1:
+					print_connect = ', connect = '+str(self.connect)
+				else:
+					print_connect = ''
+			line = '-------------------------------------'
+			io_stats = self.io_stats
+			print(line+'\n'+name+' + '+self.ads
+				+print_eta+print_connect
+				+'\nCoord. Num. = '+io_stats['cnum']+', '+io_stats['planar']
+				+'\n'+io_stats['result']+'\n'+line)
 
 		return new_mof
 
@@ -412,6 +457,7 @@ class ads_pos_optimizer():
 		new_mofs_path = self.new_mofs_path
 
 		n_new_atoms = len(string_to_formula(ads))
+		self.io_stats['n_new_atoms'] = str(n_new_atoms)
 		overlap = False
 
 		#Loop over each new atom and confirm no overlap
@@ -425,14 +471,12 @@ class ads_pos_optimizer():
 						os.makedirs(error_path)
 					write(os.path.join(error_path,new_name+'.cif'),new_mof)
 				break
-		if overlap:
-			return True
-		else:
-			if write_file:
-				if not os.path.exists(new_mofs_path):
-					os.makedirs(new_mofs_path)
-				write(os.path.join(new_mofs_path,new_name+'.cif'),new_mof)
-		return False
+		if write_file and not overlap:
+			if not os.path.exists(new_mofs_path):
+				os.makedirs(new_mofs_path)
+			write(os.path.join(new_mofs_path,new_name+'.cif'),new_mof)
+
+		return overlap
 
 
 	def construct_mof(self,mof,ads_pos,site_idx):
