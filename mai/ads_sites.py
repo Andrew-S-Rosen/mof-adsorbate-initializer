@@ -356,7 +356,27 @@ class ads_pos_optimizer():
 			ads_pos = self.get_planar_ads_pos(center_coord,dist,site_idx)
 		else:
 			self.io_stats['planar'] = 'Nonplanar'
-			ads_pos = self.get_nonplanar_ads_pos(scaled_sum_dist,center_coord)
+			go_nonplanar = True
+			#Better handling of not perfectly square pyramidal structures (e.g. MOF-74)
+			if cnum >= 5:
+				test_indices = np.arange(0,cnum)
+				rmse_test_all = []
+				normal_vec_test_all = []
+				for i in range(cnum):
+					partial_indices = np.roll(test_indices,i)[0:cnum-1].tolist()
+					partial_indices.sort()
+					rmse_test, normal_vec_test = TLS_fit(mic_coords[partial_indices,:])
+					rmse_test_all.append(rmse_test)
+					normal_vec_test_all.append(normal_vec_test)
+				argmin_rmse_test = np.argmin(rmse_test_all)
+				min_rmse_test = rmse_test_all[argmin_rmse_test]
+				if min_rmse_test <= rmse_tol:
+					go_nonplanar = False
+					normal_vec = normal_vec_test_all[argmin_rmse_test]
+					dist = self.get_dist_planar(normal_vec)
+					ads_pos = self.get_planar_ads_pos(center_coord,dist,site_idx)
+			if go_nonplanar:
+				ads_pos = self.get_nonplanar_ads_pos(scaled_sum_dist,center_coord)
 
 		return ads_pos
 
