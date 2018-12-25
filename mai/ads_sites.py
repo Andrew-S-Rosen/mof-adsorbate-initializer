@@ -408,6 +408,11 @@ class ads_pos_optimizer():
 			self.io_stats['result'] = 'Failure :('
 
 		if log_stats:
+			if int(self.io_stats['cnum']) <= 3:
+				self.io_stats['planar'] = ''
+				print_io_stats = ''
+			else:
+				print_io_stats = ', '+self.io_stats['planar']
 			if self.io_stats['n_new_atoms'] == '1':
 				print_eta = ''
 				print_connect = ''
@@ -421,7 +426,7 @@ class ads_pos_optimizer():
 			io_stats = self.io_stats
 			print(line+'\n'+name+' + '+self.ads
 				+print_eta+print_connect
-				+'\nCoord. Num. = '+io_stats['cnum']+', '+io_stats['planar']
+				+'\nCoord. Num. = '+io_stats['cnum']+print_io_stats
 				+'\n'+io_stats['result']+'\n'+line)
 
 		return new_mof
