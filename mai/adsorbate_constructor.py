@@ -176,7 +176,7 @@ class adsorbate_constructor():
 
 		new_atoms = []
 		for i, oms_idx in enumerate(omsex_dict['oms_idx']):
-			if allowed_sites is not None and omsex_dict['oms_sym'] not in allowed_sites:
+			if allowed_sites is not None and omsex_dict['oms_sym'][i] not in allowed_sites:
 				continue
 			NN_idx = omsex_dict['NN_idx'][i]
 			mic_coords = np.squeeze(atoms.get_distances(oms_idx,NN_idx,
