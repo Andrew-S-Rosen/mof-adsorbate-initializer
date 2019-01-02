@@ -5,7 +5,7 @@ The previous tutorials should get you up and running so you can automate the con
 --------------------------
 Adding Multiple Adsorbates
 --------------------------
-Instead of adding a single adsorbate, you may want to add an adsorbate to every metal site in a given MOF. We will consider the :download:`Ni2Cl2-BTDD <../examples/example_MOFs/Ni2Cl2-BTDD.cif>` MOF from the triatomic tutorial, except this time we will add an H2O molecule to every Ni site. This can be done using the code below.
+Instead of adding a single adsorbate, you may want to add an adsorbate to every metal site in a given MOF. We will consider the :download:`Ni-BTP <../examples/example_MOFs/Ni-BTP.cif>` MOF from the diatomic tutorial, except this time we will add an H2O molecule to every Ni site. This can be done using the code below.
 
 .. literalinclude:: ../examples/add_all_H2O.py
 

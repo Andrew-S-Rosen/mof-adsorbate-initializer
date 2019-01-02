@@ -1,12 +1,12 @@
 Triatomics
 ===========
 
-In this example, we'll work through how to add three-atom adsorbates to open metal sites in MOFs. The CIF for the MOF we'll use for this example can be found :download:`here <../examples/example_MOFs/Ni2Cl2-BTDD.cif>`. This MOF is known Ni2Cl2(BTDD) and has a honeycomb-like structure with square pyramidal Ni cations that run down the crystallographic c-axis.
+In this example, we'll work through how to add three-atom adsorbates to open metal sites in MOFs. The CIF for the MOF we'll use for this example can be found :download:`here <../examples/example_MOFs/Fe-MIL-8BB.cif>`. This MOF is known as MIL-8BB and has trimetallic nodes. It is structurally similar to the much larger MIL-101.
 
 --------------------
 Contiguous Adsorbate
 --------------------
-For this example, we will consider the initialization of a "contiguous" triatomic adsorbate. What I mean by this is that if we treat the adsorbate as an arbitrary molecule X1-X2-X3, then the adsorption process is described by M-X1-X2-X3. In this example, we'll consider the adsorption of N2O to a Ni site, in both an η1-N and η1-O binding mode. The code to handle this is shown below. 
+For this example, we will consider the initialization of a "contiguous" triatomic adsorbate. What I mean by this is that if we treat the adsorbate as an arbitrary molecule X1-X2-X3, then the adsorption process is described by M-X1-X2-X3. In this example, we'll consider the adsorption of N2O to an Fe site, in both an η1-N and η1-O binding mode. The code to handle this is shown below. 
 
 .. literalinclude:: ../examples/add_N2O.py
 
@@ -18,11 +18,11 @@ Like with the previous examples, we need to initialize an :class:`~mai.adsorbate
 
 That takes care of initializing the :class:`~mai.adsorbate_constructor.adsorbate_constructor` object. With this, we provide the object with the path to the MOF, and it will initialize the adsorbate. Now let's see what happens as a result of running this code! The initialized structures are shown below:
 
-|Ni2Cl2-BTDD-N2O|
+|Fe-MIL-8BB-N2O|
 
 Exactly what we'd expect once more! You can see that in the first example, N2O is bound in an η1-N mode, whereas the second is bound in an η1-O mode, as specified. Feel free to play around with the bond distance and bond angle arguments to get a feel for how MAI works.
 
-.. |Ni2Cl2-BTDD-N2O| image:: _static/n2o.png
+.. |Fe-MIL-8BB-N2O| image:: _static/n2o.png
    :align: middle
 
 ---------------------
@@ -36,9 +36,9 @@ An example code is shown below. The main thing to keep in mind is that now the c
 
 This results in the following initialized structure:
 
-|Ni2Cl2-BTDD-H2O|
+|Fe-MIL-8BB-H2O|
 
-.. |Ni2Cl2-BTDD-H2O| image:: _static/h2o.png
+.. |Fe-MIL-8BB-H2O| image:: _static/h2o.png
    :align: middle
    :scale: 25 %
 

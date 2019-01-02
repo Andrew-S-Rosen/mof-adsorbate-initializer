@@ -1,7 +1,7 @@
 import os
 from mai.adsorbate_constructor import adsorbate_constructor
 
-mof_path = os.path.join('example_MOFs','Ni2Cl2-BTDD.cif') #path to CIF of MOF
+mof_path = os.path.join('example_MOFs','Fe-MIL-88B.cif') #path to CIF of MOF
 
 #add H2O adsorbate
 ads = adsorbate_constructor(ads='HOH',d_MX1=2.0,d_X1X2=0.96,d_X2X3=0.96,

@@ -2,9 +2,9 @@ import os
 from mai.adsorbate_constructor import adsorbate_constructor
 from ase.io import read, write
 
-starting_mof_path = os.path.join('example_MOFs','Ni2Cl2-BTDD.cif') #path to CIF of MOF
+starting_mof_path = os.path.join('example_MOFs','Ni-BTP.cif') #path to CIF of MOF
 
-#Get all Ni indices in ASE Atoms object of MOF
+#Get all Niindices in ASE Atoms object of MOF
 start_mof = read(starting_mof_path)
 Ni_idx = [atom.index for atom in start_mof if atom.symbol == 'Ni']
 
@@ -18,4 +18,4 @@ for i, site_idx in enumerate(Ni_idx):
 #Write out final CIF with all H2O molecules added
 if not os.path.isdir('new_mofs'):
 	os.makedirs('new_mofs')
-write(os.path.join('new_mofs','Ni2Cl2-BBTA_allH2O.cif'),atoms)
+write(os.path.join('new_mofs','Ni-BTP_allH2O.cif'),atoms)
