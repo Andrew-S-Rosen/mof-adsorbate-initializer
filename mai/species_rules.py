@@ -224,6 +224,7 @@ def add_triatomic(mof,ads_species,ads_pos,site_idx,d_X1X2=1.25,d_X2X3=None,
 		r_vec = mof.get_distance(-2,-1,vector=True,mic=True)
 		pos_temp = mof[-1].position+d_X2X3*(r_vec/np.linalg.norm(r_vec))
 		mof.extend(Atoms([Atom(X3,pos_temp)]))
+		mof[-1].position += 1e-6
 		mof.set_angle(-3,-2,-1,ang_triads)
 	elif connect == 2:
 		if ang_MX1X2 == 180 and ang_triads == 180:
@@ -232,6 +233,7 @@ def add_triatomic(mof,ads_species,ads_pos,site_idx,d_X1X2=1.25,d_X2X3=None,
 		r_vec = mof.get_distance(site_idx,-2,vector=True,mic=True)
 		r_bond = d_X2X3*(r_vec/np.linalg.norm(r_vec))
 		mof.extend(Atoms([Atom(X3,ads_pos+r_bond)]))
+		mof[-1].position += 1e-6
 		mof.set_angle(-2,-3,-1,ang_triads)
 	else:
 		raise ValueError('Connecting atom must have value of <= 3')

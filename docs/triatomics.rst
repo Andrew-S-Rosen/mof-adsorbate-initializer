@@ -12,9 +12,9 @@ For this example, we will consider the initialization of a "contiguous" triatomi
 
 Like with the previous examples, we need to initialize an :class:`~mai.adsorbate_constructor.adsorbate_constructor` object and then provide it the MOF of interest. In the case of triatomics, we have a few new keywords to introduce. In addition to the arguments described in the previous examples, we can now provide MAI additional geometric parameters if desired. Namely, the new features are now that we can include the X2-X3 bond length and the X1-X2-X3 bond angle. The arguments used here are described below:
 
-1. The ``ads``, ``d_MX1X2``, , ``d_X1X2``, and ``ang_MX1X2`` are the same as before.
+1. The ``ads``, ``d_MX1X2``, ``d_X1X2``, and ``ang_MX1X2`` are the same as before.
 2. Now, we have the option to add the ``d_X2X3`` keyword argument, which specifies the X2-X3 distance. It defaults to ``d_X2X3=d_X1X2`` if not specified.
-3. We can also add the ``ang_triads`` keyword argument, which specifies the X2-X1-X3 bond angle. It defaults to ``ang_triads=180`` if not specified. We'll leave this one at the default for this example since N2O is generally linear when adsorbed to metals.
+3. We can also add the ``ang_triads`` keyword argument, which specifies the X2-X1-X3 bond angle. It defaults to ``ang_triads=180`` if not specified.
 
 That takes care of initializing the :class:`~mai.adsorbate_constructor.adsorbate_constructor` object. With this, we provide the object with the path to the MOF, and it will initialize the adsorbate. Now let's see what happens as a result of running this code! The initialized structures are shown below:
 
