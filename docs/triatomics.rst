@@ -1,7 +1,7 @@
 Triatomics
 ===========
 
-In this example, we'll work through how to add three-atom adsorbates to open metal sites in MOFs. The CIF for the MOF we'll use for this example can be found :download:`here <../examples/example_MOFs/Fe-MIL-8BB.cif>`. This MOF is known as MIL-8BB and has trimetallic nodes with each metal cation in a square pyramidal geometry.
+In this example, we'll work through how to add three-atom adsorbates to open metal sites in MOFs. The CIF for the MOF we'll use for this example can be found :download:`here <../examples/example_MOFs/Fe-MIL-88B.cif>`. This MOF is known as MIL-8BB and has trimetallic nodes with each metal cation in a square pyramidal geometry.
 
 --------------------
 Contiguous Adsorbate
