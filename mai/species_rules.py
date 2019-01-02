@@ -185,7 +185,7 @@ def add_triatomic(mof,ads_species,ads_pos,site_idx,d_X1X2=1.25,d_X2X3=None,
 
 		ang_MX1X2 (float): site-X1-X2 angle (defaults to 180 degrees)
 
-		ang_triads (float): X3-X1-X2 angle (defaults to 180 degrees for connect == 1
+		ang_triads (float): triatomic angle (defaults to 180 degrees for connect == 1
 		and ang_MX1X2 for connect == 2)
 
 		connect (int): the connecting atom in the species string (defaults to 1)

@@ -1,7 +1,7 @@
 Triatomics
 ===========
 
-In this example, we'll work through how to add three-atom adsorbates to open metal sites in MOFs. The CIF for the MOF we'll use for this example can be found :download:`here <../examples/example_MOFs/Fe-MIL-8BB.cif>`. This MOF is known as MIL-8BB and has trimetallic nodes. It is structurally similar to the much larger MIL-101.
+In this example, we'll work through how to add three-atom adsorbates to open metal sites in MOFs. The CIF for the MOF we'll use for this example can be found :download:`here <../examples/example_MOFs/Fe-MIL-8BB.cif>`. This MOF is known as MIL-8BB and has trimetallic nodes with each metal cation in a square pyramidal geometry.
 
 --------------------
 Contiguous Adsorbate
@@ -14,7 +14,7 @@ Like with the previous examples, we need to initialize an :class:`~mai.adsorbate
 
 1. The ``ads``, ``d_MX1X2``, ``d_X1X2``, and ``ang_MX1X2`` are the same as before.
 2. Now, we have the option to add the ``d_X2X3`` keyword argument, which specifies the X2-X3 distance. It defaults to ``d_X2X3=d_X1X2`` if not specified.
-3. We can also add the ``ang_triads`` keyword argument, which specifies the X2-X1-X3 bond angle. It defaults to ``ang_triads=180`` if not specified.
+3. We can also add the ``ang_triads`` keyword argument, which specifies the X1-X2-X3 bond angle. It defaults to ``ang_triads=180`` if not specified.
 
 That takes care of initializing the :class:`~mai.adsorbate_constructor.adsorbate_constructor` object. With this, we provide the object with the path to the MOF, and it will initialize the adsorbate. Now let's see what happens as a result of running this code! The initialized structures are shown below:
 
@@ -24,13 +24,14 @@ Exactly what we'd expect once more! You can see that in the first example, N2O i
 
 .. |Fe-MIL-8BB-N2O| image:: _static/n2o.png
    :align: middle
+   :scale: 50 %
 
 ---------------------
 Noncontiguous Adsorbate
 ---------------------
 The last bit of trickery comes into play when dealing with what I'll call "noncontiguous" adsorbates. These are adsorbates like water, where it is triatomic, but it is not bound in a sequential fashion. As with water, you will have a central atom of the adsorbate bound to the metal (instead of an M-O-H-H adsorption mode). To tell MAI about this desired adsorption mode, :class:`~mai.adsorbate_constructor.adsorbate_constructor` has a keyword argument named ``connect``, which is the atom number in ``ads`` that should be bound to the adsorption site. For the case of ``ads='HOH'``, we should set ``connect=2`` to have the second atom (i.e. the O atom) bound to the adsorption site. Note that for this reason we cannot use ``ads='H2O'`` here.
 
-An example code is shown below. The main thing to keep in mind is that now the connecting atom of the adsorbate is X2 instead of X1.
+An example code is shown below. The main thing to keep in mind is that now the connecting atom of the adsorbate is X2 instead of X1. If not specified, ``ang_triads`` will default to ``ang_triads=ang_MX1X2`` if ``connect=2``, but here we set it to 104.5°, as is standard for H2O.
 
 .. literalinclude:: ../examples/add_H2O.py
 
@@ -40,6 +41,6 @@ This results in the following initialized structure:
 
 .. |Fe-MIL-8BB-H2O| image:: _static/h2o.png
    :align: middle
-   :scale: 25 %
+   :scale: 50 %
 
 That concludes our tutorial for triatomic adsorbates.
