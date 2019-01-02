@@ -41,6 +41,6 @@ This results in the following initialized structure:
 
 .. |Fe-MIL-8BB-H2O| image:: _static/h2o.png
    :align: middle
-   :scale: 50 %
+   :scale: 60 %
 
 That concludes our tutorial for triatomic adsorbates.

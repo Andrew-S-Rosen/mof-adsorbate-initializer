@@ -4,7 +4,7 @@ from ase.io import read, write
 
 starting_mof_path = os.path.join('example_MOFs','Ni-BTP.cif') #path to CIF of MOF
 
-#Get all Niindices in ASE Atoms object of MOF
+#Get all Ni indices in ASE Atoms object of MOF
 start_mof = read(starting_mof_path)
 Ni_idx = [atom.index for atom in start_mof if atom.symbol == 'Ni']
 
