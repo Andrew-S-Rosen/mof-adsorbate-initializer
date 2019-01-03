@@ -45,7 +45,7 @@ def add_diatomic(mof,ads_species,ads_pos,site_idx,d_X1X2=1.25,ang_MX1X2=None,eta
 		d_X1X2 (float): X1-X2 bond length (defaults to 1.25)
 
 		ang_MX1X2 (float): site-X1-X2 angle (defaults to 180 degrees except for
-		side-on in which it defaults to 90)
+		side-on in which it defaults to 90 degrees prior to the centering)
 
 		eta (int): denticity of end-on (1) or side-on (2) (defaults to 1)
 
