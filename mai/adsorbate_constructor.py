@@ -13,52 +13,52 @@ This module provides classes to add adsorbates to a MOF
 class adsorbate_constructor():
 	"""
 	This class constructs an ASE atoms object with an adsorbate
-	"""
+	Initialized variables
+
+	Args:
+		ads (string): string of element or molecule for adsorbate
+		(defaults to 'X')
+
+		d_MX1 (float): distance between adsorbate and surface atom. If
+		used with get_adsorbate_grid, it represents the maximum distance
+		(defaults to 2.0)
+
+		eta (int): denticity of end-on (1) or side-on (2) (defaults to 1)
+
+		connect (int): the connecting atom in the species string (defaults to 1)
+
+		d_X1X2 (float): X1-X2 bond length (defaults to 1.25)
+
+		d_X2X3 (float): X2-X3 bond length for connect == 1 or
+		X1-X3 bond length for connect == 2 (defaults to d_bond1)
+
+		ang_MX1X2 (float): site-X1-X2 angle (for diatomics, defaults to 180 degrees
+		except for side-on in which it defaults to 90 or end-on O2 in which
+		it defaults to 120; for triatomics, defaults to 180 except for H2O
+		in which it defaults to 104.5)
+
+		ang_triads (float): X3-X1-X2 angle (defaults to 180 degrees for connect == 1
+		and 90 degrees for connect == 2)
+
+		r_cut (float): cutoff distance for calculating nearby atoms when
+		ranking adsorption sites
+
+		sum_tol (float): threshold to determine planarity. when the sum
+		of the Euclidean distance vectors of coordinating atoms is less
+		than sum_tol, planarity is assumed
+		
+		rmse_tol (float): second threshold to determine planarity. when the 
+		root mean square error of the best-fit plane is less than rmse_tol,
+		planarity is assumed
+		
+		overlap_tol (float): distance below which atoms are assumed to be
+		overlapping
+		"""
+
 	def __init__(self,ads='X',d_MX1=2.0,eta=1,connect=1,
 		d_X1X2=1.25,d_X2X3=None,ang_MX1X2=None,ang_triads=None,
 		r_cut=2.5,sum_tol=0.5,rmse_tol=0.25,overlap_tol=0.75):
-		"""
-		Initialized variables
 
-		Args:
-			ads (string): string of element or molecule for adsorbate
-			(defaults to 'X')
-
-			d_MX1 (float): distance between adsorbate and surface atom. If
-			used with get_adsorbate_grid, it represents the maximum distance
-			(defaults to 2.0)
-
-			eta (int): denticity of end-on (1) or side-on (2) (defaults to 1)
-
-			connect (int): the connecting atom in the species string (defaults to 1)
-
-			d_X1X2 (float): X1-X2 bond length (defaults to 1.25)
-
-			d_X2X3 (float): X2-X3 bond length for connect == 1 or
-			X1-X3 bond length for connect == 2 (defaults to d_bond1)
-
-			ang_MX1X2 (float): site-X1-X2 angle (for diatomics, defaults to 180 degrees
-			except for side-on in which it defaults to 90 or end-on O2 in which
-			it defaults to 120; for triatomics, defaults to 180 except for H2O
-			in which it defaults to 104.5)
-
-			ang_triads (float): X3-X1-X2 angle (defaults to 180 degrees for connect == 1
-			and 90 degrees for connect == 2)
-
-			r_cut (float): cutoff distance for calculating nearby atoms when
-			ranking adsorption sites
-
-			sum_tol (float): threshold to determine planarity. when the sum
-			of the Euclidean distance vectors of coordinating atoms is less
-			than sum_tol, planarity is assumed
-			
-			rmse_tol (float): second threshold to determine planarity. when the 
-			root mean square error of the best-fit plane is less than rmse_tol,
-			planarity is assumed
-			
-			overlap_tol (float): distance below which atoms are assumed to be
-			overlapping
-		"""
 		if not isinstance(ads,str):
 			raise ValueError('ads must be a string')
 		if eta not in [1,2]:

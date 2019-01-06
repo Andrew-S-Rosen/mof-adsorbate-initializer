@@ -12,27 +12,25 @@ This module provides a class to identify ideal adsorption sites
 class ads_pos_optimizer():
 	"""
 	This identifies ideal adsorption sites
+
+	Args:
+		adsorbate_constructor (class): adsorbate_constructor class
+		containing many relevant defaults
+		
+		write_file (bool): if True, the new ASE atoms object should be
+		written to a CIF file (defaults to True)
+		
+		new_mofs_path (string): path to store the new CIF files if
+		write_file is True (defaults to /new_mofs)
+		
+		error_path (string): path to store any adsorbates flagged as
+		problematic (defaults to /errors)
+
+		log_stats (bool): print stats about process
 	"""
 	def __init__(self,adsorbate_constructor,write_file=True,
 		new_mofs_path=None,error_path=None,log_stats=True):
-		"""
-		Initialized variables
 
-		Args:
-			adsorbate_constructor (class): adsorbate_constructor class
-			containing many relevant defaults
-			
-			write_file (bool): if True, the new ASE atoms object should be
-			written to a CIF file (defaults to True)
-			
-			new_mofs_path (string): path to store the new CIF files if
-			write_file is True (defaults to /new_mofs)
-			
-			error_path (string): path to store any adsorbates flagged as
-			problematic (defaults to /errors)
-
-			log_stats (bool): print stats about process
-		"""
 		self.full_ads_species = adsorbate_constructor.ads
 		self.ads = adsorbate_constructor.ads.split('_')[0]
 		self.d_MX1 = adsorbate_constructor.d_MX1
