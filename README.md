@@ -1,7 +1,7 @@
 # MOF Adsorbate Initializer (MAI)
 Python code to initialize the position of adsorbates in MOFs for high-throughput DFT screening workflows. Relevant details for the code can be found in the following manuscript (once published):
 
-A.S. Rosen, J.M. Notestein, R.Q. Snurr. "Identifying Promising Metal-Organic Frameworks for Heterogeneous Catalysis via High-Throughput Periodic Density Functional Theory", J. Comput. Chem (2019). DOI: 10.1002/jcc.25787 
+A.S. Rosen, J.M. Notestein, R.Q. Snurr. "Identifying Promising Metal-Organic Frameworks for Heterogeneous Catalysis via High-Throughput Periodic Density Functional Theory", J. Comput. Chem (2019). DOI: [10.1002/jcc.25787](https://onlinelibrary.wiley.com/doi/10.1002/jcc.25787).
 
 [![DOI](https://zenodo.org/badge/127307047.svg)](https://zenodo.org/badge/latestdoi/127307047)
 [![Build Status](https://travis-ci.com/arosen93/mof-adsorbate-initializer.svg?branch=master)](https://travis-ci.com/arosen93/mof-adsorbate-initializer)
