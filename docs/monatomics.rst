@@ -5,7 +5,7 @@ In this example, we'll work through how to add a single atom adsorbate to open m
 
 |Cu-BTC|
 
-The metal (Cu) sites here are shown in orange. There are multiple Cu sites per unit cell, and each Cu site is in a paddlewheel-like structure. For this example, we will consider the initialization of an O atom adsorbate to a single coordinatively unsaturated Cu site. 
+The metal (Cu) sites here are shown in blue. There are multiple Cu sites per unit cell, and each Cu site is in a paddlewheel-like structure. For this example, we will consider the initialization of an O atom adsorbate to a single coordinatively unsaturated Cu site. 
 
 .. |Cu-BTC| image:: _static/cubtc1.png
    :align: middle
