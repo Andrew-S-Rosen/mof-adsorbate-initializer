@@ -16,7 +16,7 @@ There are a few changes we've made to the usual workflow. The first is that we n
 --------------------
 Neighbor Algorithms
 --------------------
-When specifying ``site_idx``, the :func:`~mai.adsorbate_constructor.adsorbate_constructor.get_adsorbate` function will automatically use Pymatgen's built-in nearest neighbor algorithms to determine the atoms in the first coordination sphere of the adsorption site. By default, MAI uses Pymatgen's ``crystal`` algorithm, but additional algorithms are available as listed in :func:`~mai.NN_algos.get_NNs_pm` and described here_. Through iterative testing, we have found ``crystal`` to be the best-performing algorithm for MOFs in general, but other algorithms can be considered if desired.
+When specifying ``site_idx``, the :func:`~mai.adsorbate_constructor.adsorbate_constructor.get_adsorbate` function will automatically use Pymatgen's built-in nearest neighbor algorithms to determine the atoms in the first coordination sphere of the adsorption site. By default, MAI uses Pymatgen's ``crystalNN`` algorithm, but additional algorithms are available as listed in :func:`~mai.NN_algos.get_NNs_pm` and described here_. Through iterative testing, we have found ``crystalNN`` to be the best-performing algorithm for MOFs in general, but other algorithms can be considered if desired.
 
 ----------------------------
 Pre-specification of Indices

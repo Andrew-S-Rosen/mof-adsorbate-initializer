@@ -5,6 +5,7 @@ A.S. Rosen, J.M. Notestein, R.Q. Snurr. "Identifying Promising Metal-Organic Fra
 
 [![DOI](https://zenodo.org/badge/127307047.svg)](https://zenodo.org/badge/latestdoi/127307047)
 [![Build Status](https://travis-ci.com/arosen93/mof-adsorbate-initializer.svg?branch=master)](https://travis-ci.com/arosen93/mof-adsorbate-initializer)
+[![Documentation Status](https://readthedocs.org/projects/mai/badge/?version=latest)](https://mai.readthedocs.io/en/latest/?badge=latest)
 
 ![TOC](toc.png)
 
