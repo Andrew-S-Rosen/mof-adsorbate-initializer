@@ -182,13 +182,17 @@ class ads_pos_optimizer():
 
 		return ads_pos
 
-	def get_bi_ads_pos(self,normal_vec,center_coord,site_idx):
+	def get_bi_ads_pos(self,normal_vec,scaled_sum_dist,center_coord,site_idx):
 		"""
 		Get adsorption site for a 2-coordinate site
 
 		Args:
 			normal_vec (numpy array): 1D numpy array for the
 			normal vector to the line
+
+			scaled_sum_dist (numpy array): 2D numpy array for the
+			scaled Euclidean distance vectors between each coordinating
+			atom and the central atom (i.e. the adsorption site)
 			
 			center_coord (numpy array): 1D numpy array for adsorption site
 			
@@ -199,52 +203,61 @@ class ads_pos_optimizer():
 			adsorption position
 		"""
 		r_cut = self.r_cut
+		sum_tol = self.sum_tol
 		overlap_tol = self.overlap_tol
 		dist = self.get_dist_planar(normal_vec)
+		n_overlap = None
 
-		#Prepare 2 temporary adsorbates
-		try_angles = np.arange(0,360,10)
-		ads_pos_temp_unrotated1 = center_coord + dist
-		ads_pos_temp_unrotated2 = center_coord - dist
-		ads_temp1 = Atoms([Atom('X',ads_pos_temp_unrotated1)])
-		ads_temp2 = Atoms([Atom('X',ads_pos_temp_unrotated2)])
-		mof_temp_orig = self.start_atoms.copy()
+		if np.linalg.norm(scaled_sum_dist) > sum_tol:
+			ads_pos_nonplanar = self.get_nonplanar_ads_pos(scaled_sum_dist,center_coord)
+			NN_nonplanar, min_dist_nonplanar, n_overlap = self.get_NNs(ads_pos_nonplanar,
+				site_idx)
+		if n_overlap == 0:
+			ads_pos = ads_pos_nonplanar
+		else:
+			#Prepare 2 temporary adsorbates
+			try_angles = np.arange(0,360,10)
+			ads_pos_temp_unrotated1 = center_coord + dist
+			ads_pos_temp_unrotated2 = center_coord - dist
+			ads_temp1 = Atoms([Atom('X',ads_pos_temp_unrotated1)])
+			ads_temp2 = Atoms([Atom('X',ads_pos_temp_unrotated2)])
+			mof_temp_orig = self.start_atoms.copy()
 
-		#Rotate one of the adsorbates about the axis
-		#defined by the two coordinating atoms
-		for i, angle in enumerate(try_angles):
+			#Rotate one of the adsorbates about the axis
+			#defined by the two coordinating atoms
+			for i, angle in enumerate(try_angles):
 
-			#Add 2 overlapping atoms
-			mof_temp = mof_temp_orig.copy()
-			mof_temp.extend(ads_temp1)
-			mof_temp.extend(ads_temp2)
+				#Add 2 overlapping atoms
+				mof_temp = mof_temp_orig.copy()
+				mof_temp.extend(ads_temp1)
+				mof_temp.extend(ads_temp2)
 
-			#Offset one of the atoms by small value
-			#(just to be higher than machine epsilon)
-			mof_temp[-1].position += 1e-6
+				#Offset one of the atoms by small value
+				#(just to be higher than machine epsilon)
+				mof_temp[-1].position += 1e-6
 
-			#Set the new angle
-			mof_temp.set_angle(-1,site_idx,-2,angle)
+				#Set the new angle
+				mof_temp.set_angle(-1,site_idx,-2,angle)
 
-			#Determine number of nearby atoms
-			dist_mat = mof_temp.get_distances(-2,np.arange(0,
-				len(mof_temp)-2).tolist(),mic=True)
-			NNs = sum(dist_mat <= r_cut)
-			n_overlap = sum(dist_mat <= overlap_tol)
-			min_dist = np.min(dist_mat)
+				#Determine number of nearby atoms
+				dist_mat = mof_temp.get_distances(-2,np.arange(0,
+					len(mof_temp)-2).tolist(),mic=True)
+				NNs = sum(dist_mat <= r_cut)
+				n_overlap = sum(dist_mat <= overlap_tol)
+				min_dist = np.min(dist_mat)
 
-			#Select best option
-			if i == 0:
-				ads_pos = mof_temp[-2].position
-				old_min_NNs = NNs
-				old_min_dist = min_dist
-				old_overlap = n_overlap
-			elif n_overlap <= old_overlap and (NNs < old_min_NNs or
-				(NNs == old_min_NNs and min_dist > old_min_dist)):
-				ads_pos = mof_temp[-2].position
-				old_min_NNs = NNs
-				old_min_dist = min_dist
-				old_overlap = n_overlap
+				#Select best option
+				if i == 0:
+					ads_pos = mof_temp[-2].position
+					old_min_NNs = NNs
+					old_min_dist = min_dist
+					old_overlap = n_overlap
+				elif n_overlap <= old_overlap and (NNs < old_min_NNs or
+					(NNs == old_min_NNs and min_dist > old_min_dist)):
+					ads_pos = mof_temp[-2].position
+					old_min_NNs = NNs
+					old_min_dist = min_dist
+					old_overlap = n_overlap
 
 		return ads_pos
 
@@ -319,6 +332,12 @@ class ads_pos_optimizer():
 		self.io_stats['cnum'] = str(cnum)
 
 		#Calculate relevant quantities based on coordination number
+		if cnum >= 2:
+			#Calculate sum of Euclidean vectors
+			scaled_mic_coords = mic_coords*scale_factor/np.linalg.norm(
+				mic_coords,axis=1)[np.newaxis].T
+			scaled_sum_dist = np.sum(scaled_mic_coords,axis=0)
+			norm_scaled = np.linalg.norm(scaled_sum_dist)
 		if cnum == 1:
 			#Define direction as colinear with center atom and
 			#coordinating atom
@@ -328,12 +347,7 @@ class ads_pos_optimizer():
 			#the two coordinating atoms
 			normal_vec = OLS_fit(mic_coords)
 		elif cnum >= 3:
-			#Calculate normal vector to best-fit plane and the
-			#sum of Euclidean vectors
-			scaled_mic_coords = mic_coords*scale_factor/np.linalg.norm(
-				mic_coords,axis=1)[np.newaxis].T
-			scaled_sum_dist = np.sum(scaled_mic_coords,axis=0)
-			norm_scaled = np.linalg.norm(scaled_sum_dist)
+			#Calculate normal vector to best-fit plane
 			rmse, normal_vec = TLS_fit(mic_coords)
 
 		#Get adsorption site based on coordination number
@@ -341,7 +355,8 @@ class ads_pos_optimizer():
 			dist = self.get_dist_planar(normal_vec)
 			ads_pos = center_coord-dist
 		elif cnum == 2:
-			ads_pos = self.get_bi_ads_pos(normal_vec,center_coord,site_idx)
+			ads_pos = self.get_bi_ads_pos(normal_vec,scaled_sum_dist,center_coord,
+				site_idx)
 		elif cnum == 3 and norm_scaled > sum_tol:
 			ads_pos = self.get_tri_ads_pos(normal_vec,scaled_sum_dist,center_coord,
 				site_idx)

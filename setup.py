@@ -6,7 +6,7 @@ setup(name='MAI',
       author_email='rosen@u.northwestern.edu',
       url='https://github.com/arosen93/mof-adsorbate-initializer',
       requires_python='>=3.6.0',
-      version='1.1',
+      version='1.2',
       packages=find_packages(),
       license='MIT'
      )

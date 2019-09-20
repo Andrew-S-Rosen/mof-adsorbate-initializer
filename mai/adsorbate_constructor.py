@@ -275,10 +275,10 @@ class adsorbate_constructor():
 		
 		site_pos = atoms[site_idx].position
 		ads_pos = get_best_grid_pos(atoms,max_dist,site_idx,grid_filepath)
-		if ads_pos is 'nogrid':
+		if ads_pos == 'nogrid':
 			print('WARNING: no grid for '+name)
 			return None
-		elif ads_pos is 'invalid':
+		elif ads_pos == 'invalid':
 			print('WARNING: all NaNs within cutoff for '+name)
 			return None
 		ads_optimizer = ads_pos_optimizer(self,new_mofs_path=new_mofs_path,
