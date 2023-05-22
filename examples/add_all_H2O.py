@@ -10,7 +10,7 @@ Ni_idx = [atom.index for atom in start_mof if atom.symbol == 'Ni']
 
 #add H2O adsorbate
 atoms = start_mof
-for i, site_idx in enumerate(Ni_idx):
+for site_idx in Ni_idx:
 	ads = adsorbate_constructor(ads='HOH',d_MX1=2.0,d_X1X2=0.96,d_X2X3=0.96,
 		ang_MX1X2=120,ang_triads=104.5,connect=2)
 	atoms = ads.get_adsorbate(atoms=atoms,site_idx=site_idx,write_file=False)

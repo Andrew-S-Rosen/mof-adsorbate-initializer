@@ -133,7 +133,7 @@ class adsorbate_constructor():
 		if site_idx is not None and omd_path is not None:
 			raise ValueError('Cannot provide site index and OMD results path')
 		if atoms_path is not None and not os.path.isfile(atoms_path):
-			print('WARNING: No MOF found for '+atoms_path)
+			print(f'WARNING: No MOF found for {atoms_path}')
 			return None
 		if atoms is not None and not isinstance(atoms,Atoms):
 			raise ValueError('atoms argument must be an ASE Atoms object')
@@ -233,7 +233,7 @@ class adsorbate_constructor():
 
 		#Error handling of variables and setting of defaults
 		if atoms_path is not None and not os.path.isfile(atoms_path):
-			print('WARNING: No MOF found for '+atoms_path)
+			print(f'WARNING: No MOF found for {atoms_path}')
 			return None
 		if atoms is not None and not isinstance(atoms,Atoms):
 			raise ValueError('atoms argument must be an ASE Atoms object')
@@ -256,7 +256,7 @@ class adsorbate_constructor():
 		elif grid_format == 'cube':
 			grid_ext = '.cube'
 		else:
-			raise ValueError('Unsupported grid_format '+grid_format)
+			raise ValueError(f'Unsupported grid_format {grid_format}')
 
 		if grid_path is None:
 			grid_path = os.path.join(os.getcwd(),'energy_grids')
@@ -272,17 +272,15 @@ class adsorbate_constructor():
 		max_dist = self.d_MX1
 
 		grid_filepath = os.path.join(grid_path,name+grid_ext)
-		
+
 		site_pos = atoms[site_idx].position
 		ads_pos = get_best_grid_pos(atoms,max_dist,site_idx,grid_filepath)
 		if ads_pos == 'nogrid':
-			print('WARNING: no grid for '+name)
+			print(f'WARNING: no grid for {name}')
 			return None
 		elif ads_pos == 'invalid':
-			print('WARNING: all NaNs within cutoff for '+name)
+			print(f'WARNING: all NaNs within cutoff for {name}')
 			return None
 		ads_optimizer = ads_pos_optimizer(self,new_mofs_path=new_mofs_path,
 			error_path=error_path,write_file=write_file)
-		new_atoms = ads_optimizer.get_new_atoms_grid(site_pos,ads_pos)
-
-		return new_atoms
+		return ads_optimizer.get_new_atoms_grid(site_pos,ads_pos)

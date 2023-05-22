@@ -77,13 +77,13 @@ def get_omd_data(oms_data_path,name,atoms):
 	NN_idx_all = []
 	oms_sym_all = []
 
-	json_path = os.path.join(oms_data_path,name,name+'.json')
+	json_path = os.path.join(oms_data_path, name, f'{name}.json')
 	if os.stat(json_path).st_size == 0:
 		return None
 	with open(json_path) as f:
 		oms_results = json.load(f)
 	if not oms_results['cif_okay'] or oms_results['problematic']:
-		print(name+': Open Metal Detector failed')
+		print(f'{name}: Open Metal Detector failed')
 		return None
 	if not oms_results['has_oms']:
 		return None
@@ -92,7 +92,11 @@ def get_omd_data(oms_data_path,name,atoms):
 		if site['problematic'] or not site['is_open'] or not site['unique']:
 			continue
 		cnum = site['number_of_linkers']
-		sphere = read(os.path.join(oms_data_path,name,'first_coordination_sphere'+str(i)+'.cif'))
+		sphere = read(
+			os.path.join(
+				oms_data_path, name, f'first_coordination_sphere{str(i)}.cif'
+			)
+		)
 		oms_coords = sphere[0].position
 		oms_sym = sphere[0].symbol
 		oms_idx = get_ase_oms_idx(atoms,oms_coords)
@@ -105,8 +109,11 @@ def get_omd_data(oms_data_path,name,atoms):
 		oms_sym_all.append(oms_sym)
 		NN_coords_all.append(NN_coords)
 		NN_idx_all.append(NN_idx)
-	omsex_dict = {'cnums':cnums_all,'oms_coords':oms_coords_all,
-	'oms_idx':oms_idx_all,'oms_sym':oms_sym_all,'NN_coords':NN_coords_all,
-	'NN_idx':NN_idx_all}
-	
-	return omsex_dict
+	return {
+		'cnums': cnums_all,
+		'oms_coords': oms_coords_all,
+		'oms_idx': oms_idx_all,
+		'oms_sym': oms_sym_all,
+		'NN_coords': NN_coords_all,
+		'NN_idx': NN_idx_all,
+	}

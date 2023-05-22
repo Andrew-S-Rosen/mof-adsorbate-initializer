@@ -70,9 +70,7 @@ class ads_pos_optimizer():
 		#Scale normal vector to desired bond length
 		d_MX1 = self.d_MX1
 		unit_normal = normal_vec/np.linalg.norm(normal_vec)
-		dist = unit_normal*d_MX1
-
-		return dist
+		return unit_normal*d_MX1
 
 	def get_NNs(self,ads_pos,site_idx):
 		"""
@@ -143,21 +141,18 @@ class ads_pos_optimizer():
 
 		#Select best direction for normal vector
 		if n_overlaps[0] == n_overlaps[1]:
-			if NN[0] == NN[1]:
-				if min_dist[0] >= min_dist[1]:
-					ads_pos = center_coord + dist
-				else:
-					ads_pos = center_coord - dist
-			elif NN[0] <= NN[1]:
-				ads_pos = center_coord + dist
-			else:
-				ads_pos = center_coord - dist
+			return (
+				center_coord + dist
+				if NN[0] == NN[1]
+				and min_dist[0] >= min_dist[1]
+				or NN[0] != NN[1]
+				and NN[0] <= NN[1]
+				else center_coord - dist
+			)
 		elif n_overlaps[0] < n_overlaps[1]:
-			ads_pos = center_coord + dist
+			return center_coord + dist
 		else:
-			ads_pos = center_coord - dist
-
-		return ads_pos
+			return center_coord - dist
 
 	def get_nonplanar_ads_pos(self,scaled_sum_dist,center_coord):
 		"""
@@ -178,9 +173,7 @@ class ads_pos_optimizer():
 		#Sum up Euclidean vectors and scale to bond distance
 		d_MX1 = self.d_MX1
 		dist = d_MX1*scaled_sum_dist/np.linalg.norm(scaled_sum_dist)
-		ads_pos = center_coord - dist
-
-		return ads_pos
+		return center_coord - dist
 
 	def get_bi_ads_pos(self,normal_vec,scaled_sum_dist,center_coord,site_idx):
 		"""
@@ -288,20 +281,14 @@ class ads_pos_optimizer():
 		NN_nonplanar, min_dist_nonplanar, n_overlap = self.get_NNs(ads_pos_nonplanar,
 			site_idx)
 
-		#3-coordinate can be something like trigonal planar or T-shaped.
-		#Use planar algorithm (normal vector) for trigonal planar structures
-		#and sum of Euclidean vectors for the other shapes
-		if NN_planar == NN_nonplanar:
-			if min_dist_planar >= min_dist_nonplanar:
-				ads_pos = ads_pos_planar
-			else:
-				ads_pos = ads_pos_nonplanar
-		elif NN_planar <= NN_nonplanar:
-			ads_pos = ads_pos_planar
-		else:
-			ads_pos = ads_pos_nonplanar
-			
-		return ads_pos
+		return (
+			ads_pos_planar
+			if NN_planar == NN_nonplanar
+			and min_dist_planar >= min_dist_nonplanar
+			or NN_planar != NN_nonplanar
+			and NN_planar <= NN_nonplanar
+			else ads_pos_nonplanar
+		)
 
 	def get_opt_ads_pos(self,mic_coords,site_idx):
 		"""
@@ -320,19 +307,16 @@ class ads_pos_optimizer():
 		"""
 		sum_tol = self.sum_tol
 		rmse_tol = self.rmse_tol
-		scale_factor = 2.0
-
 		#Get coordinates of center atom and coordination number
-		if mic_coords.ndim == 1:
-			cnum = 1
-		else:
-			cnum = np.shape(mic_coords)[0]
+		cnum = 1 if mic_coords.ndim == 1 else np.shape(mic_coords)[0]
 		start_atoms = self.start_atoms.copy()
 		center_coord = start_atoms[site_idx].position
 		self.io_stats['cnum'] = str(cnum)
 
 		#Calculate relevant quantities based on coordination number
 		if cnum >= 2:
+			scale_factor = 2.0
+
 			#Calculate sum of Euclidean vectors
 			scaled_mic_coords = mic_coords*scale_factor/np.linalg.norm(
 				mic_coords,axis=1)[np.newaxis].T
@@ -376,7 +360,7 @@ class ads_pos_optimizer():
 				rmse_test_all = []
 				normal_vec_test_all = []
 				for i in range(cnum):
-					partial_indices = np.roll(test_indices,i)[0:cnum-1].tolist()
+					partial_indices = np.roll(test_indices,i)[:cnum-1].tolist()
 					partial_indices.sort()
 					rmse_test, normal_vec_test = TLS_fit(mic_coords[partial_indices,:])
 					rmse_test_all.append(rmse_test)
@@ -407,19 +391,15 @@ class ads_pos_optimizer():
 		log_stats = self.log_stats
 		full_ads_species = self.full_ads_species
 		name = self.name
-		full_name = name+'_site'+str(site_idx)
-		new_name = full_name+'_'+full_ads_species
+		full_name = f'{name}_site{str(site_idx)}'
+		new_name = f'{full_name}_{full_ads_species}'
 		mof = self.start_atoms.copy()
 		new_mof = self.construct_mof(mof,ads_pos,site_idx)
 		overlap = self.check_and_write(new_mof,new_name)
 		if overlap:
 			new_mof = None
 
-		if not overlap:
-			self.io_stats['result'] = 'Success :)'
-		else:
-			self.io_stats['result'] = 'Failure :('
-
+		self.io_stats['result'] = 'Success :)' if not overlap else 'Failure :('
 		if log_stats:
 			if int(self.io_stats['cnum']) <= 3:
 				self.io_stats['planar'] = ''
@@ -430,11 +410,8 @@ class ads_pos_optimizer():
 				print_eta = ''
 				print_connect = ''
 			else:
-				print_eta = ', eta = '+str(self.eta)
-				if self.connect != 1:
-					print_connect = ', connect = '+str(self.connect)
-				else:
-					print_connect = ''
+				print_eta = f', eta = {str(self.eta)}'
+				print_connect = f', connect = {str(self.connect)}' if self.connect != 1 else ''
 			line = '-------------------------------------'
 			io_stats = self.io_stats
 			print(line+'\n'+name+' + '+self.ads
@@ -459,19 +436,17 @@ class ads_pos_optimizer():
 		ads = self.ads
 		site_idx = self.site_idx
 		name = self.name
-		full_name = name+'_site'+str(site_idx)
-		new_name = full_name+'_'+full_ads_species
-		
+		full_name = f'{name}_site{str(site_idx)}'
+		new_name = f'{full_name}_{full_ads_species}'
+
 		#Add molecule to structure
 		mof = self.start_atoms.copy()
 		if full_ads_species == 'CH4_grid':
 			new_mof = self.construct_mof(mof,ads_pos,site_idx)
 		else:
-			raise ValueError('Unsupported adsorbate: '+ads)
+			raise ValueError(f'Unsupported adsorbate: {ads}')
 
-		#Confirm no overlapping atoms and write file
-		overlap = self.check_and_write(new_mof,new_name)
-		if overlap:
+		if overlap := self.check_and_write(new_mof, new_name):
 			return None
 
 		return new_mof
@@ -500,19 +475,22 @@ class ads_pos_optimizer():
 
 		#Loop over each new atom and confirm no overlap
 		for i in range(n_new_atoms):
-			dist = new_mof.get_distances(-(i+1),
-				np.arange(0,len(new_mof))[0:len(new_mof)-n_new_atoms],mic=True)
+			dist = new_mof.get_distances(
+				-(i + 1),
+				np.arange(0, len(new_mof))[: len(new_mof) - n_new_atoms],
+				mic=True,
+			)
 			if np.sum(dist <= overlap_tol) > 0:
 				overlap = True
 				if write_file:
 					if not os.path.exists(error_path):
 						os.makedirs(error_path)
-					write(os.path.join(error_path,new_name+'.cif'),new_mof)
+					write(os.path.join(error_path, f'{new_name}.cif'), new_mof)
 				break
 		if write_file and not overlap:
 			if not os.path.exists(new_mofs_path):
 				os.makedirs(new_mofs_path)
-			write(os.path.join(new_mofs_path,new_name+'.cif'),new_mof)
+			write(os.path.join(new_mofs_path, f'{new_name}.cif'), new_mof)
 
 		return overlap
 
@@ -543,8 +521,6 @@ class ads_pos_optimizer():
 		eta = self.eta
 		connect = self.connect
 
-		n_new_atoms = len(string_to_formula(ads))
-
 		#Construct MOF based on type of adsorbate
 		if '_grid' in full_ads_species:
 			if ads == 'CH4':
@@ -552,6 +528,8 @@ class ads_pos_optimizer():
 			else:
 				raise ValueError('Unsupported species for grid method')
 		else:
+			n_new_atoms = len(string_to_formula(ads))
+
 			if n_new_atoms == 1:
 				new_mof = add_monoatomic(mof,ads,ads_pos)
 			elif n_new_atoms == 2:

@@ -18,11 +18,11 @@ def get_refcode(atoms_filename):
 		refcode = atoms_filename.split('CAR_')[-1]
 	elif '_CAR' in atoms_filename:
 		refcode = atoms_filename.split('_CAR')[0]
-	elif atoms_filename == 'CONTCAR' or atoms_filename == 'POSCAR':
+	elif atoms_filename in ['CONTCAR', 'POSCAR']:
 		refcode = 'mof'
 	else:
 		raise ValueError('Unknown file naming scheme')
-		
+
 	return refcode
 
 def string_to_formula(species_string):

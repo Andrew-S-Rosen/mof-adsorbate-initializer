@@ -91,9 +91,7 @@ def get_best_grid_pos(atoms,max_dist,site_idx,grid_filepath):
 	if np.sum(cut_df['E']) == 0:
 		return 'invalid'
 	best = cut_df.loc[cut_df['E'].idxmin()]
-	ads_pos = [best['x'],best['y'],best['z']]
-
-	return ads_pos
+	return [best['x'],best['y'],best['z']]
 
 def cube_to_xyzE(cube_file):
 	"""
@@ -122,8 +120,7 @@ def cube_to_xyzE(cube_file):
 			elif nline > 6 and nline <= 6+nat:
 				at_coord.append(line.split())
 			elif nline > 5 and nline > 6+nat:
-				for i in line.split():
-					values.append(float(i))
+				values.extend(float(i) for i in line.split())
 	idx = -1
 	for i in range(0,int(spacing_vec[0][0])):
 		for j in range(0,int(spacing_vec[1][0])):
@@ -131,5 +128,4 @@ def cube_to_xyzE(cube_file):
 				idx += 1
 				x,y,z = i*float(spacing_vec[0][1]),j*float(spacing_vec[1][2]),k*float(spacing_vec[2][3])
 				data.append([x,y,z,values[idx]])
-	pd_data = pd.DataFrame(data)
-	return pd_data
+	return pd.DataFrame(data)

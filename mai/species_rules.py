@@ -23,7 +23,7 @@ def add_monoatomic(mof,ads_species,ads_pos):
 	try:
 		adsorbate = Atoms([Atom(ads_species,ads_pos)])
 	except:
-		raise ValueError('Unsupported adsorbate: '+ads_species)
+		raise ValueError(f'Unsupported adsorbate: {ads_species}')
 	mof.extend(adsorbate)
 
 	return mof
@@ -72,7 +72,7 @@ def add_diatomic(mof,ads_species,ads_pos,site_idx,d_X1X2=1.25,ang_MX1X2=None,eta
 		mol[0].symbol = X1
 		mol[1].symbol = X2
 	except:
-		raise ValueError('Invalid chemical species: '+ads_species)
+		raise ValueError(f'Invalid chemical species: {ads_species}')
 
 	#Set default bond ang_MX1X2
 	if ang_MX1X2 is None:
@@ -100,12 +100,12 @@ def add_diatomic(mof,ads_species,ads_pos,site_idx,d_X1X2=1.25,ang_MX1X2=None,eta
 		mof[-2].position += shift
 		mof[-1].position += shift
 	elif eta > 2:
-		raise ValueError('Wrong value for eta: '+str(eta))
+		raise ValueError(f'Wrong value for eta: {str(eta)}')
 
 	#If not linear, sweep possible angles for X2 to minimize sterics
 	if ang_MX1X2 != 180:
 		dtheta = 10
-		n_angles = int(360/dtheta)
+		n_angles = 360 // dtheta
 
 		if eta == 1:
 			temp_atoms = 2
@@ -128,7 +128,7 @@ def add_diatomic(mof,ads_species,ads_pos,site_idx,d_X1X2=1.25,ang_MX1X2=None,eta
 			mof_temp[-1].position = ads_temp[0].position
 			if eta == 2:
 				mof_temp[-2].position = ads_temp[1].position
-			
+
 			dist_mat = mof_temp.get_distances(-1,np.arange(0,
 				n_start-1).tolist(),vector=False,mic=True)
 			n_overlap = sum(dist_mat <= overlap_tol)
@@ -203,24 +203,21 @@ def add_triatomic(mof,ads_species,ads_pos,site_idx,d_X1X2=1.25,d_X2X3=None,
 	X3 = ads_formula[2]
 
 	if d_X2X3 is None:
-		d_X2X3 = d_X1X2 
+		d_X2X3 = d_X1X2
 	if ang_MX1X2 is None:
 		ang_MX1X2 = 180.0
 	if ang_triads is None:
-		if connect == 1 or connect == 3:
-			ang_triads = 180.0
-		else:
-			ang_triads = ang_MX1X2
+		ang_triads = 180.0 if connect in [1, 3] else ang_MX1X2
 	if connect == 2:
 		ads_formula[0], ads_formula[1] = ads_formula[1], ads_formula[0]
 	elif connect == 3:
 		ads_formula[0], ads_formula[2] = ads_formula[2], ads_formula[0]
 
-	di_ads_species = ''.join(ads_formula[0:2])
+	di_ads_species = ''.join(ads_formula[:2])
 	mof = add_diatomic(mof,di_ads_species,ads_pos,site_idx,d_X1X2=d_X1X2,
 		ang_MX1X2=ang_MX1X2,r_cut=r_cut,overlap_tol=overlap_tol)
 
-	if connect == 1 or connect == 3:
+	if connect in [1, 3]:
 		r_vec = mof.get_distance(-2,-1,vector=True,mic=True)
 		pos_temp = mof[-1].position+d_X2X3*(r_vec/np.linalg.norm(r_vec))
 		mof.extend(Atoms([Atom(X3,pos_temp)]))

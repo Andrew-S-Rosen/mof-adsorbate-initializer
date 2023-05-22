@@ -65,8 +65,4 @@ def get_NNs_pm(atoms,site_idx,NN_method):
 	with warnings.catch_warnings():
 		warnings.simplefilter('ignore')
 		neighbors = nn_object.get_nn_info(struct,site_idx)
-	neighbors_idx = []
-	for neighbor in neighbors:
-		neighbors_idx.append(neighbor['site_index'])
-
-	return neighbors_idx
+	return [neighbor['site_index'] for neighbor in neighbors]
